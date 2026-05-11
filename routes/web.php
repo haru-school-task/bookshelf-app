@@ -16,17 +16,11 @@ use App\Models\Genre;
 |
 */
 
-// 書籍一覧（トップページ）
-Route::get('/', function () {
-    // DBから本とジャンルを「本物」のデータとして取得する
-    $books = Book::paginate(10);
-    $genres = Genre::all();
+// リソースルートを使うことで、index, show, createなどの7つのルートが一気に定義されます
+Route::resource('books', BookController::class);
 
-    return view('books.index', [
-        'books' => $books,
-        'genres' => $genres
-    ]);
-})->name('books.index');
+// トップページ（/）を、書籍一覧（books.index）に紐付ける
+Route::get('/', [BookController::class, 'index'])->name('books.index');
 
 // 書籍詳細画面（仮）
 Route::get('/books/{book}', function ($id) {
