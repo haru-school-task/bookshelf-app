@@ -14,7 +14,11 @@ class BookController extends Controller
      */
     public function index()
     {
-        //
+        $books = Book::paginate(10);
+        $genres = \App\Models\Genre::all();
+
+        // ★重要：必ず view() を return する！
+        return view('books.index', compact('books', 'genres'));
     }
 
     /**
@@ -39,7 +43,8 @@ class BookController extends Controller
      */
     public function show(Book $book)
     {
-        //
+        // ★重要：詳細画面（books.show）のお皿を返す
+        return view('books.show', compact('book'));
     }
 
     /**

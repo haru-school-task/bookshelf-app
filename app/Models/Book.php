@@ -15,4 +15,11 @@ class Book extends Model
         // 多対多の関係（book_genreテーブルを介してGenreと繋がる）
         return $this->belongsToMany(Genre::class);
     }
+
+    // ↓ これを追記！
+    public function reviews()
+    {
+        // 一冊の本は、たくさんのレビューを持っている（1対多）
+        return $this->hasMany(Review::class);
+    }
 }

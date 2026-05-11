@@ -16,43 +16,16 @@ use App\Models\Genre;
 |
 */
 
-// リソースルートを使うことで、index, show, createなどの7つのルートが一気に定義されます
-Route::resource('books', BookController::class);
-
-// トップページ（/）を、書籍一覧（books.index）に紐付ける
+// 1. トップページを books.index に紐付ける（これが一番上にあると安心です）
 Route::get('/', [BookController::class, 'index'])->name('books.index');
 
-// 書籍詳細画面（仮）
-Route::get('/books/{book}', function ($id) {
-    return "書籍詳細画面（ID: {$id}）の準備中です！";
-})->name('books.show');
+// 2. その他の書籍関連ルートを一括定義
+Route::resource('books', BookController::class);
 
-// 書籍登録（仮）
-Route::get('/books/create', function () {
-    return '書籍登録画面（準備中）';
-})->name('books.create');
+// --- お守り（これらがないとBladeがエラーになります） ---
+Route::get('/ranking', fn() => 'ranking')->name('ranking.index');
+Route::get('/favorites', fn() => 'favorites')->name('favorites.index');
+Route::get('/genres', fn() => 'genres')->name('genres.index');
+Route::get('/login', fn() => 'login')->name('login');
+Route::get('/register', fn() => 'register')->name('register'); // ← これを追記！
 
-// ランキング（仮）
-Route::get('/ranking', function () {
-    return 'ランキング画面（準備中）';
-})->name('ranking.index');
-
-// お気に入り一覧（仮）
-Route::get('/favorites', function () {
-    return 'お気に入り一覧（準備中）';
-})->name('favorites.index');
-
-// ジャンル一覧（仮） ← 今回のターゲットはこれ！
-Route::get('/genres', function () {
-    return 'ジャンル一覧画面（準備中）';
-})->name('genres.index');
-
-// ログイン（仮）
-Route::get('/login', function () {
-    return 'ログイン画面（準備中）';
-})->name('login');
-
-// 会員登録（仮）
-Route::get('/register', function () {
-    return '会員登録画面（準備中）';
-})->name('register');
