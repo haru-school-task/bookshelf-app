@@ -20,4 +20,6 @@ class Review extends Model
         // 一つのレビューは、一人のユーザーに所属している
         return $this->belongsTo(\App\Models\User::class);
     }
+
+    protected $fillable = ['user_id', 'book_id', 'rating', 'comment'];
 }

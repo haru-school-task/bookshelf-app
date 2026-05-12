@@ -5,7 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Book;
 use App\Models\Genre; // 追記：Genreモデルを使うために必要
 use App\Http\Requests\BookRequest; // 追記：作った「盾」を使うために必要
-use Illuminate\Http\Request;
+use App\Http\Requests\ReviewRequest; // 追記
+use App\Models\Review;
 
 class BookController extends Controller
 {
@@ -119,4 +120,68 @@ class BookController extends Controller
         $book->delete();
         return redirect()->route('books.index')->with('success', '書籍を削除しました。');
     }
+
+    public function storeReview(ReviewRequest $request, Book $book)
+    {
+        $book->reviews()->create([
+            'user_id' => auth()->id(),
+            'rating' => $request->rating,
+            'comment' => $request->comment,
+        ]);
+
+        return redirect()->route('books.show', $book)->with('success', 'レビューを投稿しました！');
+    }
+
+    /**
+     * お気に入りの追加・解除（トグル）
+     */
+    public function toggleFavorite(Book $book)
+    {
+        // toggleメソッドは、存在すれば削除、なければ追加を1行で行う魔法の関数です [INDEX1]
+        auth()->user()->favoriteBooks()->toggle($book->id);
+
+        return back()->with('success', 'お気に入りを更新しました。');
+    }
+
+    /**
+     * レビューへの「いいね」
+     */
+    public function toggleLike(\App\Models\Review $review)
+    {
+        // ユーザーとレビューの「いいね」リレーションをトグル
+        auth()->user()->likedReviews()->toggle($review->id);
+
+        return back();
+    }
+
+    // app/Http/Controllers/BookController.php
+
+    /**
+     * レビュー編集画面の表示
+     */
+    public function editReview(Review $review)
+    {
+        // 【重要】投稿者本人かチェック（Policyは後ほど作成）
+        $this->authorize('update', $review);
+
+        // 編集用のお皿（reviews.edit）を出し、レビュー情報を渡す
+        return view('reviews.edit', compact('review'));
+    }
+
+    /**
+     * レビューの更新処理
+     */
+    public function updateReview(ReviewRequest $request, Review $review)
+    {
+        // 【重要】投稿者本人かチェック
+        $this->authorize('update', $review);
+
+        // 盾（ReviewRequest）を通過した安全なデータで更新
+        $review->update($request->validated());
+
+        // その本（親）の詳細画面に戻る
+        return redirect()->route('books.show', $review->book_id)
+            ->with('success', 'レビューを更新しました。');
+    }
+
 }
