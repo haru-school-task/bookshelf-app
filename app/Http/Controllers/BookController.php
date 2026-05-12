@@ -92,7 +92,20 @@ class BookController extends Controller
         $this->authorize('update', $book);
 
         $validated = $request->validated();
-        // ここから更新ロジック...
+
+        // 3. Eloquent を活用して書籍情報を一気に更新
+        $book->update([
+            'title' => $validated['title'],
+            'author' => $validated['author'],
+            'isbn' => $validated['isbn'] ?? null,
+            'description' => $validated['description'] ?? null,
+        ]);
+
+        // 4. 中間テーブルのジャンル紐付けを、最新の状態に綺麗に上書き（sync）
+        $book->genres()->sync($validated['genre_ids']);
+
+        // 5. 一覧画面に戻し、緑色の成功メッセージを添える
+        return redirect()->route('books.index')->with('success', '書籍情報を更新しました。');
     }
 
     /**
@@ -104,6 +117,6 @@ class BookController extends Controller
         $this->authorize('delete', $book);
 
         $book->delete();
-        return redirect()->route('books.index');
+        return redirect()->route('books.index')->with('success', '書籍を削除しました。');
     }
 }
