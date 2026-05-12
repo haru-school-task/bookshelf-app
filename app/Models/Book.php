@@ -24,4 +24,9 @@ class Book extends Model
     }
 
     protected $fillable = ['user_id', 'title', 'author', 'isbn', 'description', 'image_url'];
+
+    public function favoriteUsers() // ← ここがこの名前になっているかチェック
+    {
+        return $this->belongsToMany(User::class, 'favorites', 'book_id', 'user_id');
+    }
 }

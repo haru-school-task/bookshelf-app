@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\BookController; // 後でコントローラーを作る時に使います
+use App\Http\Controllers\GenreController; // ★この1行を追加！
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -24,9 +25,9 @@ Route::resource('books', BookController::class)->except(['index', 'show'])->midd
 Route::resource('books', BookController::class)->only(['index', 'show']);
 
 // 3. お守り（Blade内のエラー防止用）
-Route::get('/ranking', fn() => 'ranking')->name('ranking.index');
-Route::get('/favorites', fn() => 'favorites')->name('favorites.index');
-Route::get('/genres', fn() => 'genres')->name('genres.index');
+Route::get('/ranking', [BookController::class, 'ranking'])->name('ranking.index');
+Route::get('/favorites', [BookController::class, 'favorites'])->name('favorites.index')->middleware('auth');
+Route::resource('genres', GenreController::class);
 
 // --- ここから下が「本物」に昇格したルートたち ---
 Route::post('/books/{book}/favorite', [BookController::class, 'toggleFavorite'])->name('favorites.toggle')->middleware('auth');
@@ -36,6 +37,7 @@ Route::post('/reviews/{review}/like', [BookController::class, 'toggleLike'])->na
 // ★【新規！】レビュー編集・更新ルート（ここを追記・書き換え！）
 Route::get('/reviews/{review}/edit', [BookController::class, 'editReview'])->name('reviews.edit')->middleware('auth');
 Route::put('/reviews/{review}', [BookController::class, 'updateReview'])->name('reviews.update')->middleware('auth');
+Route::delete('/reviews/{review}', [BookController::class, 'destroyReview'])->name('reviews.destroy')->middleware('auth');
 
 
 // 4. ログイン関連（画面表示 ＆ 強制ログイン）

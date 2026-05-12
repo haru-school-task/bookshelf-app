@@ -100,4 +100,69 @@ class BookActionTest extends TestCase
         $this->assertDatabaseHas('reviews', ['id' => $review->id, 'rating' => 1]);
     }
 
+    /** @test */
+    public function 本人は自分のレビューを削除できる()
+    {
+        $user = User::factory()->create();
+        $review = Review::factory()->create(['user_id' => $user->id]);
+
+        $response = $this->actingAs($user)->delete(route('reviews.destroy', $review));
+
+        $response->assertRedirect();
+        $this->assertDatabaseMissing('reviews', ['id' => $review->id]);
+    }
+
+    /** @test */
+    public function ログインユーザーは自分のお気に入り書籍一覧を表示できる()
+    {
+        $user = User::factory()->create();
+        $book = Book::factory()->create(['user_id' => $user->id]);
+
+        // あらかじめお気に入りに登録しておく
+        $user->favoriteBooks()->attach($book->id);
+
+        // お気に入り一覧画面にアクセス
+        $response = $this->actingAs($user)->get(route('favorites.index'));
+
+        $response->assertStatus(200);
+        $response->assertViewIs('favorites.index');
+        $response->assertSee($book->title); // 登録した本のタイトルが見えるか
+    }
+
+    /** @test */
+    public function 書籍がお気に入り数が多い順にランキング表示される()
+    {
+        $this->withoutExceptionHandling(); // ← これを追加して再実行！
+        // 1. 2冊の本を用意
+        $popularBook = Book::factory()->create(['title' => '人気本']);
+        $normalBook = Book::factory()->create(['title' => '普通本']);
+
+        // 2. 人気本に2人、普通本に1人のお気に入りを付ける
+        $users = User::factory(3)->create();
+        $popularBook->favoriteUsers()->attach([$users[0]->id, $users[1]->id]);
+        $normalBook->favoriteUsers()->attach([$users[2]->id]);
+
+        // 3. ランキング画面にアクセス
+        $response = $this->get(route('ranking.index'));
+
+        $response->assertStatus(200);
+        // 4. 人気本が「先」に表示されていることを確認（順序のチェック）
+        $response->assertSeeInOrder(['人気本', '普通本']);
+    }
+
+    /** @test */
+    public function 管理者はジャンル一覧画面を表示できる()
+    {
+        $this->withoutExceptionHandling(); // ← これを追加して再実行！
+        $genre = Genre::factory()->create(['name' => 'SF小説']);
+
+        $response = $this->get(route('genres.index'));
+
+        $response->assertStatus(200);
+        $response->assertViewIs('genres.index');
+        $response->assertSee('SF小説');
+    }
+
+
+
 }

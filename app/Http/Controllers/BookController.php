@@ -123,6 +123,11 @@ class BookController extends Controller
 
     public function storeReview(ReviewRequest $request, Book $book)
     {
+        // すでにレビュー済みかチェック
+        if ($book->reviews()->where('user_id', auth()->id())->exists()) {
+            return back()->withErrors(['comment' => 'この本には既にレビューを投稿済みです。']);
+        }
+
         $book->reviews()->create([
             'user_id' => auth()->id(),
             'rating' => $request->rating,
@@ -182,6 +187,46 @@ class BookController extends Controller
         // その本（親）の詳細画面に戻る
         return redirect()->route('books.show', $review->book_id)
             ->with('success', 'レビューを更新しました。');
+    }
+
+    /**
+     * レビューの削除処理
+     */
+    public function destroyReview(Review $review)
+    {
+        // 1. 本人以外が不正に消そうとしたら 403 で弾く！
+        // ※ReviewPolicyは先ほど作成済みなので、そのまま使えます
+        $this->authorize('delete', $review);
+
+        // 2. 削除実行
+        $review->delete();
+
+        // 3. 元の本の画面に戻る
+        return back()->with('success', 'レビューを削除しました。');
+    }
+
+    public function favorites()
+    {
+        // ログイン中のユーザーが「お気に入り」している本を、10件ずつ取得
+        $books = auth()->user()->favoriteBooks()->paginate(10);
+
+        // サイドバーのジャンル一覧用
+        $genres = \App\Models\Genre::all();
+
+        // お気に入り一覧のお皿（favorites.index）を表示
+        return view('favorites.index', compact('books', 'genres'));
+    }
+
+    public function ranking()
+    {
+        // 1. お気に入り（favorites）の数が多い順に上位10件を取得するプロのクエリ
+        $rankedBooks = Book::withCount('favoriteUsers') // お気に入り数をカウント
+            ->orderBy('favorite_users_count', 'desc') // カウントが多い順に並べる
+            ->limit(10) // 上位10件に絞る
+            ->get();
+
+        // 2. ランキングのお皿（ranking.index）を表示
+        return view('ranking.index', compact('rankedBooks'));
     }
 
 }
