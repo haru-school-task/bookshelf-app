@@ -48,4 +48,11 @@ class User extends Authenticatable
     {
         return $this->belongsToMany(Book::class, 'favorites');
     }
+
+    public function likedReviews()
+    {
+        // ユーザーは、多くの中間テーブル（review_likes）を介して、多くのレビューに「いいね」している
+        // 第2引数には、昨日作った中間テーブル名 'review_likes' を指定します
+        return $this->belongsToMany(\App\Models\Review::class, 'review_likes', 'user_id', 'review_id');
+    }
 }

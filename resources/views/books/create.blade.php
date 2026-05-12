@@ -9,14 +9,25 @@
         <div class="max-w-2xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 text-gray-900">
-                    <form action="{{ route('books.store') }}" method="POST" novalidate>
+                    <form action="{{ route('books.store') }}" method="POST" enctype="multipart/form-data">
+                        @csrf
+
+                        <!-- ここにさっきのエラー表示コードを追加 -->
+                        @if ($errors->any())
+                            <div class="text-red-500">
+                                @foreach ($errors->all() as $error) <li>{{ $error }}</li> @endforeach
+                            </div>
+                        @endif
+
+                        <!-- この一行が消えていないかチェック！ -->
                         @include('books._form')
 
                         <div class="flex items-center justify-end mt-6 pt-6 border-t border-gray-200">
                             <a href="{{ route('books.index') }}" class="text-gray-600 hover:text-gray-900 mr-4">
                                 キャンセル
                             </a>
-                            <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded">
+                            <button type="submit"
+                                class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded">
                                 登録
                             </button>
                         </div>

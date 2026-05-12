@@ -14,4 +14,10 @@ class Review extends Model
     {
         return $this->belongsToMany(User::class, 'review_likes');
     }
+
+    public function user()
+    {
+        // 一つのレビューは、一人のユーザーに所属している
+        return $this->belongsTo(\App\Models\User::class);
+    }
 }

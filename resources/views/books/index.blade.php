@@ -8,7 +8,7 @@
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="mb-4 flex justify-end">
-                <a href="{{ route('books.index') }}"
+                <a href="{{ route('books.create') }}"
                     class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
                     書籍を登録
                 </a>

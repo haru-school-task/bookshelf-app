@@ -14,8 +14,9 @@ class BookController extends Controller
      */
     public function index()
     {
-        $books = Book::paginate(10);
-        $genres = \App\Models\Genre::all();
+        // with('genres') を追加することで、本と一緒にジャンルデータを一括取得します（N+1対策）
+        $books = Book::with('genres')->paginate(10);
+        $genres = Genre::all();
 
         // ★重要：必ず view() を return する！
         return view('books.index', compact('books', 'genres'));
@@ -26,7 +27,11 @@ class BookController extends Controller
      */
     public function create()
     {
-        //
+        // ジャンルを選択できるようにDBから全部取ってくる
+        $genres = \App\Models\Genre::all();
+
+        // 書籍登録画面（books/create.blade.php）を表示
+        return view('books.create', compact('genres'));
     }
 
     /**
@@ -36,6 +41,22 @@ class BookController extends Controller
     {
         // ここに来たときには、すでにバリデーションを通過した「綺麗なデータ」しか入っていません
         $validated = $request->validated();
+
+        // 2. ログイン中のユーザーIDをセットして書籍を作成（Eloquentの活用）
+        $book = \App\Models\Book::create([
+            'user_id' => auth()->id(),
+            'title' => $validated['title'],
+            'author' => $validated['author'],
+            'isbn' => $validated['isbn'] ?? null,
+            'description' => $validated['description'] ?? null,
+            'image_url' => $validated['image_url'] ?? null, // 追加分
+        ]);
+
+        // 3. 中間テーブル（book_genre）に選択されたジャンルIDを紐付ける（プロの技：sync）
+        $book->genres()->sync($validated['genre_ids']);
+
+        // 4. 一覧画面へ戻し、「登録できたよ」という緑色の通知メッセージを添える
+        return redirect()->route('books.index')->with('success', '書籍を登録しました。');
     }
 
     /**
@@ -43,6 +64,9 @@ class BookController extends Controller
      */
     public function show(Book $book)
     {
+        // 本に紐づくジャンル、レビュー、そしてレビューを書いたユーザーを一気にロード
+        $book->load(['genres', 'reviews.user']);
+
         // ★重要：詳細画面（books.show）のお皿を返す
         return view('books.show', compact('book'));
     }

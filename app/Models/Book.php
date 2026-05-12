@@ -22,4 +22,6 @@ class Book extends Model
         // 一冊の本は、たくさんのレビューを持っている（1対多）
         return $this->hasMany(Review::class);
     }
+
+    protected $fillable = ['user_id', 'title', 'author', 'isbn', 'description', 'image_url'];
 }
