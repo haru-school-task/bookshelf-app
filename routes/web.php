@@ -19,10 +19,13 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', [BookController::class, 'index'])->name('books.index');
 
 // 2. 書籍関連ルート（ガードを最適化）
-// 登録・編集・更新・削除（create, store, edit, update, destroy）はログイン必須にする
+// 2. 書籍関連ルート（ガードを最適化＆14画面完全対応版）
+
+// ★修正点：それ以外の5つのルート（create, store, edit, update, destroy）はすべてログイン必須（auth）にする
 Route::resource('books', BookController::class)->except(['index', 'show'])->middleware('auth');
 Route::get('/reports', [BookController::class, 'report'])->name('reports.index')->middleware('auth');
-// 一覧（index）と詳細（show）は誰でも見られるオープンな道にする
+
+// ✅ ②「show」を含む一般公開ルートを【後】に書く
 Route::resource('books', BookController::class)->only(['index', 'show']);
 
 // 3. お守り（Blade内のエラー防止用）

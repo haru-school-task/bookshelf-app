@@ -59,6 +59,19 @@ class BookController extends Controller
         return view('books.index', compact('books', 'genres'));
     }
 
+    /**
+     * ★【新規追記！】書籍登録画面を表示（応用版PG03）
+     * 
+     * @return \Illuminate\View\View
+     */
+    public function create(): View
+    {
+        // 登録画面のセレクトボックス（またはチェックボックス）用に全ジャンルを取得
+        $genres = Genre::all();
+
+        // 登録画面のお皿（books.create）に盛り付けて出す
+        return view('books.create', compact('genres'));
+    }
 
     /**
      * 書籍を新規登録
@@ -274,11 +287,11 @@ class BookController extends Controller
                 'id' => $item['id'],
                 'name' => $item['name'],
                 'count' => $count,
-                'avg_rating' => $avg,
+                'average_rating' => $avg,
             ];
         })
             // 画面のタイトル「ジャンル別評価傾向 TOP5」の通り、平均点が高い順に上位5件を抽出
-            ->sortByDesc('avg_rating')
+            ->sortByDesc('average_rating')
             ->take(5)
             ->values(); // インデックスを 0, 1, 2... に綺麗にリセット！
 
