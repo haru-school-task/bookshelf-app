@@ -12,14 +12,16 @@ return new class extends Migration {
     {
         Schema::create('books', function (Blueprint $table) {
             $table->id();
-            // 親（User）への参照。cascadeにすることで退会時に本も自然に還る
-            $table->foreignId('user_id')->constrained()->onDelete('cascade');
+            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
             $table->string('title');
             $table->string('author');
-            // フェーズ2（Google Books API）を見据えた設計
-            $table->string('isbn')->unique()->nullable();
-            $table->string('image_url')->nullable(); // ← この一行を追加！
+
+            // ★ここを修正！末尾に ->nullable() を追加して空でもOKにします [INDEX1]
+            $table->string('isbn')->nullable();
+            $table->date('published_date')->nullable();
+
             $table->text('description')->nullable();
+            $table->string('image_url')->nullable();
             $table->timestamps();
         });
     }

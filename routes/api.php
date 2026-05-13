@@ -14,13 +14,13 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-// --- 公開API（V1）のルート設計 ---
+// --- 公開API（V1）：応用機能（Sanctumによるトークン認証を後付け） ---
 Route::prefix('v1')->name('api.v1.')->group(function () {
 
-    // ① 認証なし（一覧・詳細） -> ルート名は api.v1.books.index になります
+    // ① 基本機能：認証なしで誰でもアクセスできるルート（一覧・詳細）
     Route::apiResource('books', BookController::class)->only(['index', 'show']);
 
-    // ② 認証あり（登録・更新・削除） -> ルート名は api.v1.books.store になります
+    // ② 応用機能：★ここでSanctumトークン認証を後付け（登録・更新・削除を鉄壁にガード）
     Route::apiResource('books', BookController::class)
         ->except(['index', 'show'])
         ->middleware('auth:sanctum');

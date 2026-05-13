@@ -10,24 +10,48 @@ class ReviewSeeder extends Seeder
     /**
      * Run the database seeds.
      */
+
     public function run(): void
     {
         $users = \App\Models\User::all();
         $books = \App\Models\Book::all();
-        $comments = ['最高の一冊です！', '非常に勉強になりました。', '何度も読み返したい。', '視点が変わりました。', '万人におすすめしたい。'];
+
+        // ★要件：コメントを評価別日本語テンプレート5段階に用意
+        $comments = [
+            1 => '内容が難しく、途中で挫折してしまいました。',
+            2 => '期待していましたが、少し物足りない印象です。',
+            3 => '標準的な内容で、初心者向けの解説書として読めます。',
+            4 => '非常に実用的で、明日からの開発にすぐ活かせそうです！',
+            5 => '文句なしの名著！すべてのアーキテクトに捧げたい一冊。'
+        ];
 
         foreach ($books as $book) {
-            // 各書籍に2〜4件のレビューをランダムなユーザーから配分
-            $reviewers = $users->random(rand(2, 4));
+            // ★要件：各書籍へのレビュー件数をランダム化（各書籍に2〜4件）
+            $reviewCount = rand(2, 4);
 
-            foreach ($reviewers as $user) {
+            // レビュー投稿者が重複しないように、ユーザーをランダムにシャッフルして選ぶ
+            $shuffledUsers = $users->shuffle();
+
+            for ($i = 0; $i < $reviewCount; $i++) {
+                // ★要件：投稿者をランダム化
+                $reviewer = $shuffledUsers[$i];
+
+                // 自分が登録した本にはレビューできないルール（DB制約など）がある場合は回避
+                if ($reviewer->id === $book->user_id) {
+                    continue;
+                }
+
+                // ★要件：評価を 1〜5 の全範囲に拡大
+                $rating = rand(1, 5);
+
                 \App\Models\Review::create([
-                    'user_id' => $user->id,
                     'book_id' => $book->id,
-                    'rating' => rand(3, 5), // 基本要件：3〜5の範囲
-                    'comment' => $comments[array_rand($comments)],
+                    'user_id' => $reviewer->id,
+                    'rating' => $rating,
+                    'comment' => $comments[$rating], // 評価に対応した簡潔な汎文言
                 ]);
             }
         }
     }
+
 }

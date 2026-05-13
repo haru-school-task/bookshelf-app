@@ -16,6 +16,7 @@ class BookActionTest extends TestCase
     /** @test */
     public function ログインユーザーは書籍をお気に入りに登録および解除できる()
     {
+        $this->withoutExceptionHandling(); // ← これを追加して再実行！
         $user = User::factory()->create();
         $book = Book::factory()->create(['user_id' => $user->id]);
 
@@ -161,6 +162,71 @@ class BookActionTest extends TestCase
         $response->assertStatus(200);
         $response->assertViewIs('genres.index');
         $response->assertSee('SF小説');
+    }
+
+    /** @test */
+    public function 書籍一覧でキーワード検索およびジャンル絞り込みができる()
+    {
+        $genre1 = Genre::factory()->create(['name' => '小説']);
+        $genre2 = Genre::factory()->create(['name' => '技術書']);
+
+        $book1 = Book::factory()->create(['title' => '夏目漱石の本', 'user_id' => User::factory()->create()->id]);
+        $book2 = Book::factory()->create(['title' => 'PHPの教科書', 'user_id' => User::factory()->create()->id]);
+
+        $book1->genres()->attach($genre1->id);
+        $book2->genres()->attach($genre2->id);
+
+        // 1. キーワード「夏目」で検索リクエストを送る
+        $response = $this->get(route('books.index', ['keyword' => '夏目']));
+        $response->assertStatus(200);
+        $response->assertSee('夏目漱石の本');
+        $response->assertDontSee('PHP의 教科書');
+
+        // 2. ジャンル「技術書」で絞り込みリクエストを送る
+        $response = $this->get(route('books.index', ['genre_id' => $genre2->id]));
+        $response->assertStatus(200);
+        $response->assertSee('PHPの教科書');
+        $response->assertDontSee('夏目漱石の本');
+    }
+
+    /** @test */
+    public function 書籍一覧でお気に入り数が多い順にソートして表示できる()
+    {
+        $book1 = Book::factory()->create(['title' => '普通の本', 'user_id' => User::factory()->create()->id]);
+        $book2 = Book::factory()->create(['title' => '超人気本', 'user_id' => User::factory()->create()->id]);
+
+        // 超人気本にだけユーザーをお気に入り登録する
+        $user = User::factory()->create();
+        $user->favoriteBooks()->attach($book2->id);
+
+        // ソート条件を「popular」にしてリクエストを送る
+        $response = $this->get(route('books.index', ['sort' => 'popular']));
+
+        $response->assertStatus(200);
+        // 超人気本が先に画面に表示されている順序を確認する
+        $response->assertSeeInOrder(['超人気本', '普通の本']);
+    }
+
+    /** @test */
+    public function ログインユーザーは自身の読書統計レポート画面を表示できる()
+    {
+        $user = User::factory()->create();
+
+        // テストデータを仕込む（本1冊、レビュー1件を自分に紐づける）
+        $book = Book::factory()->create(['user_id' => $user->id]);
+        $user->reviews()->create([
+            'book_id' => $book->id,
+            'rating' => 5,
+            'comment' => 'テストレポート用のレビューです。'
+        ]);
+
+        // ログインしてレポート画面へアクセス
+        $response = $this->actingAs($user)->get(route('reports.index'));
+
+        $response->assertStatus(200);
+        $response->assertViewIs('reports.index');
+        // 画面に「総レビュー数：1」や「平均評価：5」の形跡があるか確認
+        $response->assertSee('1');
     }
 
 

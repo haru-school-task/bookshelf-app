@@ -4,22 +4,30 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Review extends Model
 {
     use HasFactory;
 
-    // いいね機能用
-    public function likedByUsers()
-    {
-        return $this->belongsToMany(User::class, 'review_likes');
-    }
-
-    public function user()
-    {
-        // 一つのレビューは、一人のユーザーに所属している
-        return $this->belongsTo(\App\Models\User::class);
-    }
-
     protected $fillable = ['user_id', 'book_id', 'rating', 'comment'];
+
+    // レビューを書いた本人（User）との絆
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    // レビュー対象の書籍（Book）との絆
+    public function book(): BelongsTo
+    {
+        return $this->belongsTo(Book::class);
+    }
+
+    // ★メソッド名を likedByUsers に変更！
+    public function likedByUsers(): BelongsToMany
+    {
+        return $this->belongsToMany(\App\Models\User::class, 'review_likes', 'review_id', 'user_id');
+    }
 }

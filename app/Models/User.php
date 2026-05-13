@@ -2,11 +2,12 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class User extends Authenticatable
 {
@@ -43,16 +44,28 @@ class User extends Authenticatable
         'password' => 'hashed',
     ];
 
-    // お気に入り機能用
-    public function favoriteBooks()
+    // 自分が登録した複数の書籍（Book）との絆
+    public function books(): HasMany
     {
-        return $this->belongsToMany(Book::class, 'favorites');
+        return $this->hasMany(Book::class);
     }
 
-    public function likedReviews()
+    // 自分が投稿した複数のレビュー（Review）との絆
+    public function reviews(): HasMany
     {
-        // ユーザーは、多くの中間テーブル（review_likes）を介して、多くのレビューに「いいね」している
-        // 第2引数には、昨日作った中間テーブル名 'review_likes' を指定します
-        return $this->belongsToMany(\App\Models\Review::class, 'review_likes', 'user_id', 'review_id');
+        return $this->hasMany(Review::class);
     }
+
+    // 自分がお気に入りに登録した複数の書籍（Book）との絆
+    public function favoriteBooks(): BelongsToMany
+    {
+        return $this->belongsToMany(Book::class, 'favorites', 'user_id', 'book_id');
+    }
+
+    // 自分が「いいね」した複数のレビュー（Review）との絆
+    public function likedReviews(): BelongsToMany
+    {
+        return $this->belongsToMany(Review::class, 'review_likes', 'user_id', 'review_id');
+    }
+
 }

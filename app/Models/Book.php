@@ -4,28 +4,36 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Book extends Model
 {
     use HasFactory;
 
+    protected $fillable = ['user_id', 'title', 'author', 'isbn', 'published_date', 'description', 'image_url'];
 
-    public function genres()
+    // 書籍の持ち主（User）との絆
+    public function user(): BelongsTo
     {
-        // 多対多の関係（book_genreテーブルを介してGenreと繋がる）
+        return $this->belongsTo(User::class);
+    }
+
+    // 書籍に紐づく複数のジャンル（Genre）との絆
+    public function genres(): BelongsToMany
+    {
         return $this->belongsToMany(Genre::class);
     }
 
-    // ↓ これを追記！
-    public function reviews()
+    // 書籍に寄せられた複数のレビュー（Review）との絆
+    public function reviews(): HasMany
     {
-        // 一冊の本は、たくさんのレビューを持っている（1対多）
         return $this->hasMany(Review::class);
     }
 
-    protected $fillable = ['user_id', 'title', 'author', 'isbn', 'description', 'image_url'];
-
-    public function favoriteUsers() // ← ここがこの名前になっているかチェック
+    // お気に入りしてくれた複数のユーザー（User）との絆（ランキングで使用）
+    public function favoriteUsers(): BelongsToMany
     {
         return $this->belongsToMany(User::class, 'favorites', 'book_id', 'user_id');
     }
