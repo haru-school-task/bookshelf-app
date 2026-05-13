@@ -1,8 +1,7 @@
 <?php
 
-use Illuminate\Http\Request;
+use App\Http\Controllers\Api\V1\BookController;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Api\V1\BookController as ApiBookController;
 
 /*
 |--------------------------------------------------------------------------
@@ -15,10 +14,15 @@ use App\Http\Controllers\Api\V1\BookController as ApiBookController;
 |
 */
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
-});
+// --- 公開API（V1）のルート設計 ---
+Route::prefix('v1')->name('api.v1.')->group(function () {
 
-Route::prefix('v1')->group(function () {
-    Route::apiResource('books', ApiBookController::class);
+    // ① 認証なし（一覧・詳細） -> ルート名は api.v1.books.index になります
+    Route::apiResource('books', BookController::class)->only(['index', 'show']);
+
+    // ② 認証あり（登録・更新・削除） -> ルート名は api.v1.books.store になります
+    Route::apiResource('books', BookController::class)
+        ->except(['index', 'show'])
+        ->middleware('auth:sanctum');
+
 });
