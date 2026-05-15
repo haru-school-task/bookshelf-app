@@ -77,7 +77,7 @@ class BookController extends Controller
     }
 
     /**
-     * 書籍情報を更新
+     * 書籍情報を更新（API版）
      */
     public function update(BookRequest $request, string $id): BookResource|JsonResponse
     {
@@ -86,6 +86,9 @@ class BookController extends Controller
         if (!$book) {
             return response()->json(['message' => '指定された書籍が見つかりません。'], Response::HTTP_NOT_FOUND);
         }
+
+        // ★最重要要件：API経由でも「所有者本人か」を厳格に認可する門番を発動！ [INDEX1]
+        $this->authorize('update', $book);
 
         $validated = $request->validated();
         $book->update($validated);
@@ -96,7 +99,7 @@ class BookController extends Controller
     }
 
     /**
-     * 書籍を削除
+     * 書籍を削除（API版）
      */
     public function destroy(string $id): JsonResponse
     {
@@ -106,9 +109,12 @@ class BookController extends Controller
             return response()->json(['message' => '指定された書籍が見つかりません。'], Response::HTTP_NOT_FOUND);
         }
 
-        $book->delete();
+        // ★最重要要件：API経由でも「所有者本人か」を厳格に認可する門番を発動！ [INDEX1]
+        $this->authorize('delete', $book);
 
+        $book->delete();
         return response()->json(['message' => '書籍を削除しました。'], Response::HTTP_OK);
     }
+
 
 }

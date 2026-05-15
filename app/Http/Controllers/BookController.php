@@ -41,13 +41,29 @@ class BookController extends Controller
             });
         }
 
-        // 4. 【要件】並び順ソート（新着順、またはお気に入り数順）
-        $sort = $request->input('sort', 'latest'); // 指定がない場合はデフォルトで新着順
-        if ($sort === 'popular') {
-            // お気に入り（favoriteUsers）の数が多い順に並び替えるプロのクエリ
-            $query->withCount('favoriteUsers')->orderBy('favorite_users_count', 'desc');
-        } else {
-            $query->latest();
+        // 4. 【要件完全一致版】並び順ソート（4パターン分岐）
+        $sort = $request->input('sort', 'latest'); // デフォルトは新着順
+
+        switch ($sort) {
+            case 'oldest':
+                $query->oldest();
+                break;
+
+            case 'title':
+                $query->orderBy('title', 'asc'); // タイトル昇順
+                break;
+
+            case 'rating':
+                // ★超重要要件：平均評点が高い順、かつ「レビューがない（nullの）書籍は最後」にするプロのクエリ
+                $query->withAvg('reviews', 'rating')
+                    ->orderByRaw('reviews_avg_rating IS NULL ASC') // レビューなし(NULL)を一番後ろに回す魔法の1行
+                    ->orderBy('reviews_avg_rating', 'desc');
+                break;
+
+            case 'latest':
+            default:
+                $query->latest();
+                break;
         }
 
         // 5. 【要件】検索条件をページネーションのリンク（2ページ目以降）に完全に引き継ぐ
@@ -225,8 +241,10 @@ class BookController extends Controller
      */
     public function ranking(): View
     {
-        $rankedBooks = Book::withCount('favoriteUsers')
-            ->orderBy('favorite_users_count', 'desc')
+        // ★仕様要件：レビュー平均評価のTOP10（レビューなしは表示しない）
+        $rankedBooks = Book::has('reviews') // ★要件：レビューがある書籍だけに絞る [INDEX1]
+            ->withAvg('reviews', 'rating') // 平均評点を計算 [INDEX2]
+            ->orderBy('reviews_avg_rating', 'desc') // 評価が高い順
             ->limit(10)
             ->get();
 

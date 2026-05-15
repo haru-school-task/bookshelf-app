@@ -1,66 +1,81 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# 📚 BookShelf（書籍管理アプリケーション）
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+---
 
-## About Laravel
+## 📝 ブックシェルフアプリの説明
+本アプリケーションは、カリキュラムの基本機能および応用機能の要件に基づいて開発された書籍管理システムです。
+Bladeテンプレートを使用した従来のWeb画面機能と、外部アプリケーションから接続可能な公開API（V1）の2つの機能を統合して実装しています。
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+---
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## 🛠️ 環境構築手順
+Docker環境（Laravel Sail）を使用して、以下の手順でローカル環境を起動できます。
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+### 1. 環境設定ファイルの作成
+```bash
+cp .env.example .env
+```
 
-## Learning Laravel
+### 2. コンテナの起動とパッケージインストール
+```bash
+./vendor/bin/sail up -d
+sail composer install
+sail npm install
+```
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+### 3. アプリケーションキーの生成
+```bash
+sail artisan key:generate
+```
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+### 4. データベースの初期化と応用データの注入
+```bash
+# 応用機能の要件に準拠したランダムデータが自動生成されます
+sail artisan migrate:fresh --seed
+```
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+### 5. フロントエンドの起動
+```bash
+sail npm run dev
+```
 
-## Laravel Sponsors
+---
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+## 💻 使用技術
+- **言語**: PHP 8.5 / JavaScript
+- **フレームワーク**: Laravel 10.x
+- **データベース**: MySQL 8.0
+- **認証**: Laravel Fortify（セッション認証） / Laravel Sanctum（APIトークン認証）
+- **フロントエンド**: Tailwind CSS / Vite / Chart.js
+- **開発環境**: Docker / Laravel Sail
 
-### Premium Partners
+---
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[WebReinvent](https://webreinvent.com/)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Jump24](https://jump24.co.uk)**
-- **[Redberry](https://redberry.international/laravel/)**
-- **[Active Logic](https://activelogic.com)**
-- **[byte5](https://byte5.de)**
-- **[OP.GG](https://op.gg)**
+## 🔗 URL
+- **トップ画面（書籍一覧）**: `http://localhost/`
+- **ジャンル管理画面（認証必須）**: `http://localhost/genres`
+- **マイ読書レポート画面（認証必須）**: `http://localhost/reports`
+- **公開API（書籍一覧）**: `http://localhost/api/v1/books`
 
-## Contributing
+---
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+## 💡 概要や補足など（実装内容）
 
-## Code of Conduct
+課題の「基本機能」および「応用機能」の要件を満たすため、以下の設計・実装を行っています。
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+### 1. バリデーションと日本語メッセージの定義
+- バリデーション処理はコントローラーから独立させ、`BookRequest` および `ReviewRequest` のFormRequestクラスへ完全に分離しました。
+- 応用機能のデータモデル変更に伴い、一部の必須項目（ISBN、出版日）を `nullable`（任意入力）へ適切に設計変更しています。
+- 各項目には、要件に準拠した独自の日本語エラーメッセージ（`messages()`）を自作して定義しています。
 
-## Security Vulnerabilities
+### 2. 権限管理とセキュリティ（Sanctum × Policy）
+- **画面・API共通の認可**: 自分の登録した書籍や投稿したレビューのみが編集・削除できるよう、`BookPolicy` および `ReviewPolicy` を用いた厳格な認可ガード（403エラー制御）を実装しました。
+- **公開APIの認証**: 応用機能の要件通り、APIの登録・更新・削除エンドポイントに `Laravel Sanctum` によるトークン認証（auth:sanctum）を後付けし、未認証アクセスを防御しています。
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+### 3. マイ読書レポートとソートの集計ロジック
+- **読書レポート（PG14）**: 1クエリで取得したレビューデータを基に、画面側のグラフ描画（Chart.js）の期待値に合わせて「基本統計」「評価分布」「高評価TOP5」「ジャンル別評価傾向」の立体データを配列・Collectionで集計しました。
+- **ソート順の拡張（PG01）**: 評点順ソートにおいて「レビューがない書籍を最後に表示する」という要件を満たす特殊クエリ（`orderByRaw`）を実装しました。
 
-## License
-
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+### 4. テストコードによる検証
+- 外部API（Google Books API）連携のテストにおいて、`Http::fake()` を用いた通信のモック化を実装。
+- 画面側の操作からAPIのトークン認証、バリデーションの異常系に至るまで、**合計21個（68アサーション）の全テストがPASS（合格）**することを確認済みです。
