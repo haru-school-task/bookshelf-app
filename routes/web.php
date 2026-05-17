@@ -47,28 +47,3 @@ Route::get('/reviews/{review}/edit', [BookController::class, 'editReview'])->nam
 Route::put('/reviews/{review}', [BookController::class, 'updateReview'])->name('reviews.update')->middleware('auth');
 Route::delete('/reviews/{review}', [BookController::class, 'destroyReview'])->name('reviews.destroy')->middleware('auth');
 
-// 4. ログイン関連（画面表示 ＆ 強制ログイン）
-Route::get('/login', function () {
-    return view('auth.login');
-})->name('login');
-
-Route::post('/login', function () {
-    auth()->loginUsingId(1); // 山田太郎としてログイン
-    return redirect()->route('books.index');
-})->name('login.store');
-
-// 5. 会員登録関連（画面表示 ＆ 強制ログイン）
-Route::get('/register', function () {
-    return view('auth.register');
-})->name('register');
-
-Route::post('/register', function () {
-    auth()->loginUsingId(1); // 登録ボタン押下時も自動で山田太郎としてログイン
-    return redirect()->route('books.index');
-})->name('register.store');
-
-// 6. ログアウト処理
-Route::post('/logout', function () {
-    auth()->logout();
-    return redirect()->route('books.index');
-})->name('logout');
