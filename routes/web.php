@@ -47,3 +47,4 @@ Route::get('/reviews/{review}/edit', [BookController::class, 'editReview'])->nam
 Route::put('/reviews/{review}', [BookController::class, 'updateReview'])->name('reviews.update')->middleware('auth');
 Route::delete('/reviews/{review}', [BookController::class, 'destroyReview'])->name('reviews.destroy')->middleware('auth');
 
+Route::get('/books/isbn/{isbn}', [BookController::class, 'fetchByIsbn']);

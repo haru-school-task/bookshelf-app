@@ -81,6 +81,7 @@
 
                 try {
                     const response = await fetch(`/books/isbn/${isbn}`, {
+
                         headers: {
                             'Accept': 'application/json',
                         },

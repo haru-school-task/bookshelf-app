@@ -23,7 +23,7 @@
                                 @for($i = 1; $i <= 5; $i++)
                                     <label class="cursor-pointer">
                                         <input type="radio" name="rating" value="{{ $i }}" class="sr-only peer" {{ old('rating', $review->rating) == $i ? 'checked' : '' }} required>
-                                        <span class="text-2xl peer-checked:text-yellow-400 text-gray-300 hover:text-yellow-400">★</span>
+                                        <span class="text-2xl star-icon {{ old('rating', $review->rating) >= $i ? 'text-yellow-400' : 'text-gray-300' }} hover:text-yellow-400">★</span>
                                     </label>
                                 @endfor
                             </div>
@@ -52,3 +52,30 @@
         </div>
     </div>
 </x-app-layout>
+
+<!-- 評価エリアの </div> のすぐ下に追記 -->
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // 💡 画面にある5つのラジオボタンと、5つの星のアイコンをすべて取得します
+        const radios = document.querySelectorAll('input[name="rating"]');
+        const stars = document.querySelectorAll('.star-icon');
+
+        radios.forEach((radio, index) => {
+            // ★ラジオボタン（星）がクリックされた瞬間を検知します [INDEX1]
+            radio.addEventListener('change', function () {
+                const selectedValue = parseInt(this.value); // クリックされた星の数（1〜5）
+
+                // 💡 クリックされた数以下の星はすべて黄色、それより大きい星はグレーに塗り替えます
+                stars.forEach((star, i) => {
+                    if (i < selectedValue) {
+                        star.classList.remove('text-gray-300');
+                        star.classList.add('text-yellow-400');
+                    } else {
+                        star.classList.remove('text-yellow-400');
+                        star.classList.add('text-gray-300');
+                    }
+                });
+            });
+        });
+    });
+</script>

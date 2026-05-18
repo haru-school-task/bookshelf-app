@@ -10,6 +10,7 @@ use App\Http\Requests\ReviewRequest;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Http;
 
 
 class BookController extends Controller
@@ -337,6 +338,68 @@ class BookController extends Controller
         ];
 
         return view('reports.index', compact('stats'));
+    }
+
+    // app/Http/Controllers/BookController.php の一番下に追記 [INDEX2]
+
+    /**
+    * 外部API（Google Books）からISBNで書籍情報を取得してJSONで返す（仲介処理）
+    */
+    public function fetchByIsbn(string $isbn): \Illuminate\Http\JsonResponse
+    {
+        // 💡 13桁チェック
+        if (strlen($isbn) !== 13) {
+            return response()->json(['error' => 'ISBNは13桁で入力してください。'], 422);
+        }
+
+        // 1. ISBNとAPIキーを取得（trimで余計な空白を排除）
+        $cleanIsbn = trim($isbn);
+        $apiKey = trim(env('GOOGLE_BOOKS_API_KEY'));
+
+        $encodedIsbn = urlencode("isbn:" . $cleanIsbn);
+        $targetUrl = "https://www.googleapis.com/books/v1/volumes?q={$encodedIsbn}&country=JP&key={$apiKey}";
+
+
+        // 3. Google Books APIへリクエストを送信
+        $response = \Illuminate\Support\Facades\Http::withoutVerifying()->get($targetUrl);
+
+        // 4. 通信成功＆データが存在するかチェック
+        if ($response->successful() && isset($response->json()['items'])) {
+            $bookData = $response->json()['items'][0]['volumeInfo'];
+
+            // フロントエンド（JavaScript）が待っているキーの形にしてデータを返却
+            return response()->json([
+                'title'       => $bookData['title'] ?? '',
+                'author'      => isset($bookData['authors']) ? implode(', ', $bookData['authors']) : '',
+                'description' => $bookData['description'] ?? '',
+            ]);
+        }
+
+        // 本が見つからなかった場合のエラー返却
+        return response()->json(['error' => '書籍情報が見つかりませんでした。'], 404);
+
+
+        // Googleの特有の立体構造（itemsの1番目のvolumeInfo）から安全にデータを抽出 [INDEX2]
+        $bookData = $response->json()['items'][0]['volumeInfo'] ?? null;
+
+        if (!$bookData) {
+            return response()->json(['error' => '書籍詳細情報が取得できませんでした。'], 404);
+        }
+
+        // 先ほど実装した、セキュリティブロックを回避する「https」版の画像URL処理！
+        $thumbnail = $bookData['imageLinks']['thumbnail'] ?? null;
+        if ($thumbnail) {
+            $thumbnail = str_replace('http://', 'https://', $thumbnail);
+        }
+
+        // ★お皿（JavaScript）の期待値（data.titleなど）にミリ単位で100%同期させて返却！
+        return response()->json([
+            'title'          => $bookData['title'] ?? '',
+            'author'         => isset($bookData['authors']) ? implode(', ', $bookData['authors']) : '',
+            'description'    => $bookData['description'] ?? '',
+            'published_date' => $bookData['publishedDate'] ?? null,
+            'image_url'      => $thumbnail,
+        ]);
     }
 
 }
