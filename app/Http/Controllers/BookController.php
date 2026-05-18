@@ -33,33 +33,36 @@ class BookController extends Controller
             });
         }
 
-        // 3. 【要件】ジャンルフィルタ（選択されたジャンルIDで絞り込み）
-        if ($request->filled('genre_id')) {
-            $genreId = $request->input('genre_id');
+        
+        // ★修正：画面から「genre_id」または「genre」という名前で届いたデータを、両方チェックして受け止めます！
+        $genreId = $request->input('genre_id') ?? $request->input('genre');
+
+        if (!empty($genreId)) {
+            // 絆（多対多）を辿り、中間テーブルの中にこのIDがある本だけに美しく絞り込みます
             $query->whereHas('genres', function ($q) use ($genreId) {
                 $q->where('genres.id', $genreId);
             });
         }
-
-        // 4. 【要件完全一致版】並び順ソート（4パターン分岐）
-        $sort = $request->input('sort', 'latest'); // デフォルトは新着順
+        // ★修正点1：画面のプルダウンの value 属性が何であっても確実にキャッチします
+        $sort = $request->input('sort', 'latest'); 
 
         switch ($sort) {
+            // ★修正点2：もし画面から 'title' だけでなく 'title_asc' という名前で届いても、同じ昇順部屋（asc）へ案内します
+            case 'title':
+            case 'title_asc':
+                $query->orderBy('title_kana', 'asc');
+                break;
+        
             case 'oldest':
                 $query->oldest();
                 break;
-
-            case 'title':
-                $query->orderBy('title', 'asc'); // タイトル昇順
-                break;
-
+        
             case 'rating':
-                // ★超重要要件：平均評点が高い順、かつ「レビューがない（nullの）書籍は最後」にするプロのクエリ
                 $query->withAvg('reviews', 'rating')
-                    ->orderByRaw('reviews_avg_rating IS NULL ASC') // レビューなし(NULL)を一番後ろに回す魔法の1行
-                    ->orderBy('reviews_avg_rating', 'desc');
+                      ->orderByRaw('reviews_avg_rating IS NULL ASC')
+                      ->orderBy('reviews_avg_rating', 'desc');
                 break;
-
+        
             case 'latest':
             default:
                 $query->latest();
@@ -96,12 +99,19 @@ class BookController extends Controller
     {
         $validated = $request->validated();
 
+        $imageUrl = $request->input('image_url');
+        if ($imageUrl) {
+            // 💡 プロのセキュリティ対策：届いたURLの中に「http://」があれば、強制的に「https://」へ一括書き換えします [INDEX1.3.1]
+            $imageUrl = str_replace('http://', 'https://', $imageUrl);
+        }
+
         $book = Book::create([
-            'user_id' => auth()->id(),
-            'title' => $validated['title'],
-            'author' => $validated['author'],
-            'isbn' => $validated['isbn'] ?? null,
+            'user_id'     => auth()->id(),
+            'title'       => $validated['title'],
+            'author'      => $validated['author'],
+            'isbn'        => $validated['isbn'] ?? null,
             'description' => $validated['description'] ?? null,
+            'image_url'   => $imageUrl ?? null, // 🔥 安全になった本物のURLをDBへ保存！,
         ]);
 
         $book->genres()->sync($validated['genre_ids']);
