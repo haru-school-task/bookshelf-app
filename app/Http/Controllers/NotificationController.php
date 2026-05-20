@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
 
@@ -13,8 +12,6 @@ class NotificationController extends Controller
 {
     /**
      * PG18: 通知一覧の表示（DatabaseChannel連動）
-     * 
-     * @return View
      */
     public function index(): View
     {
@@ -26,9 +23,6 @@ class NotificationController extends Controller
 
     /**
      * 各通知の既読化アクション
-     * 
-     * @param string $id
-     * @return RedirectResponse
      */
     public function markAsRead(string $id): RedirectResponse
     {
@@ -43,4 +37,3 @@ class NotificationController extends Controller
         return redirect()->back()->with('success', '通知を既読にしました。');
     }
 }
-

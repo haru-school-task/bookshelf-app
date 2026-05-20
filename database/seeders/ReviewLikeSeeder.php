@@ -2,7 +2,8 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use App\Models\Review;
+use App\Models\User;
 use Illuminate\Database\Seeder;
 
 class ReviewLikeSeeder extends Seeder
@@ -12,12 +13,12 @@ class ReviewLikeSeeder extends Seeder
      */
     public function run(): void
     {
-        $users = \App\Models\User::all();
-        $reviews = \App\Models\Review::all();
+        $users = User::all();
+        $reviews = Review::all();
 
         foreach ($reviews as $review) {
             // 自分以外から0〜3人
-            $likers = $users->reject(fn($user) => $user->id === $review->user_id)
+            $likers = $users->reject(fn ($user) => $user->id === $review->user_id)
                 ->random(rand(0, 3))
                 ->pluck('id');
             $review->likedByUsers()->syncWithoutDetaching($likers);

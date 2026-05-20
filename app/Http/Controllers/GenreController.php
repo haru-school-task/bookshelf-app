@@ -3,9 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\Genre;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
-use Illuminate\Http\RedirectResponse;
 
 class GenreController extends Controller
 {
@@ -15,6 +15,7 @@ class GenreController extends Controller
         // これにより、一覧（index）や詳細（show）も含め、ジャンル関連はすべてログインしないと絶対に入れない鉄壁のガードに戻ります！
         $this->middleware('auth');
     }
+
     /**
      * ジャンル管理の一覧画面を表示（冊数カウント対応版）
      */
@@ -80,7 +81,7 @@ class GenreController extends Controller
     {
         // 1. バリデーションの盾（自分自身の名前は重複OKにするプロのユニーク制約） [INDEX2]
         $validated = $request->validate([
-            'name' => ['required', 'string', 'max:255', 'unique:genres,name,' . $genre->id],
+            'name' => ['required', 'string', 'max:255', 'unique:genres,name,'.$genre->id],
         ]);
 
         // 2. データベースの値を更新
@@ -94,9 +95,6 @@ class GenreController extends Controller
 
     /**
      * ★【最終兵器！】ジャンルを削除
-     *
-     * @param \App\Models\Genre $genre
-     * @return \Illuminate\Http\RedirectResponse
      */
     public function destroy(Genre $genre): RedirectResponse
     {
@@ -106,6 +104,7 @@ class GenreController extends Controller
         }
 
         $genre->delete();
+
         return redirect()->route('genres.index')->with('success', 'ジャンルを削除しました。');
     }
 }

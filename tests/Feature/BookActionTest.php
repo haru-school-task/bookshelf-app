@@ -130,7 +130,6 @@ class BookActionTest extends TestCase
         $response->assertSee($book->title); // 登録した本のタイトルが見えるか
     }
 
-
     /** @test */
     public function 管理者はジャンル一覧画面を表示できる()
     {
@@ -171,7 +170,6 @@ class BookActionTest extends TestCase
         $response->assertDontSee('夏目漱石の本');
     }
 
-
     /** @test */
     public function ログインユーザーは自身の読書統計レポート画面を表示できる()
     {
@@ -182,7 +180,7 @@ class BookActionTest extends TestCase
         $user->reviews()->create([
             'book_id' => $book->id,
             'rating' => 5,
-            'comment' => 'テストレポート用のレビューです。'
+            'comment' => 'テストレポート用のレビューです。',
         ]);
 
         // ログインしてレポート画面へアクセス
@@ -227,5 +225,4 @@ class BookActionTest extends TestCase
         $response->assertStatus(200);
         $response->assertSeeInOrder(['人気本', '普通本']);
     }
-
 }

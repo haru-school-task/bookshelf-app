@@ -2,7 +2,8 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use App\Models\Book;
+use App\Models\User;
 use Illuminate\Database\Seeder;
 
 class FavoriteSeeder extends Seeder
@@ -12,8 +13,8 @@ class FavoriteSeeder extends Seeder
      */
     public function run(): void
     {
-        $users = \App\Models\User::all();
-        $books = \App\Models\Book::all();
+        $users = User::all();
+        $books = Book::all();
 
         foreach ($users as $user) {
             // 各ユーザーに3〜5冊ランダムに選択

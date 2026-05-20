@@ -2,10 +2,12 @@
 
 namespace Database\Factories;
 
+use App\Models\Book;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Book>
+ * @extends Factory<Book>
  */
 class BookFactory extends Factory
 {
@@ -20,7 +22,7 @@ class BookFactory extends Factory
         $title = $this->faker->realText(15);
 
         return [
-            'user_id' => \App\Models\User::factory(), // 本の持ち主（User）も自動で作ってもらう
+            'user_id' => User::factory(), // 本の持ち主（User）も自動で作ってもらう
             'title' => fake()->realText(20),
             'title_kana' => $title,
             'author' => $this->faker->name(),

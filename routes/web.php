@@ -2,17 +2,20 @@
 
 use App\Http\Controllers\BookController; // 後でコントローラーを作る時に使います
 use App\Http\Controllers\GenreController; // ★この1行を追加！
-use App\Http\Controllers\ReadingPlanController;
 use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\ReadingPlanController;
 use Illuminate\Support\Facades\Route;
 
 /*
+
 |--------------------------------------------------------------------------
 | Web Routes
 |--------------------------------------------------------------------------
+
 |
 | Here is where you can register web routes for your application. These
 | routes are loaded by the RouteServiceProvider and all of them will
+
 | be assigned to the "web" middleware group. Make something great!
 |
 */
@@ -29,7 +32,6 @@ Route::resource('books', BookController::class)->only(['index', 'show']);
 
 // ★マイ読書レポートは書籍リソースの「下」へ配置
 Route::get('/reports', [BookController::class, 'report'])->name('reports.index')->middleware('auth');
-
 
 // routes/web.php の3番をこれに書き換え
 
@@ -58,22 +60,25 @@ Route::get('/books/isbn/{isbn}', [BookController::class, 'fetchByIsbn']);
 // =========================================================================
 Route::middleware('auth')->group(function () {
     // PG15: 読書計画一覧（状態による絞り込み対応）
-    Route::get('/reading-plans', [\App\Http\Controllers\ReadingPlanController::class, 'index'])
+    Route::get('/reading-plans', [ReadingPlanController::class, 'index'])
         ->name('reading-plans.index');
-        
+
     // PG16: 読書計画作成（書籍プルダウン・期日入力フォーム）
-    Route::get('/reading-plans/create', [\App\Http\Controllers\ReadingPlanController::class, 'create'])
+    Route::get('/reading-plans/create', [ReadingPlanController::class, 'create'])
         ->name('reading-plans.create');
-    Route::post('/reading-plans', [\App\Http\Controllers\ReadingPlanController::class, 'store'])
+    Route::post('/reading-plans', [ReadingPlanController::class, 'store'])
         ->name('reading-plans.store');
-        
+
     // PG17: 読書計画編集（作成者のみ閲覧・期日変更フォーム）
-    Route::get('/reading-plans/{reading_plan}/edit', [\App\Http\Controllers\ReadingPlanController::class, 'edit'])
+    Route::get('/reading-plans/{reading_plan}/edit', [ReadingPlanController::class, 'edit'])
         ->name('reading-plans.edit');
-    Route::put('/reading-plans/{reading_plan}', [\App\Http\Controllers\ReadingPlanController::class, 'update'])
+    Route::put('/reading-plans/{reading_plan}', [ReadingPlanController::class, 'update'])
         ->name('reading-plans.update');
-    Route::delete('/reading-plans/{reading_plan}', [\App\Http\Controllers\ReadingPlanController::class, 'destroy'])
+    Route::delete('/reading-plans/{reading_plan}', [ReadingPlanController::class, 'destroy'])
         ->name('reading-plans.destroy');
+    // 変更後（受け皿をPOSTに変更してガチッと噛み合わせます）
+    Route::post('/reading-plans/{reading_plan}/complete', [ReadingPlanController::class, 'complete'])
+        ->name('reading-plans.complete');
 });
 
 // =========================================================================
@@ -81,8 +86,8 @@ Route::middleware('auth')->group(function () {
 // =========================================================================
 Route::middleware('auth')->group(function () {
     // PG18: 通知一覧の表示、および各通知の既読化アクション（DatabaseChannel連動）
-    Route::get('/notifications', [\App\Http\Controllers\NotificationController::class, 'index'])
+    Route::get('/notifications', [NotificationController::class, 'index'])
         ->name('notifications.index');
-    Route::post('/notifications/{id}/read', [\App\Http\Controllers\NotificationController::class, 'markAsRead'])
+    Route::post('/notifications/{id}/read', [NotificationController::class, 'markAsRead'])
         ->name('notifications.read');
 });

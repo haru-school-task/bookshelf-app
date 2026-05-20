@@ -10,6 +10,7 @@ use Tests\TestCase;
 class BookAccessTest extends TestCase
 {
     use RefreshDatabase; // テストごとにDBをリセットして綺麗に保つ魔法
+
     /** @test */
     public function 一覧画面にアクセスできる()
     {

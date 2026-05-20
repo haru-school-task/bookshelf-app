@@ -18,17 +18,17 @@ class BookSeeder extends Seeder
         $users = User::all();
 
         $books = [
-            ['title' => '吾輩は猫である', 'title_kana' => 'わがはいはねこである','author' => '夏目漱石', 'isbn' => '9784101010014', 'genres' => ['小説'], 'date' => '1905-01-01'],
-            ['title' => '人を動かす', 'title_kana' => 'ひとをうごかす','author' => 'D・カーネギー', 'isbn' => '9784422100524', 'genres' => ['ビジネス', '自己啓発'], 'date' => '1936-11-12'],
-            ['title' => 'リーダブルコード', 'title_kana' => 'りーだぶるこーど','author' => 'Dustin Boswell', 'isbn' => '9784873115658', 'genres' => ['技術書'], 'date' => '2012-06-01'],
-            ['title' => '7つの習慣', 'title_kana' => 'ななつのしゅうかん','author' => 'スティーブン・R・コヴィー', 'isbn' => '9784863940246', 'genres' => ['ビジネス', '自己啓発'], 'date' => '1989-10-24'],
-            ['title' => '坊っちゃん', 'title_kana' => 'ぼっちゃん','author' => '夏目漱石', 'isbn' => '9784101010021', 'genres' => ['小説'], 'date' => '1906-04-01'],
-            ['title' => 'サピエンス全史', 'title_kana' => 'さぴえんすぜんし','author' => 'ユヴァル・ノア・ハラリ', 'isbn' => '9784309226712', 'genres' => ['歴史', '科学'], 'date' => '2011-01-01'],
-            ['title' => 'Clean Code', 'title_kana' => 'くりーんこーど','author' => 'Robert C. Martin', 'isbn' => '9784848330598', 'genres' => ['技術書'], 'date' => '2008-08-01'],
-            ['title' => '嫌われる勇気', 'title_kana' => 'きらわれるゆうき','author' => '岸見一郎・古賀史健', 'isbn' => '9784776205819', 'genres' => ['自己啓発'], 'date' => '2013-12-13'],
-            ['title' => '火花', 'title_kana' => 'ひばな','author' => '又吉直樹', 'isbn' => '9784163902302', 'genres' => ['小説'], 'date' => '2015-03-11'],
-            ['title' => 'FACTFULNESS', 'title_kana' => 'ふぁくとふるねす','author' => 'ハンス・ロスリング', 'isbn' => '9784822289607', 'genres' => ['ビジネス', '科学'], 'date' => '2018-04-03'],
-            ['title' => 'コンテナ物語','title_kana' => 'こんてなものがたり','author' => 'マルク・レヴィンソン', 'isbn' => '9784822245566', 'genres' => ['ビジネス', '歴史'], 'date' => '2006-01-01'],
+            ['title' => '吾輩は猫である', 'title_kana' => 'わがはいはねこである', 'author' => '夏目漱石', 'isbn' => '9784101010014', 'genres' => ['小説'], 'date' => '1905-01-01'],
+            ['title' => '人を動かす', 'title_kana' => 'ひとをうごかす', 'author' => 'D・カーネギー', 'isbn' => '9784422100524', 'genres' => ['ビジネス', '自己啓発'], 'date' => '1936-11-12'],
+            ['title' => 'リーダブルコード', 'title_kana' => 'りーだぶるこーど', 'author' => 'Dustin Boswell', 'isbn' => '9784873115658', 'genres' => ['技術書'], 'date' => '2012-06-01'],
+            ['title' => '7つの習慣', 'title_kana' => 'ななつのしゅうかん', 'author' => 'スティーブン・R・コヴィー', 'isbn' => '9784863940246', 'genres' => ['ビジネス', '自己啓発'], 'date' => '1989-10-24'],
+            ['title' => '坊っちゃん', 'title_kana' => 'ぼっちゃん', 'author' => '夏目漱石', 'isbn' => '9784101010021', 'genres' => ['小説'], 'date' => '1906-04-01'],
+            ['title' => 'サピエンス全史', 'title_kana' => 'さぴえんすぜんし', 'author' => 'ユヴァル・ノア・ハラリ', 'isbn' => '9784309226712', 'genres' => ['歴史', '科学'], 'date' => '2011-01-01'],
+            ['title' => 'Clean Code', 'title_kana' => 'くりーんこーど', 'author' => 'Robert C. Martin', 'isbn' => '9784848330598', 'genres' => ['技術書'], 'date' => '2008-08-01'],
+            ['title' => '嫌われる勇気', 'title_kana' => 'きらわれるゆうき', 'author' => '岸見一郎・古賀史健', 'isbn' => '9784776205819', 'genres' => ['自己啓発'], 'date' => '2013-12-13'],
+            ['title' => '火花', 'title_kana' => 'ひばな', 'author' => '又吉直樹', 'isbn' => '9784163902302', 'genres' => ['小説'], 'date' => '2015-03-11'],
+            ['title' => 'FACTFULNESS', 'title_kana' => 'ふぁくとふるねす', 'author' => 'ハンス・ロスリング', 'isbn' => '9784822289607', 'genres' => ['ビジネス', '科学'], 'date' => '2018-04-03'],
+            ['title' => 'コンテナ物語', 'title_kana' => 'こんてなものがたり', 'author' => 'マルク・レヴィンソン', 'isbn' => '9784822245566', 'genres' => ['ビジネス', '歴史'], 'date' => '2006-01-01'],
         ];
 
         foreach ($books as $index => $data) {
@@ -37,12 +37,12 @@ class BookSeeder extends Seeder
             $book = Book::create([
                 'user_id' => $users->random()->id,
                 'title' => $data['title'],
-                'title_kana' => $data['title_kana'], 
+                'title_kana' => $data['title_kana'],
                 'author' => $data['author'],
                 'isbn' => $data['isbn'],
                 'published_date' => $data['date'], // ★【要件】前行程で追加した published_date を流し込む
-                'description' => $data['title'] . 'の解説文がここに入ります。',
-                'image_url' => 'https://books.google.com/books/publisher/content/images/frontcover/' . $data['isbn'] . '?fife=w400-h600&source=gbs_api',
+                'description' => $data['title'].'の解説文がここに入ります。',
+                'image_url' => 'https://books.google.com/books/publisher/content/images/frontcover/'.$data['isbn'].'?fife=w400-h600&source=gbs_api',
             ]);
 
             // ジャンル名からIDを取得

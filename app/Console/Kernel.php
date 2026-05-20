@@ -12,7 +12,8 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule): void
     {
-        // $schedule->command('inspire')->hourly();
+        // 🔥 先ほど作成したコマンドのシグネチャを指定し、毎日自動実行（daily）に設定します！
+        $schedule->command('reading-plans:update-status')->daily();
     }
 
     /**

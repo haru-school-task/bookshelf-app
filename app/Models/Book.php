@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\BookStatus;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -12,7 +13,7 @@ class Book extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['user_id', 'title','title_kana', 'author', 'isbn', 'published_date', 'description', 'image_url'];
+    protected $fillable = ['user_id', 'title', 'title_kana', 'author', 'isbn', 'published_date', 'description', 'image_url'];
 
     // 書籍の持ち主（User）との絆
     public function user(): BelongsTo
@@ -39,14 +40,14 @@ class Book extends Model
     }
 
     /**
-    * 属性のキャスト定義
-    */
+     * 属性のキャスト定義
+     */
     protected function casts(): array
     {
         return [
             // 💡 もしデータベースに「status」というカラムがあった場合、
             // 単なる数字（1, 2）ではなく、自動的に上で作った BookStatus 型のオブジェクトに一発変換します！
-            'status' => \App\Enums\BookStatus::class,
-       ];
+            'status' => BookStatus::class,
+        ];
     }
 }

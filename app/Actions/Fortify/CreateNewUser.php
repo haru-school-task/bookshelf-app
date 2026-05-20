@@ -32,18 +32,18 @@ class CreateNewUser implements CreatesNewUsers
             'password' => $this->passwordRules(),
         ], [
             // ★【要件完全一致】日本語バリデーションメッセージの設計 [INDEX1]
-            'name.required'     => 'お名前は必須項目です。',
-            'name.string'       => 'お名前は正しい文字形式で入力してください。',
-            'name.max'          => 'お名前は255文字以内で入力してください。',
-            
-            'email.required'    => 'メールアドレスは必須項目です。',
-            'email.string'      => 'メールアドレスは正しい文字形式で入力してください。',
-            'email.email'       => '正しいメールアドレスの形式（@を含む形式）で入力してください。',
-            'email.max'         => 'メールアドレスは255文字以内で入力してください。',
-            'email.unique'      => 'このメールアドレスは既に登録されています。',
-            
+            'name.required' => 'お名前は必須項目です。',
+            'name.string' => 'お名前は正しい文字形式で入力してください。',
+            'name.max' => 'お名前は255文字以内で入力してください。',
+
+            'email.required' => 'メールアドレスは必須項目です。',
+            'email.string' => 'メールアドレスは正しい文字形式で入力してください。',
+            'email.email' => '正しいメールアドレスの形式（@を含む形式）で入力してください。',
+            'email.max' => 'メールアドレスは255文字以内で入力してください。',
+            'email.unique' => 'このメールアドレスは既に登録されています。',
+
             'password.required' => 'パスワードは必須項目です。',
-            'password.confirmed'=> 'パスワード（確認用）と一致しません。',
+            'password.confirmed' => 'パスワード（確認用）と一致しません。',
             // ※PasswordValidationRulesを使用している場合、文字数制限などはそちらに準拠します
         ])->validate();
 
@@ -54,4 +54,3 @@ class CreateNewUser implements CreatesNewUsers
         ]);
     }
 }
-

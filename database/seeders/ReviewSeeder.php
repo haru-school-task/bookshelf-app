@@ -2,7 +2,9 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use App\Models\Book;
+use App\Models\Review;
+use App\Models\User;
 use Illuminate\Database\Seeder;
 
 class ReviewSeeder extends Seeder
@@ -10,11 +12,10 @@ class ReviewSeeder extends Seeder
     /**
      * Run the database seeds.
      */
-
     public function run(): void
     {
-        $users = \App\Models\User::all();
-        $books = \App\Models\Book::all();
+        $users = User::all();
+        $books = Book::all();
 
         // ★要件：コメントを評価別日本語テンプレート5段階に用意
         $comments = [
@@ -22,7 +23,7 @@ class ReviewSeeder extends Seeder
             2 => '期待していましたが、少し物足りない印象です。',
             3 => '標準的な内容で、初心者向けの解説書として読めます。',
             4 => '非常に実用的で、明日からの開発にすぐ活かせそうです！',
-            5 => '文句なしの名著！すべてのアーキテクトに捧げたい一冊。'
+            5 => '文句なしの名著！すべてのアーキテクトに捧げたい一冊。',
         ];
 
         foreach ($books as $book) {
@@ -44,7 +45,7 @@ class ReviewSeeder extends Seeder
                 // ★要件：評価を 1〜5 の全範囲に拡大
                 $rating = rand(1, 5);
 
-                \App\Models\Review::create([
+                Review::create([
                     'book_id' => $book->id,
                     'user_id' => $reviewer->id,
                     'rating' => $rating,
@@ -53,5 +54,4 @@ class ReviewSeeder extends Seeder
             }
         }
     }
-
 }

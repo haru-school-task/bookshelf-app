@@ -2,23 +2,32 @@
 
 namespace App\Models;
 
+use App\Enums\ReadingPlanStatus;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use App\Enums\BookStatus;
 
 class ReadingPlan extends Model
 {
     use HasFactory;
 
     /**
-     * 複数代入を許可する属性（一括保存の名簿）
-     * ★DR09のデータ要件（計画者、対象書籍、期日、状態）を100%安全に通過させます
+     * 複数代入を許可する属性
      */
     protected $fillable = [
         'user_id',
         'book_id',
         'target_date',
         'status',
+    ];
+
+    /**
+     * 💡【Laravel 10仕様】プロパティ形式でキャストを定義
+     * これにより、Laravel 10環境で確実に日付オブジェクトへ変換されます
+     */
+    protected $casts = [
+        'status' => ReadingPlanStatus::class,
+        'target_date' => 'date',
+        'completed_at' => 'date',
     ];
 
     /**
@@ -35,16 +44,5 @@ class ReadingPlan extends Model
     public function book()
     {
         return $this->belongsTo(Book::class);
-    }
-
-    /**
-     * 属性のキャスト定義
-     */
-    protected function casts(): array
-    {
-        return [
-            // ⭕ 古い BookStatus::class を消して、新しい ReadingPlanStatus::class に変更します！
-            'status' => \App\Enums\ReadingPlanStatus::class,
-        ];
     }
 }

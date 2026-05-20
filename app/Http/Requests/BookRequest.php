@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
 class BookRequest extends FormRequest
@@ -17,28 +18,27 @@ class BookRequest extends FormRequest
     /**
      * Get the validation rules that apply to the request.
      *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
+     * @return array<string, ValidationRule|array<mixed>|string>
      */
     public function rules(): array
     {
         return [
-            'title'        => ['required', 'string', 'max:255'],
-            'author'       => ['required', 'string', 'max:255'],
-            'genre_ids'    => ['required', 'array'], // ジャンル選択は必須
-            'genre_ids.*'  => ['exists:genres,id'], // 選ばれたIDがDBに存在するかチェック
-            'isbn'         => ['nullable', 'string', 'unique:books,isbn,' . $this->book?->id], // 自分以外の重複を禁止
-            'description'  => ['nullable', 'string', 'max:400'], // 指示書の「400文字制限」
-        
+            'title' => ['required', 'string', 'max:255'],
+            'author' => ['required', 'string', 'max:255'],
+            'genre_ids' => ['required', 'array'], // ジャンル選択は必須
+            'genre_ids.*' => ['exists:genres,id'], // 選ばれたIDがDBに存在するかチェック
+            'isbn' => ['nullable', 'string', 'unique:books,isbn,'.$this->book?->id], // 自分以外の重複を禁止
+            'description' => ['nullable', 'string', 'max:400'], // 指示書の「400文字制限」
+
             // ❌ 以前の古いファイルアップロード用ルールは使わないので削除、またはそのまま残してもOKです
-            // 'image' => ['nullable', 'image', 'mimes:jpeg,png,jpg', 'max:2048'], 
+            // 'image' => ['nullable', 'image', 'mimes:jpeg,png,jpg', 'max:2048'],
 
             // ★【最重要・超絶加点パズル】この2行を新規追記してください！
             // 門番に「隠しポストから届くこの2つの大切なデータも、安全だからそのまま通してね」と100%の許可を与えます！
-            'title_kana'   => ['nullable', 'string', 'max:255'],
-            'image_url'    => ['nullable', 'string'],
+            'title_kana' => ['nullable', 'string', 'max:255'],
+            'image_url' => ['nullable', 'string'],
         ];
     }
-
 
     /**
      * ★【新規追記！】指示書要件：日本語のバリデーションメッセージを自分で設計して定義

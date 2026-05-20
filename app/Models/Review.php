@@ -28,6 +28,6 @@ class Review extends Model
     // ★メソッド名を likedByUsers に変更！
     public function likedByUsers(): BelongsToMany
     {
-        return $this->belongsToMany(\App\Models\User::class, 'review_likes', 'review_id', 'user_id');
+        return $this->belongsToMany(User::class, 'review_likes', 'review_id', 'user_id');
     }
 }

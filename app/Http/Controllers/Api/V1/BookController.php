@@ -3,12 +3,12 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
-use App\Models\Book;
 use App\Http\Requests\BookRequest;
 use App\Http\Resources\Api\V1\BookResource;
+use App\Models\Book;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
-use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Response;
 
 class BookController extends Controller
@@ -46,7 +46,7 @@ class BookController extends Controller
             ->withAvg('reviews', 'rating')
             ->find($id);
 
-        if (!$book) {
+        if (! $book) {
             return response()->json(['message' => '指定された書籍が見つかりません。'], Response::HTTP_NOT_FOUND);
         }
 
@@ -83,7 +83,7 @@ class BookController extends Controller
     {
         $book = Book::find($id);
 
-        if (!$book) {
+        if (! $book) {
             return response()->json(['message' => '指定された書籍が見つかりません。'], Response::HTTP_NOT_FOUND);
         }
 
@@ -95,6 +95,7 @@ class BookController extends Controller
         $book->genres()->sync($validated['genre_ids']);
 
         $book->load('genres')->loadCount('reviews')->loadAvg('reviews', 'rating');
+
         return new BookResource($book);
     }
 
@@ -105,7 +106,7 @@ class BookController extends Controller
     {
         $book = Book::find($id);
 
-        if (!$book) {
+        if (! $book) {
             return response()->json(['message' => '指定された書籍が見つかりません。'], Response::HTTP_NOT_FOUND);
         }
 
@@ -113,8 +114,7 @@ class BookController extends Controller
         $this->authorize('delete', $book);
 
         $book->delete();
+
         return response()->json(['message' => '書籍を削除しました。'], Response::HTTP_OK);
     }
-
-
 }

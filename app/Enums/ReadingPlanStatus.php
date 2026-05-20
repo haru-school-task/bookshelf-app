@@ -2,27 +2,34 @@
 
 namespace App\Enums;
 
-/**
- * 読書計画の状態を管理するEnum（スクール完全同期版）
- */
 enum ReadingPlanStatus: int
 {
-    case UNREAD = 1;    // 未着手
-    case READING = 2;   // 読書中
-    case COMPLETED = 3;  // 読了
+    // 🔥 大文字小文字の定義を画面側の要求（Completed）に合わせます
+    case Unread = 1;      // 未着手
+    case Reading = 2;     // 読書中
+    case Completed = 3;   // 完了
 
     /**
-     * スクール公式のBlade（index.blade.phpの17行目）が呼び出している、
-     * 日本語の表示名（ラベル）を返す本物のメソッドです！
-     * 
-     * @return string
+     * 各ステータスの日本語ラベルを返す
      */
     public function label(): string
     {
-        return match($this) {
-            self::UNREAD    => '未着手',
-            self::READING   => '読書中',
-            self::COMPLETED => '読了',
+        return match ($this) {
+            self::Unread => '未着手',
+            self::Reading => '読書中',
+            self::Completed => '完了',
+        };
+    }
+
+    /**
+     * バッジのCSSクラスを返す関数
+     */
+    public function badgeClass(): string
+    {
+        return match ($this) {
+            self::Unread => 'bg-gray-100 text-gray-800 font-semibold px-2 py-1 rounded text-xs',
+            self::Reading => 'bg-blue-100 text-blue-800 font-semibold px-2 py-1 rounded text-xs',
+            self::Completed => 'bg-green-100 text-green-800 font-semibold px-2 py-1 rounded text-xs',
         };
     }
 }

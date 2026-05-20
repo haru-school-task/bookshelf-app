@@ -2,17 +2,19 @@
 
 namespace Tests\Feature\Api\V1;
 
-use Illuminate\Support\Facades\Http; // ★最上部に必ず追記してください
-use App\Models\Book;
+use App\Models\Book; // ★最上部に必ず追記してください
 use App\Models\Genre;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Http;
 use Tests\TestCase;
 
 class BookApiTest extends TestCase
 {
-    use RefreshDatabase;/** @test */
-    public function 適切な値が送信されればAPI経由でお気に入りやジャンルを含めて新規登録できる()
+    use RefreshDatabase;
+
+    /** @test */
+    public function 適切な値が送信されれば_ap_i経由でお気に入りやジャンルを含めて新規登録できる()
     {
         // 1. 【モック発動】外部の書籍APIへの通信を偽装し、常に「200 OK」とダミーJSONを返すようにする [INDEX2]
         Http::fake([
@@ -22,16 +24,16 @@ class BookApiTest extends TestCase
                         'volumeInfo' => [
                             'title' => '新時代のAPI設計',
                             'authors' => ['天才アーキテクト'],
-                        ]
-                    ]
-                ]
+                        ],
+                    ],
+                ],
             ], 200),
             // もしOpenBDなど別のAPIを使っている場合はここにそのURLを記述します
             'openbd.jp*' => Http::response([], 200),
         ]);
 
-        $user = \App\Models\User::factory()->create();
-        $genre = \App\Models\Genre::factory()->create();
+        $user = User::factory()->create();
+        $genre = Genre::factory()->create();
 
         $data = [
             'title' => '新時代のAPI設計',
@@ -49,12 +51,11 @@ class BookApiTest extends TestCase
         $this->assertDatabaseHas('books', ['title' => '新時代のAPI設計']);
 
         // 4. 【プロの検証】本当に外部APIへの通信が1回発生したかをチェック [INDEX2]
-        //Http::assertSentCount(1);
+        // Http::assertSentCount(1);
     }
 
-
     /** @test */
-    public function 必須データを含む書籍一覧をJSON形式で取得できる()
+    public function 必須データを含む書籍一覧を_jso_n形式で取得できる()
     {
         $user = User::factory()->create();
         $genre = Genre::factory()->create(['name' => '技術書']);
@@ -79,15 +80,15 @@ class BookApiTest extends TestCase
                         'description',
                         'genres' => [['id', 'name']],
                         'average_rating',
-                        'reviews_count'
-                    ]
-                ]
+                        'reviews_count',
+                    ],
+                ],
             ])
             ->assertJsonFragment(['title' => 'APIテスト本']);
     }
 
     /** @test */
-    public function 書籍詳細APIで存在しないIDを指定した場合は404エラーを返す()
+    public function 書籍詳細_ap_iで存在しない_i_dを指定した場合は404エラーを返す()
     {
         // 存在しないID（999など）を指定してアクセス
         $response = $this->getJson(route('api.v1.books.show', ['book' => 999]));
@@ -96,5 +97,4 @@ class BookApiTest extends TestCase
         $response->assertStatus(404)
             ->assertJson(['message' => '指定された書籍が見つかりません。']);
     }
-
 }

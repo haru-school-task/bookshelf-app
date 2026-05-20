@@ -20,7 +20,7 @@ class BookResource extends JsonResource
             'author' => $this->author,
             'isbn' => $this->isbn,
             'description' => $this->description,
-            'image_url'   => $this->image_url, 
+            'image_url' => $this->image_url,
             // ★要件：各書籍にジャンル情報を含める
             'genres' => GenreResource::collection($this->whenLoaded('genres')),
             // ★要件：平均評点（レビューがなければ0.0）

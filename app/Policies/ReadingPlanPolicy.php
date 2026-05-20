@@ -2,10 +2,10 @@
 
 namespace App\Policies;
 
-use App\Models\Book;
+use App\Models\ReadingPlan;
 use App\Models\User;
 
-class BookPolicy
+class ReadingPlanPolicy
 {
     /**
      * Determine whether the user can view any models.
@@ -18,7 +18,7 @@ class BookPolicy
     /**
      * Determine whether the user can view the model.
      */
-    public function view(User $user, Book $book): bool
+    public function view(User $user, ReadingPlan $readingPlan): bool
     {
         //
     }
@@ -34,25 +34,31 @@ class BookPolicy
     /**
      * Determine whether the user can update the model.
      */
-    public function update(User $user, Book $book): bool
+    public function update(User $user, ReadingPlan $readingPlan): bool
     {
-        // 「操作しようとしているユーザー」と「本の作成者」が一致するかチェック
-        return $user->id === $book->user_id;
+        return $user->id === $readingPlan->user_id;
     }
 
     /**
      * Determine whether the user can delete the model.
      */
-    public function delete(User $user, Book $book): bool
+    public function delete(User $user, ReadingPlan $readingPlan): bool
     {
-        // 削除も同様に本人だけ
-        return $user->id === $book->user_id;
+        return $user->id === $readingPlan->user_id;
+    }
+
+    /**
+     * 読書計画を完了（読了）にできるのは「所有者」のみ
+     */
+    public function complete(User $user, ReadingPlan $readingPlan): bool
+    {
+        return $user->id === $readingPlan->user_id;
     }
 
     /**
      * Determine whether the user can restore the model.
      */
-    public function restore(User $user, Book $book): bool
+    public function restore(User $user, ReadingPlan $readingPlan): bool
     {
         //
     }
@@ -60,7 +66,7 @@ class BookPolicy
     /**
      * Determine whether the user can permanently delete the model.
      */
-    public function forceDelete(User $user, Book $book): bool
+    public function forceDelete(User $user, ReadingPlan $readingPlan): bool
     {
         //
     }
