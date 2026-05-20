@@ -4,7 +4,8 @@ namespace App\Providers;
 
 use App\Actions\Fortify\CreateNewUser;
 // 💡 修正：末尾にセミコロン「;」を正しく追記しました
-use Laravel\Fortify\Contracts\CreatesNewUsers; 
+use Laravel\Fortify\Contracts\CreatesNewUsers;
+use Laravel\Fortify\Contracts\LogoutResponse; 
 use App\Actions\Fortify\ResetUserPassword;
 use App\Actions\Fortify\UpdateUserPassword;
 use App\Actions\Fortify\UpdateUserProfileInformation;
@@ -19,13 +20,6 @@ use Laravel\Fortify\Fortify;
 // 💡 修正：消えてしまっていたクラス宣言の「枠組み」を正しく復活させました
 class FortifyServiceProvider extends ServiceProvider
 {
-    /**
-     * Register any application services.
-     */
-    public function register(): void
-    {
-        //
-    }
 
     /**
      * Bootstrap any application services.
@@ -42,6 +36,16 @@ class FortifyServiceProvider extends ServiceProvider
 
         Fortify::registerView(function () {
             return view('auth.register');
+        });
+    }
+
+    public function register()
+    {
+        $this->app->instance(LogoutResponse::class, new class implements LogoutResponse {
+            public function toResponse($request)
+            {
+                return redirect('/login');
+            }
         });
     }
 }

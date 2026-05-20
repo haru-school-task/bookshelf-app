@@ -3,26 +3,18 @@
 use App\Http\Controllers\Api\V1\BookController;
 use Illuminate\Support\Facades\Route;
 
-/*
-|--------------------------------------------------------------------------
-| API Routes
-|--------------------------------------------------------------------------
-|
-| Here is where you can register API routes for your application. These
-| routes are loaded by the RouteServiceProvider and all of them will
-| be assigned to the "api" middleware group. Make something great!
-|
-*/
+// ⭕ すべてのAPIルートに「api.v1.books.index」などの名前を自動付与するグループ
+Route::name('api.v1.')->group(function () {
+    
+    // 【基本機能】誰でもアクセスできる読み取りルート（認証なし）
+    Route::get('/books', [BookController::class, 'index'])->name('books.index');
+    Route::get('/books/{book}', [BookController::class, 'show'])->name('books.show');
 
-// --- 公開API（V1）：応用機能（Sanctumによるトークン認証を後付け） ---
-Route::prefix('v1')->name('api.v1.')->group(function () {
-
-    // ① 基本機能：認証なしで誰でもアクセスできるルート（一覧・詳細）
-    Route::apiResource('books', BookController::class)->only(['index', 'show']);
-
-    // ② 応用機能：★ここでSanctumトークン認証を後付け（登録・更新・削除を鉄壁にガード）
-    Route::apiResource('books', BookController::class)
-        ->except(['index', 'show'])
-        ->middleware('auth:sanctum');
+    // 【応用機能】★Sanctumの暗号トークンが無いと絶対に叩けない鉄壁の部屋 [INDEX3]
+    Route::middleware('auth:sanctum')->group(function () {
+        Route::post('/books', [BookController::class, 'store'])->name('books.store');
+        Route::put('/books/{book}', [BookController::class, 'update'])->name('books.update');
+        Route::delete('/books/{book}', [BookController::class, 'destroy'])->name('books.destroy');
+    });
 
 });

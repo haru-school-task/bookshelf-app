@@ -21,7 +21,7 @@
                                         </div>
                                     @endif
                                     <h3 class="font-bold text-lg mb-2">
-                                        <a href="{{ route('books.show', $book) }}" class="text-blue-600 hover:underline">
+                                        <a href="{{ route('books.show', $book->id)}}" class="text-blue-600 hover:underline">
                                             {{ $book->title }}
                                         </a>
                                     </h3>

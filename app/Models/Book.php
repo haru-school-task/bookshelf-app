@@ -37,4 +37,16 @@ class Book extends Model
     {
         return $this->belongsToMany(User::class, 'favorites', 'book_id', 'user_id');
     }
+
+    /**
+    * 属性のキャスト定義
+    */
+    protected function casts(): array
+    {
+        return [
+            // 💡 もしデータベースに「status」というカラムがあった場合、
+            // 単なる数字（1, 2）ではなく、自動的に上で作った BookStatus 型のオブジェクトに一発変換します！
+            'status' => \App\Enums\BookStatus::class,
+       ];
+    }
 }

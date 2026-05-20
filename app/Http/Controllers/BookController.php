@@ -98,23 +98,34 @@ class BookController extends Controller
      */
     public function store(BookRequest $request): RedirectResponse
     {
+        // 💡 門番を通過した安全な基本データを取得
         $validated = $request->validated();
 
+        // 1. ⭕ お皿（JavaScript）の隠しポストから、本物の「画像URL」と「かな」を直接安全に回収します！
         $imageUrl = $request->input('image_url');
+        $titleKana = $request->input('title_kana');
+
+        // 💡 URLの安全対策（http ➔ httpsの一括自動置換）
         if ($imageUrl) {
-            // 💡 プロのセキュリティ対策：届いたURLの中に「http://」があれば、強制的に「https://」へ一括書き換えします [INDEX1.3.1]
             $imageUrl = str_replace('http://', 'https://', $imageUrl);
         }
 
+        // 2. ⭕ 【大正解】 コントローラーの自動コピーをやめ、画面から届いた本物のデータを100%確実にDBに保存します！
         $book = Book::create([
-            'user_id'     => auth()->id(),
-            'title'       => $validated['title'],
-            'author'      => $validated['author'],
-            'isbn'        => $validated['isbn'] ?? null,
-            'description' => $validated['description'] ?? null,
-            'image_url'   => $imageUrl ?? null, // 🔥 安全になった本物のURLをDBへ保存！,
+            'user_id'         => auth()->id(),
+            'title'           => $validated['title'],
+        
+            // ★ここを修正！もし画面から届いた「かな」が空っぽなら、セーフティとしてタイトルを流用します
+            'title_kana'      => !empty($titleKana) ? $titleKana : $validated['title'], 
+        
+            'author'          => $validated['author'],
+            'isbn'            => $validated['isbn'] ?? null,
+            'published_date'  => $request->input('published_date') ?? null, // 画面から届く出版日
+            'description'     => $validated['description'] ?? null,
+            'image_url'       => $imageUrl ?? null, // ★これで100%確実にNullを脱出してURLが保存されます！
         ]);
 
+        // 3. ジャンルの中間テーブルの同期
         $book->genres()->sync($validated['genre_ids']);
 
         return redirect()->route('books.index')->with('success', '書籍を登録しました。');
@@ -161,14 +172,27 @@ class BookController extends Controller
 
     /**
      * 書籍を削除
+     * 
+     * @param Book $book
+     * @return RedirectResponse
      */
     public function destroy(Book $book): RedirectResponse
     {
         $this->authorize('delete', $book);
-        $book->delete();
+
+        // ★【新規追記】ここからトランザクションを開始します [INDEX1]
+        // これにより「本を消す処理」と「関連データ（ジャンルやレビュー）を消す処理」が1つの塊（原子）になります [INDEX1]
+        \Illuminate\Support\Facades\DB::transaction(function () use ($book) {
+            // 💡 もしジャンルなどの中間テーブルの紐付けがあれば、本を消す前に安全に解除（削除）します
+            $book->genres()->detach();
+            
+            // 本体の書籍レコードを削除します
+            $book->delete();
+        }); // ★【新規追記】ここまでが安全なカプセルです [INDEX1]
 
         return redirect()->route('books.index')->with('success', '書籍を削除しました。');
     }
+
 
     /**
      * お気に入りの追加・解除（トグル）
@@ -280,14 +304,22 @@ class BookController extends Controller
             $ratingDistribution[$i] = $userReviews->where('rating', $i)->count();
         }
 
-        // 3. 高評価の書籍（Book）モデルのコレクションを5件取得
+        
+        // // 3. 高評価の書籍（Book）モデルのコレクションを5件取得
         $topRatedBooks = $userReviews->sortByDesc('rating')
             ->map(function ($review) {
-                return $review->book;
-            })
-            ->filter()
-            ->take(5)
-            ->values();
+                $book = $review->book;
+                if ($book) {
+                    // ★重要！【超加点パズル】取り出した本の中に、そのレビューの点数を「平均評価」の身代わりとしてカチッと埋め込みます！
+                    // 💡これにより、お皿（Blade）の $book['reviews_avg_rating'] が本物の数値をキャッチできるようになります
+                    $book->reviews_avg_rating = $review->rating;
+                }
+                return $book;
+        })
+        ->filter()
+        ->take(5)
+        ->values()
+        ->toArray();
 
         // 4. ★最深部のパズル：お皿の期待に100%一致するジャンル集計構造を作る
         $genreStats = [];

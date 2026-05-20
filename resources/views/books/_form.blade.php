@@ -98,18 +98,25 @@
                         <label class="inline-flex items-center cursor-pointer hover:bg-gray-100 p-2 rounded">
                             <input type="checkbox" name="genre_ids[]" value="{{ $genre->id }}"
                                 class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500"
-                                @if(in_array($genre->id, old('genres', $bookGenreIds))) checked @endif>
+                                @if(in_array($genre->id, old('genre_ids', $bookGenreIds))) checked @endif>
                             <span class="ml-2 text-sm text-gray-700">{{ $genre->name }}</span>
                         </label>
                     @endforeach
                 </div>
             @endif
         </div>
-        @error('genres')
+        @error('genre_ids')
             <p class="text-sm text-red-600 mt-1">{{ $message }}</p>
         @enderror
-        @error('genres.*')
+        @error('genre_ids.*')
             <p class="text-sm text-red-600 mt-1">{{ $message }}</p>
         @enderror
     </div>
 </div>
+
+<!-- 📁 resources/views/books/_form.blade.php の中 -->
+
+<!-- 💡 【超重要・大正解の仕掛け】 -->
+<!-- APIから届いた画像URLとタイトル（かな用）を、ブラウザが裏側で回収してコントローラーへ確実に送信するための隠しポストです！ [INDEX1.2.2] -->
+<input type="hidden" id="image_url" name="image_url" value="{{ old('image_url', $book->image_url ?? '') }}">
+<input type="hidden" id="title_kana" name="title_kana" value="{{ old('title_kana', $book->title_kana ?? '') }}">

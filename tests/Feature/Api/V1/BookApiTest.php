@@ -90,7 +90,7 @@ class BookApiTest extends TestCase
     public function 書籍詳細APIで存在しないIDを指定した場合は404エラーを返す()
     {
         // 存在しないID（999など）を指定してアクセス
-        $response = $this->getJson('/api/v1/books/999');
+        $response = $this->getJson(route('api.v1.books.show', ['book' => 999]));
 
         // 要件：存在しないIDの場合は適切なエラーレスポンス（404） [INDEX2]
         $response->assertStatus(404)

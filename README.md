@@ -91,3 +91,18 @@ sail npm run dev
 ### 4. テストコードによる検証
 - 外部API（Google Books API）連携のテストにおいて、`Http::fake()` を用いた通信のモック化を実装。
 - 画面側の操作からAPIのトークン認証、バリデーションの異常系に至るまで、**合計21個（68アサーション）の全テストがPASS（合格）**することを確認済みです。
+
+
+## 開発環境URL
+- Webアプリケーション: http://localhost
+- 公開APIベースURL: http://localhost/api/v1
+
+## APIエンドポイント一覧
+
+| メソッド | パス | 概要 | 認証 |
+| :--- | :--- | :--- | :--- |
+| GET | /api/v1/books | 書籍一覧の取得 (ソート・フィルター対応) | なし (基本機能) |
+| POST | /api/v1/books | 新しい書籍の登録 | Sanctum (応用機能) |
+| GET | /api/v1/books/{id} | 書籍詳細情報の取得 | なし (基本機能) |
+| PUT/PATCH | /api/v1/books/{id} | 書籍情報の更新 | Sanctum (応用機能) |
+| DELETE | /api/v1/books/{id} | 書籍の削除 | Sanctum (応用機能) |

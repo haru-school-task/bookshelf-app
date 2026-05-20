@@ -162,7 +162,7 @@ class BookActionTest extends TestCase
         $response = $this->get(route('books.index', ['keyword' => '夏目']));
         $response->assertStatus(200);
         $response->assertSee('夏目漱石の本');
-        $response->assertDontSee('PHP의 教科書');
+        $response->assertDontSee('PHPの教科書');
 
         // 2. ジャンル「技術書」で絞り込みリクエストを送る
         $response = $this->get(route('books.index', ['genre_id' => $genre2->id]));

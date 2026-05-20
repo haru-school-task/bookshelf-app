@@ -42,7 +42,7 @@
                         <div class="space-y-3">
                             @foreach ($stats['rating_distribution'] as $index => $count)
                                 @php
-                                    $rating = $index + 1;
+                                    $rating = $index;
                                     $maxCount = $stats['rating_distribution']->max() ?: 1;
                                     $percentage = ($count / $maxCount) * 100;
                                 @endphp
@@ -85,8 +85,19 @@
                                             <div class="font-medium text-gray-900 truncate">{{ $book['title'] }}</div>
                                             <div class="text-sm text-gray-500">{{ $book['author'] }}</div>
                                         </div>
-                                        <div class="flex-shrink-0 ml-3 text-yellow-500 text-sm">
-                                            {{ str_repeat('★', $book['rating']) }}{{ str_repeat('☆', 5 - $book['rating']) }}
+                                        <div class="flex-shrink-0 ml-3 text-sm flex gap-0.5">
+                                            @for($i = 1; $i <= 5; $i++)
+                                                @php
+                                                   // 💡 配列型（$book[...]）の中に潜んでいる可能性のある、平均評価のキー名をすべてチェックして安全に数値を引き出します
+                                                   $avgRating = $book['reviews_avg_rating'] 
+                                                                ?? $book['average_rating'] 
+                                                                ?? $book['rating'] 
+                                                                ?? $book['reviews_avg_rating_'] 
+                                                               ?? 0;
+                                                @endphp
+                                                <!-- ⭕ 引き出した平均数値を四捨五入して、100%確実に黄色（text-yellow-400）に染め上げます！ -->
+                                                <span class="{{ $i <= round((float)$avgRating) ? 'text-yellow-400' : 'text-gray-300' }}">★</span>
+                                            @endfor
                                         </div>
                                     </a>
                                 @endforeach
