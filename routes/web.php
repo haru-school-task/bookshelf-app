@@ -2,6 +2,8 @@
 
 use App\Http\Controllers\BookController; // 後でコントローラーを作る時に使います
 use App\Http\Controllers\GenreController; // ★この1行を追加！
+use App\Http\Controllers\ReadingPlanController;
+use App\Http\Controllers\NotificationController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -48,3 +50,39 @@ Route::put('/reviews/{review}', [BookController::class, 'updateReview'])->name('
 Route::delete('/reviews/{review}', [BookController::class, 'destroyReview'])->name('reviews.destroy')->middleware('auth');
 
 Route::get('/books/isbn/{isbn}', [BookController::class, 'fetchByIsbn']);
+
+// 📁 routes/web.php の一番最後に追記
+
+// =========================================================================
+// 🚀 【新応用要件】読書計画（ReadingPlan）関連ルート（認証必須）
+// =========================================================================
+Route::middleware('auth')->group(function () {
+    // PG15: 読書計画一覧（状態による絞り込み対応）
+    Route::get('/reading-plans', [\App\Http\Controllers\ReadingPlanController::class, 'index'])
+        ->name('reading-plans.index');
+        
+    // PG16: 読書計画作成（書籍プルダウン・期日入力フォーム）
+    Route::get('/reading-plans/create', [\App\Http\Controllers\ReadingPlanController::class, 'create'])
+        ->name('reading-plans.create');
+    Route::post('/reading-plans', [\App\Http\Controllers\ReadingPlanController::class, 'store'])
+        ->name('reading-plans.store');
+        
+    // PG17: 読書計画編集（作成者のみ閲覧・期日変更フォーム）
+    Route::get('/reading-plans/{reading_plan}/edit', [\App\Http\Controllers\ReadingPlanController::class, 'edit'])
+        ->name('reading-plans.edit');
+    Route::put('/reading-plans/{reading_plan}', [\App\Http\Controllers\ReadingPlanController::class, 'update'])
+        ->name('reading-plans.update');
+    Route::delete('/reading-plans/{reading_plan}', [\App\Http\Controllers\ReadingPlanController::class, 'destroy'])
+        ->name('reading-plans.destroy');
+});
+
+// =========================================================================
+// 🚀 【新応用要件】通知（Notification）関連ルート（認証必須）
+// =========================================================================
+Route::middleware('auth')->group(function () {
+    // PG18: 通知一覧の表示、および各通知の既読化アクション（DatabaseChannel連動）
+    Route::get('/notifications', [\App\Http\Controllers\NotificationController::class, 'index'])
+        ->name('notifications.index');
+    Route::post('/notifications/{id}/read', [\App\Http\Controllers\NotificationController::class, 'markAsRead'])
+        ->name('notifications.read');
+});

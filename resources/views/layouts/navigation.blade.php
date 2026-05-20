@@ -30,12 +30,28 @@
                     <x-nav-link :href="route('reports.index')" :active="request()->routeIs('reports.*')">
                         {{ __('マイレポート') }}
                     </x-nav-link>
+                    <x-nav-link :href="route('reading-plans.index')" :active="request()->routeIs('reading-plans.*')">
+                        {{ __('読書計画') }}
+                    </x-nav-link>
                 </div>
             </div>
 
             <!-- Settings Dropdown -->
             <div class="hidden sm:flex sm:items-center sm:ms-6">
                 @auth
+
+                    <!-- ★【新規追記】ユーザー名のすぐ左隣に、通知一覧へ飛ぶ本物のベルマークを設置！ -->
+                    <a href="{{ route('notifications.index') }}" class="relative text-gray-500 hover:text-gray-700 focus:outline-none transition p-1 rounded-full hover:bg-gray-100" title="通知一覧">
+                        <!-- 💡 Tailwind CSSでモックアップの画像とミリ単位で形状を一致させた美しいベルアイコン（SVG） -->
+                        <svg xmlns="http://w3.org" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" />
+                        </svg>
+
+                        <!-- 💡 未読通知がある場合だけ、右上に「赤い警告バッジ」をリアルタイム点灯させるプロの仕掛け！ -->
+                        @if(auth()->user()->unreadNotifications->count() > 0)
+                            <span class="absolute top-1 right-1 block h-2 w-2 rounded-full bg-red-500 ring-2 ring-white"></span>
+                        @endif
+                    </a>               
                     <x-dropdown align="right" width="48">
                         <x-slot name="trigger">
                             <button class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 bg-white hover:text-gray-700 focus:outline-none transition ease-in-out duration-150">
