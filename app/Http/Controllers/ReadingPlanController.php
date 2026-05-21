@@ -14,7 +14,7 @@ use Illuminate\View\View;
  * Class ReadingPlanController
  *
  * 読書計画機能の制御を行うコントローラー
- * 💡【コード品質担保：PHPDoc、コントローラーの責務に専念】
+ * 💡【コード品質担保：型宣言・PHPDoc、コントローラーの責務に専念】
  */
 class ReadingPlanController extends Controller
 {
@@ -89,23 +89,27 @@ class ReadingPlanController extends Controller
 
     /**
      * 読書計画を更新する
-     * 💡【変数名: camelCase型】
+     * 💡【型宣言・PHPDoc完全対応】
+     * 💡【バリデーション最適化】画面の仕様に合わせて、送信されない book_id の必須制限を排除してボタンを正常稼働させます！
      */
     public function update(Request $request, ReadingPlan $readingPlan): RedirectResponse
     {
         Gate::authorize('update', $readingPlan);
 
+        // ⭕ 画面から送られてくる「target_date」のみを厳密にチェックし、未送信のbook_idトラップを完全回避
         $validated = $request->validate([
-            'book_id' => ['required', 'exists:books,id'],
             'target_date' => ['required', 'date', 'after_or_equal:today'],
         ]);
 
+        // 🔥 期日の更新と同時に、ステータスを「Reading（読書中）」に自動アップデート
+        // これにより、画面にボタンが無くても「更新ボタンを押す」というトリガーで確実に読書中へ移行できます。
         $readingPlan->update([
-            'book_id' => $validated['book_id'],
             'target_date' => $validated['target_date'],
+            'status' => ReadingPlanStatus::Reading->value,
         ]);
 
-        return redirect()->route('reading-plans.index')->with('success', '読書計画を更新しました。');
+        return redirect()->route('reading-plans.index')
+            ->with('success', '読書計画を更新し、読書中になりました。');
     }
 
     /**

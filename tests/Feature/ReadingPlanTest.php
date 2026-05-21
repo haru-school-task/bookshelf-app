@@ -215,26 +215,34 @@ class ReadingPlanTest extends TestCase
     }
 
     /**
-     * 本人は自分の読書計画を正常に更新（update）できることを検証する
+     * 本人は自分の読書計画を正常に更新（update）でき、
+     * 同時にステータスが自動的に「読書中（Reading）」へ移行することを検証する
      */
     public function test_update_modifies_own_reading_plan(): void
     {
         $user = User::factory()->create();
         $book = Book::factory()->create();
-        $plan = ReadingPlan::factory()->create(['user_id' => $user->id, 'book_id' => $book->id]);
 
-        // 新しい目標期日をデータとして送信
-        $putData = [
+        // 初期状態は「Unread（未着手）」で作成
+        $plan = ReadingPlan::factory()->create([
+            'user_id' => $user->id,
             'book_id' => $book->id,
-            'target_date' => now()->addDays(14)->format('Y-m-d'), // 2週間後に更新
+            'status' => ReadingPlanStatus::Unread,
+        ]);
+
+        $putData = [
+            'target_date' => now()->addDays(14)->format('Y-m-d'),
         ];
 
         $response = $this->actingAs($user)->put(route('reading-plans.update', $plan), $putData);
 
-        // データベースの値が書き換わっていることを検証
+        // 🔒【最終アサーション】
+        // データベースの期日が更新され、かつステータスが「Reading（読書中 = 値は2）」に
+        // 自動で書き換わっている（裏ルートの通過）を厳密に検証します！
         $this->assertDatabaseHas('reading_plans', [
             'id' => $plan->id,
             'target_date' => now()->addDays(14)->format('Y-m-d'),
+            'status' => ReadingPlanStatus::Reading->value,
         ]);
         $response->assertRedirect(route('reading-plans.index'));
     }
@@ -253,5 +261,21 @@ class ReadingPlanTest extends TestCase
         // データベースから完全に消え去っていることを検証
         $this->assertDatabaseMissing('reading_plans', ['id' => $plan->id]);
         $response->assertRedirect(route('reading-plans.index'));
+    }
+
+    /**
+     * ログインユーザーが読書計画の新規作成画面（create）を正常に表示できることを検証する
+     * 💡【型宣言・PHPDoc完全対応】
+     * 💡【最後の0.2%をハントする絶対の一撃】
+     */
+    public function test_create_returns_successful_response_for_owner(): void
+    {
+        $user = User::factory()->create();
+
+        // 新規作成画面（GET）へアクセスし、コントローラーの未通過行（create）を完全に踏破します
+        $response = $this->actingAs($user)->get(route('reading-plans.create'));
+
+        $response->assertStatus(200);
+        $response->assertViewHas('books');
     }
 }
