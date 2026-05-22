@@ -14,6 +14,8 @@ use Laravel\Sanctum\HasApiTokens;
  *
  * ユーザー認証、認可、および各モデル（書籍、レビュー、お気に入り、いいね）とのリレーションを管理する中心モデルクラス
  * 💡【コード品質担保：型宣言・PHPDoc完全対応】
+ * 
+ * @package App\Models
  */
 class User extends Authenticatable
 {
@@ -49,12 +51,14 @@ class User extends Authenticatable
      */
     protected $casts = [
         'email_verified_at' => 'datetime',
-        'password' => 'hashed',
+        'password'          => 'hashed',
     ];
 
     /**
      * 自分が登録した複数の書籍（Book）との1対多リレーションを定義
      * 💡【型宣言・PHPDoc完全対応】引数が無いため @return のみ厳密に記載
+     *
+     * @return HasMany
      */
     public function books(): HasMany
     {
@@ -64,6 +68,8 @@ class User extends Authenticatable
     /**
      * 自分が投稿した複数のレビュー（Review）との1対多リレーションを定義
      * 💡【型宣言・PHPDoc完全対応】
+     *
+     * @return HasMany
      */
     public function reviews(): HasMany
     {
@@ -73,6 +79,8 @@ class User extends Authenticatable
     /**
      * 自分がお気に入りに登録した複数の書籍（Book）との多対多リレーションを定義
      * 💡【型宣言・PHPDoc完全対応】
+     *
+     * @return BelongsToMany
      */
     public function favoriteBooks(): BelongsToMany
     {
@@ -82,6 +90,8 @@ class User extends Authenticatable
     /**
      * 自分が「いいね」した複数のレビュー（Review）との多対多リレーションを定義
      * 💡【型宣言・PHPDoc完全対応】
+     *
+     * @return BelongsToMany
      */
     public function likedReviews(): BelongsToMany
     {

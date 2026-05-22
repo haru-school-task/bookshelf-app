@@ -11,6 +11,8 @@ use Tests\TestCase;
  * Class BookTest
  *
  * APIエリアにおける書籍データのアクセス制御および情報隔離を検証するテストクラス
+ * 
+ * @package Tests\Feature
  */
 class BookTest extends TestCase
 {
@@ -19,6 +21,8 @@ class BookTest extends TestCase
     /**
      * API経由で書籍一覧（index）をリクエストした際、
      * 正常に200が返り、かつ他人の非公開データが意図せず漏洩していないかを検証する
+     * 
+     * @return void
      */
     public function test_api_index_returns_successful_json_response(): void
     {
@@ -37,6 +41,8 @@ class BookTest extends TestCase
      * 特定の書籍詳細API（show）に対して、
      * 存在しないIDを指定して不正に揺さぶった際、500エラーを出さずに安全に404を返すかを検証する
      * 【例外ハンドリングのハントテスト】
+     * 
+     * @return void
      */
     public function test_api_show_returns_404_safely_for_non_existent_book(): void
     {

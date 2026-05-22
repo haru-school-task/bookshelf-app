@@ -12,6 +12,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  *
  * 読書計画データおよび各モデル（ユーザー、書籍）とのリレーションを管理するモデルクラス
  * 💡【コード品質担保：型宣言・PHPDoc完全対応】
+ * 
+ * @package App\Models
  */
 class ReadingPlan extends Model
 {
@@ -37,14 +39,16 @@ class ReadingPlan extends Model
      * @var array<string, string>
      */
     protected $casts = [
-        'status' => ReadingPlanStatus::class,
-        'target_date' => 'date',
+        'status'       => ReadingPlanStatus::class,
+        'target_date'  => 'date',
         'completed_at' => 'date',
     ];
 
     /**
      * リレーション定義：この計画を立てたユーザー（User）とのリレーション
      * 💡【型宣言・PHPDoc完全対応】戻り値の型を厳密に宣言
+     *
+     * @return BelongsTo
      */
     public function user(): BelongsTo
     {
@@ -54,9 +58,12 @@ class ReadingPlan extends Model
     /**
      * リレーション定義：対象の書籍（Book）とのリレーション
      * 💡【型宣言・PHPDoc完全対応】戻り値の型を厳密に宣言
+     *
+     * @return BelongsTo
      */
     public function book(): BelongsTo
     {
         return $this->belongsTo(Book::class);
     }
 }
+

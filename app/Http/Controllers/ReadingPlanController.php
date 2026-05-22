@@ -14,12 +14,18 @@ use Illuminate\View\View;
  * Class ReadingPlanController
  *
  * 読書計画機能の制御を行うコントローラー
+ *
+ * 
+ * @package App\Http\Controllers
  */
 class ReadingPlanController extends Controller
 {
     /**
      * 読書計画の一覧および状態による絞り込み表示を行う
      * Eager Loading(with)によるN+1問題の回避を適切に実装
+     * 
+     * @param Request $request
+     * @return View
      */
     public function index(Request $request): View
     {
@@ -44,6 +50,8 @@ class ReadingPlanController extends Controller
 
     /**
      * 読書計画の新規作成画面を表示する
+     * 
+     * @return View
      */
     public function create(): View
     {
@@ -55,6 +63,9 @@ class ReadingPlanController extends Controller
 
     /**
      * 読書計画を新規保存する
+     *  
+     * @param Request $request
+     * @return RedirectResponse
      */
     public function store(Request $request): RedirectResponse
     {
@@ -76,17 +87,25 @@ class ReadingPlanController extends Controller
     /**
      * 読書計画の編集画面を表示する
      * Policyによる認可処理
+     *  
+     * @param ReadingPlan $readingPlan
+     * @return View
      */
     public function edit(ReadingPlan $readingPlan): View
     {
         // Policyを適用して、ユーザーがこの読書計画を編集する権限があるかを確認
         Gate::authorize('update', $readingPlan);
 
+        
         return view('reading-plans.edit', compact('readingPlan'));
     }
 
     /**
      * 読書計画を更新する
+     *
+     * @param Request $request
+     * @param ReadingPlan $readingPlan
+     * @return RedirectResponse
      */
     public function update(Request $request, ReadingPlan $readingPlan): RedirectResponse
     {
@@ -110,6 +129,9 @@ class ReadingPlanController extends Controller
 
     /**
      * 読書計画を削除する
+     *
+     * @param ReadingPlan $readingPlan
+     * @return RedirectResponse
      */
     public function destroy(ReadingPlan $readingPlan): RedirectResponse
     {
@@ -122,6 +144,9 @@ class ReadingPlanController extends Controller
 
     /**
      * 読書計画を完了状態にする
+     * 
+     * @param ReadingPlan $readingPlan
+     * @return RedirectResponse
      */
     public function complete(ReadingPlan $readingPlan): RedirectResponse
     {

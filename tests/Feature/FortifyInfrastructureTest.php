@@ -15,6 +15,8 @@ use Tests\TestCase;
  * Class FortifyInfrastructureTest
  *
  * Fortifyのインフラストラクチャ層を検証するテストクラス
+ * 
+ * @package Tests\Feature
  */
 class FortifyInfrastructureTest extends TestCase
 {
@@ -22,6 +24,8 @@ class FortifyInfrastructureTest extends TestCase
 
     /**
      * 新規ユーザー登録アクションを通過させる
+     * 
+     * @return void
      */
     public function test_register_creates_new_user_successfully(): void
     {
@@ -40,6 +44,8 @@ class FortifyInfrastructureTest extends TestCase
 
     /**
      * ログインユーザーのプロフィール情報更新アクションの正常系を検証する
+     *  
+     * @return void
      */
     public function test_update_profile_information_successfully(): void
     {
@@ -57,6 +63,8 @@ class FortifyInfrastructureTest extends TestCase
 
     /**
      * ログインユーザーのパスワード更新アクションの異常系を検証する
+     *  
+     * @return void
      */
     public function test_update_user_password_exception_handling(): void
     {
@@ -74,6 +82,8 @@ class FortifyInfrastructureTest extends TestCase
 
     /**
      * パスワード更新アクションの正常系ルートを強制通過させる
+     *  
+     * @return void
      */
     public function test_update_user_password_successfully_direct(): void
     {
@@ -94,6 +104,8 @@ class FortifyInfrastructureTest extends TestCase
 
     /**
      * パスワードリセットアクションを直接呼び出して正常に処理されることを検証する
+     * 
+     * @return void
      */
     public function test_password_reset_route_handling(): void
     {

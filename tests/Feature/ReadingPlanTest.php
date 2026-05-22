@@ -13,6 +13,7 @@ use Tests\TestCase;
  * Class ReadingPlanTest
  *
  * 読書計画機能（一覧、作成、保存、編集、更新、削除、完了）の機能検証およびコードカバーを行うテストクラス
+ * @package Tests\Feature
  */
 class ReadingPlanTest extends TestCase
 {
@@ -20,6 +21,8 @@ class ReadingPlanTest extends TestCase
 
     /**
      * 読書計画一覧画面が正常に表示され、他のユーザーの計画が表示されないことを検証する
+     * 
+     * @return void
      */
     public function test_index_displays_only_authenticated_users_plans(): void
     {
@@ -48,6 +51,8 @@ class ReadingPlanTest extends TestCase
 
     /**
      * 読書計画がバリデーションを通過して正常に保存できるかを検証する
+     * 
+     * @return void
      */
     public function test_store_saves_reading_plan_with_valid_data(): void
     {
@@ -73,6 +78,8 @@ class ReadingPlanTest extends TestCase
 
     /**
      * 他のユーザーの読書計画の編集画面を開こうとした際、認可ポリシーによって403拒否されるか検証する
+     *  
+     * @return void
      */
     public function test_edit_is_forbidden_for_non_owner(): void
     {
@@ -91,6 +98,8 @@ class ReadingPlanTest extends TestCase
 
     /**
      * 読書計画の完了アクションが正常に動作し、ステータスが更新されるか検証する
+     * 
+     * @return void
      */
     public function test_complete_action_updates_plan_status_to_completed(): void
     {
@@ -117,6 +126,8 @@ class ReadingPlanTest extends TestCase
     /**
      * 目標期日を超過した読書計画がバッチ処理によって正しく抽出され、
      * リマインダー通知がデータベース（DatabaseChannel）に保存されるかを検証する
+     *
+     * @return void
      */
     public function test_batch_command_sends_notification_for_expired_plans(): void
     {
@@ -147,6 +158,8 @@ class ReadingPlanTest extends TestCase
     /**
      * 他のユーザーの読書計画を悪意をもって削除（destroy）しようとした際、
      * 認可ポリシーによって403拒否され、データが守られることを検証する
+     *  
+     * @return void
      */
     public function test_destroy_is_forbidden_for_non_owner(): void
     {
@@ -168,6 +181,8 @@ class ReadingPlanTest extends TestCase
     /**
      * 他のユーザーの読書計画を悪意をもって完了（complete）しようとした際、
      * 認可ポリシーによって403拒否され、ステータスが改ざんされないことを検証する
+     * 
+     * @return void
      */
     public function test_complete_is_forbidden_for_non_owner(): void
     {
@@ -195,6 +210,8 @@ class ReadingPlanTest extends TestCase
 
     /**
      * 本人は自分の読書計画の編集画面（edit）を正常に表示できることを検証する
+     * 
+     * @return void
      */
     public function test_edit_returns_successful_response_for_owner(): void
     {
@@ -213,6 +230,8 @@ class ReadingPlanTest extends TestCase
     /**
      * 本人は自分の読書計画を正常に更新（update）でき、
      * 同時にステータスが自動的に「読書中（Reading）」へ移行することを検証する
+     * 
+     * @return void
      */
     public function test_update_modifies_own_reading_plan(): void
     {
@@ -244,6 +263,8 @@ class ReadingPlanTest extends TestCase
 
     /**
      * 本人は自分の読書計画を正常に削除（destroy）できることを検証する
+     *  
+     * @return void
      */
     public function test_destroy_removes_own_reading_plan_successfully(): void
     {
@@ -260,6 +281,8 @@ class ReadingPlanTest extends TestCase
 
     /**
      * ログインユーザーが読書計画の新規作成画面（create）を正常に表示できることを検証する
+     *
+     * @return void 
      */
     public function test_create_returns_successful_response_for_owner(): void
     {
@@ -276,6 +299,8 @@ class ReadingPlanTest extends TestCase
      * 読書計画の新規作成時（store）、攻撃者が不正なステータス（Completed）を
      * リクエストに強制介入させて送信した際、大量代入（Mass Assignment）の脆弱性を
      * すり抜けずに、初期状態（Unread）として安全に保存されるかを検証する
+     *  
+     * @return void
      */
     public function test_vulnerability_mass_assignment_cannot_tamper_initial_status(): void
     {
@@ -287,9 +312,10 @@ class ReadingPlanTest extends TestCase
         $attackData = [
             'book_id' => $book->id,
             'target_date' => now()->addDays(7)->format('Y-m-d'),
-            'status' => ReadingPlanStatus::Completed->value,
+            'status' => ReadingPlanStatus::Completed->value, 
         ];
 
+        
         $response = $this->actingAs($user)->post(route('reading-plans.store'), $attackData);
 
         $response->assertRedirect(route('reading-plans.index'));
@@ -303,7 +329,7 @@ class ReadingPlanTest extends TestCase
             'status' => ReadingPlanStatus::Unread->value,
         ]);
 
-        // 改ざんされた値（3）のレコードが実在しないことを確認
+        //改ざんされた値（3）のレコードが実在しないことを確認
         $this->assertDatabaseMissing('reading_plans', [
             'user_id' => $user->id,
             'status' => ReadingPlanStatus::Completed->value,
