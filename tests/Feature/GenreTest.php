@@ -12,7 +12,9 @@ use Tests\TestCase;
 /**
  * Class GenreTest
  *
- * ジャンル管理機能（詳細画面の10件ページネーション、書籍紐付き時の削除制限を含む）を100%検証するテストクラス
+ * ジャンル管理機能（詳細画面の10件ページネーション、書籍紐付き時の削除制限を含む）を検証するテストクラス
+ * 
+ * @package Tests\Feature
  */
 class GenreTest extends TestCase
 {
@@ -20,6 +22,8 @@ class GenreTest extends TestCase
 
     /**
      * ジャンル一覧画面が正常に表示されることを検証する
+     * 
+     * @return void
      */
     public function test_index_displays_genres(): void
     {
@@ -34,15 +38,17 @@ class GenreTest extends TestCase
 
     /**
      * ジャンル詳細画面が正常に表示され、紐づく書籍がページネーション（10件）で渡されることを検証する
-     * 💡【仕様書要件：詳細画面のページネーション10件/ページ】
+     * 仕様書要件：詳細画面のページネーション10件/ページ
+     * 
+     * @return void
      */
     public function test_show_displays_genre_detail_with_ten_books_pagination(): void
     {
         $user = User::factory()->create();
         $genre = Genre::factory()->create();
 
-        // 💡【多対多対応】本を11冊作成し、モデルのリレーション経由でジャンルへ安全に紐付けます
-        // ※ もしモデル内のリレーション名が「books」でない場合は、定義されている名前に合わせてください
+        // 💡【多対多対応】本を11冊作成し、モデルのリレーション経由でジャンルへ安全に紐付ける
+        // ※ もしモデル内のリレーション名が「books」でない場合は、定義されている名前に合わせる
         Book::factory()->count(11)->create()->each(function (Book $book) use ($genre) {
             $genre->books()->attach($book->id);
         });
@@ -58,6 +64,8 @@ class GenreTest extends TestCase
 
     /**
      * ジャンル作成画面が正常に表示されることを検証する
+     *  
+     * @return void
      */
     public function test_create_returns_successful_response(): void
     {
@@ -70,6 +78,8 @@ class GenreTest extends TestCase
 
     /**
      * ジャンルがバリデーションを通過して正常に保存できるかを検証する
+     * 
+     * @return void
      */
     public function test_store_saves_new_genre(): void
     {
@@ -84,6 +94,8 @@ class GenreTest extends TestCase
 
     /**
      * ジャンル編集画面が正常に表示されることを検証する
+     * 
+     * @return void
      */
     public function test_edit_returns_successful_response(): void
     {
@@ -98,6 +110,8 @@ class GenreTest extends TestCase
 
     /**
      * ジャンルの更新が正常に動作するかを検証する
+     *  
+     * @return void
      */
     public function test_update_modifies_genre(): void
     {
@@ -116,6 +130,8 @@ class GenreTest extends TestCase
 
     /**
      * 書籍の紐付きがないクリーンなジャンルは正常に削除できることを検証する
+     *  
+     * @return void
      */
     public function test_destroy_removes_genre_without_books(): void
     {
@@ -130,20 +146,22 @@ class GenreTest extends TestCase
 
     /**
      * 書籍が登録されているジャンルを削除しようとした際、ブロックされる（制限される）ことを検証する
+     *  
+     * @return void
      */
     public function test_destroy_restricts_deletion_if_genre_has_books(): void
     {
         $user = User::factory()->create();
         $genre = Genre::factory()->create();
 
-        // 💡【多対多対応】本を1冊作成し、リレーション経由でジャンルに紐付けてトラップを仕掛けます
+        // 【多対多対応】本を1冊作成し、モデルのリレーション経由でジャンルへ安全に紐付ける
         $book = Book::factory()->create();
         $genre->books()->attach($book->id);
 
         // 削除を実行
         $response = $this->actingAs($user)->delete(route('genres.destroy', $genre));
 
-        // 🔒【アサーション】削除が制限され、データベースにジャンルが残っていることを確認
+        // 【アサーション】削除が制限され、データベースにジャンルが残っていることを確認
         $this->assertDatabaseHas('genres', ['id' => $genre->id]);
     }
 }

@@ -14,13 +14,18 @@ use Illuminate\View\View;
  * Class ReadingPlanController
  *
  * 読書計画機能の制御を行うコントローラー
- * 💡【コード品質担保：型宣言・PHPDoc、コントローラーの責務に専念】
+ *
+ * 
+ * @package App\Http\Controllers
  */
 class ReadingPlanController extends Controller
 {
     /**
      * 読書計画の一覧および状態による絞り込み表示を行う
-     * 💡【命名規則: camelCase型変数】【Eager Loading(with)によるN+1問題の完全回避】
+     * Eager Loading(with)によるN+1問題の回避を適切に実装
+     * 
+     * @param Request $request
+     * @return View
      */
     public function index(Request $request): View
     {
@@ -45,6 +50,8 @@ class ReadingPlanController extends Controller
 
     /**
      * 読書計画の新規作成画面を表示する
+     * 
+     * @return View
      */
     public function create(): View
     {
@@ -56,6 +63,9 @@ class ReadingPlanController extends Controller
 
     /**
      * 読書計画を新規保存する
+     *  
+     * @param Request $request
+     * @return RedirectResponse
      */
     public function store(Request $request): RedirectResponse
     {
@@ -76,33 +86,38 @@ class ReadingPlanController extends Controller
 
     /**
      * 読書計画の編集画面を表示する
-     * 💡【変数名: camelCase型への完全補正】【Policyによる認可処理】
+     * Policyによる認可処理
+     *  
+     * @param ReadingPlan $readingPlan
+     * @return View
      */
     public function edit(ReadingPlan $readingPlan): View
     {
-        // 🔒 Policyを適用（指示シート通り、認可処理を強制）
+        // Policyを適用して、ユーザーがこの読書計画を編集する権限があるかを確認
         Gate::authorize('update', $readingPlan);
 
-        // ⭕ 画面（Blade）が探している「$readingPlan」という完璧なキャメルケース変数名で引き渡します！
+        
         return view('reading-plans.edit', compact('readingPlan'));
     }
 
     /**
      * 読書計画を更新する
-     * 💡【型宣言・PHPDoc完全対応】
-     * 💡【バリデーション最適化】画面の仕様に合わせて、送信されない book_id の必須制限を排除してボタンを正常稼働させます！
+     *
+     * @param Request $request
+     * @param ReadingPlan $readingPlan
+     * @return RedirectResponse
      */
     public function update(Request $request, ReadingPlan $readingPlan): RedirectResponse
     {
         Gate::authorize('update', $readingPlan);
 
-        // ⭕ 画面から送られてくる「target_date」のみを厳密にチェックし、未送信のbook_idトラップを完全回避
+        // バリデーションルールの定義と適用
         $validated = $request->validate([
             'target_date' => ['required', 'date', 'after_or_equal:today'],
         ]);
 
-        // 🔥 期日の更新と同時に、ステータスを「Reading（読書中）」に自動アップデート
-        // これにより、画面にボタンが無くても「更新ボタンを押す」というトリガーで確実に読書中へ移行できます。
+        // 期日の更新と同時に、ステータスを「Reading（読書中）」に自動アップデート
+        // これにより、画面にボタンが無くても「更新ボタンを押す」というトリガーで読書中へ移行できるようにする
         $readingPlan->update([
             'target_date' => $validated['target_date'],
             'status' => ReadingPlanStatus::Reading->value,
@@ -114,7 +129,9 @@ class ReadingPlanController extends Controller
 
     /**
      * 読書計画を削除する
-     * 💡【変数名: camelCase型】
+     *
+     * @param ReadingPlan $readingPlan
+     * @return RedirectResponse
      */
     public function destroy(ReadingPlan $readingPlan): RedirectResponse
     {
@@ -127,7 +144,9 @@ class ReadingPlanController extends Controller
 
     /**
      * 読書計画を完了状態にする
-     * 💡【変数名: camelCase型】
+     * 
+     * @param ReadingPlan $readingPlan
+     * @return RedirectResponse
      */
     public function complete(ReadingPlan $readingPlan): RedirectResponse
     {

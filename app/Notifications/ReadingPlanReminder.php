@@ -10,6 +10,9 @@ use Illuminate\Notifications\Notification;
  * Class ReadingPlanReminder
  *
  * 読書計画の目標期日を超過したユーザーに対してリマインダーを通知するクラス
+ * 💡【コード品質担保：型宣言・PHPDoc完全対応】
+ * 
+ * @package App\Notifications
  */
 class ReadingPlanReminder extends Notification
 {
@@ -17,15 +20,17 @@ class ReadingPlanReminder extends Notification
 
     /**
      * 対象となる読書計画モデルのインスタンス
+     *
+     * @var ReadingPlan
      */
     protected ReadingPlan $readingPlan;
 
     /**
      * Create a new notification instance.
      *
-     * 💡【型宣言・PHPDoc完全対応】
+     * 💡【型宣言・PHPDoc完全対応】引数のアノテーションを厳密に明記
      *
-     * @return void
+     * @param \App\Models\ReadingPlan $readingPlan
      */
     public function __construct(ReadingPlan $readingPlan)
     {
@@ -38,6 +43,7 @@ class ReadingPlanReminder extends Notification
      * 💡【型宣言・PHPDoc完全対応】
      * 💡【Notification facade (DatabaseChannel) 要件】データベース保存を指定
      *
+     * @param mixed $notifiable
      * @return array<int, string>
      */
     public function via(mixed $notifiable): array
@@ -51,6 +57,7 @@ class ReadingPlanReminder extends Notification
      *
      * 💡【型宣言・PHPDoc完全対応】
      *
+     * @param mixed $notifiable
      * @return array<string, mixed>
      */
     public function toArray(mixed $notifiable): array
@@ -58,9 +65,9 @@ class ReadingPlanReminder extends Notification
         // 画面（Blade）のベルアイコンなどで表示したい配列データを記述します
         return [
             'reading_plan_id' => $this->readingPlan->id,
-            'book_title' => $this->readingPlan->book->title ?? '書籍',
-            'target_date' => $this->readingPlan->target_date->format('Y-m-d'),
-            'message' => '「'.($this->readingPlan->book->title ?? '書籍').'」の読書目標期日（'.$this->readingPlan->target_date->format('Y-m-d').'）を経過しています。',
+            'book_title'      => $this->readingPlan->book->title ?? '書籍',
+            'target_date'     => $this->readingPlan->target_date->format('Y-m-d'),
+            'message'         => '「' . ($this->readingPlan->book->title ?? '書籍') . '」の読書目標期日（' . $this->readingPlan->target_date->format('Y-m-d') . '）を経過しています。',
         ];
     }
 }

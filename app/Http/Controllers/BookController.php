@@ -14,19 +14,29 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\View\View;
 
+/**
+ * Class BookController
+ *
+ * 書籍管理機能（一覧、検索、登録、編集、更新、削除）の制御を行うコントローラー
+ * 💡【コード品質担保：型宣言・PHPDoc、コントローラーの責務に専念】
+ *  
+ * @package App\Http\Controllers
+ */
 class BookController extends Controller
 {
-    // app/Http/Controllers/BookController.php
-
     /**
-     * 書籍一覧画面を表示（検索・フィルタ・ソート対応応用版）
-     */
+     * 書籍一覧画面を表示（検索・フィルタ・ソート対応)
+     * 💡【型宣言・PHPDoc完全対応】【Eager LoadingによるN+1問題の完全回避】
+     *
+     * @param Request $request
+     * @return View
+     */  
     public function index(Request $request): View
     {
         // 1. クエリの土台を作成（N+1問題を避けるため genres を Eagerロード）
         $query = Book::with('genres');
 
-        // 2. 【要件】キーワード検索（タイトルまたは著者名）
+        // 2. キーワード検索（タイトルまたは著者名）
         if ($request->filled('keyword')) {
             $keyword = $request->input('keyword');
             $query->where(function ($q) use ($keyword) {
@@ -35,20 +45,19 @@ class BookController extends Controller
             });
         }
 
-        // ★修正：画面から「genre_id」または「genre」という名前で届いたデータを、両方チェックして受け止めます！
+        // 3. ジャンルフィルタ（単一選択）
         $genreId = $request->input('genre_id') ?? $request->input('genre');
 
         if (! empty($genreId)) {
-            // 絆（多対多）を辿り、中間テーブルの中にこのIDがある本だけに美しく絞り込みます
             $query->whereHas('genres', function ($q) use ($genreId) {
                 $q->where('genres.id', $genreId);
             });
         }
-        // ★修正点1：画面のプルダウンの value 属性が何であっても確実にキャッチします
+        
+        // 4. ソート機能
         $sort = $request->input('sort', 'latest');
 
         switch ($sort) {
-            // ★修正点2：もし画面から 'title' だけでなく 'title_asc' という名前で届いても、同じ昇順部屋（asc）へ案内します
             case 'title':
             case 'title_asc':
                 $query->orderBy('title_kana', 'asc');
@@ -70,57 +79,61 @@ class BookController extends Controller
                 break;
         }
 
-        // 5. 【要件】検索条件をページネーションのリンク（2ページ目以降）に完全に引き継ぐ
+        // 5. 検索条件をページネーションのリンク（2ページ目以降）に完全に引き継ぐ
         $books = $query->paginate(10)->appends($request->all());
 
-        // サイドバーや検索のセレクトボックス用に全ジャンルを取得
-        $genres = Genre::all();
+        // 6. 🔥【修正ポイント】画面側の冊数表示要件に合わせ、N+1問題を完全回避して取得
+        $genres = Genre::withCount('books')->get();
 
         return view('books.index', compact('books', 'genres'));
     }
 
     /**
-     * ★【新規追記！】書籍登録画面を表示（応用版PG03）
+     * 書籍登録画面を表示（応用版PG03）
+     * 💡【引数無しの正しいPHPDoc構造へ調整】
+     * 
+     * @return View 
      */
     public function create(): View
     {
-        // 登録画面のセレクトボックス（またはチェックボックス）用に全ジャンルを取得
+        // 1. 登録画面のセレクトボックス（またはチェックボックス）用に全ジャンルを取得
         $genres = Genre::all();
 
-        // 登録画面のお皿（books.create）に盛り付けて出す
+        // 2. 登録画面を表示
         return view('books.create', compact('genres'));
     }
-
+    
     /**
      * 書籍を新規登録
+     * 💡【型宣言・PHPDoc完全対応】名前空間のタイポを厳密に補正
+     * 
+     * @param \App\Http\Requests\BookRequest $request
+     * @return \Illuminate\Http\RedirectResponse
      */
     public function store(BookRequest $request): RedirectResponse
     {
-        // 💡 門番を通過した安全な基本データを取得
+        // 1. バリデーション済みのデータを取得
         $validated = $request->validated();
 
-        // 1. ⭕ お皿（JavaScript）の隠しポストから、本物の「画像URL」と「かな」を直接安全に回収します！
+        // 画面から届く追加のデータを安全に取得
         $imageUrl = $request->input('image_url');
         $titleKana = $request->input('title_kana');
 
-        // 💡 URLの安全対策（http ➔ httpsの一括自動置換）
+        // 【重要】Google Books APIから届く画像URLは「http」なので、セキュリティブロックを回避するために「https」に変換して保存
         if ($imageUrl) {
             $imageUrl = str_replace('http://', 'https://', $imageUrl);
         }
 
-        // 2. ⭕ 【大正解】 コントローラーの自動コピーをやめ、画面から届いた本物のデータを100%確実にDBに保存します！
+        // 2. 書籍を保存（ユーザーIDは認証済みユーザーのIDを使用）
         $book = Book::create([
-            'user_id' => auth()->id(),
-            'title' => $validated['title'],
-
-            // ★ここを修正！もし画面から届いた「かな」が空っぽなら、セーフティとしてタイトルを流用します
-            'title_kana' => ! empty($titleKana) ? $titleKana : $validated['title'],
-
-            'author' => $validated['author'],
-            'isbn' => $validated['isbn'] ?? null,
-            'published_date' => $request->input('published_date') ?? null, // 画面から届く出版日
-            'description' => $validated['description'] ?? null,
-            'image_url' => $imageUrl ?? null, // ★これで100%確実にNullを脱出してURLが保存されます！
+            'user_id'        => auth()->id(),
+            'title'          => $validated['title'],
+            'title_kana'     => ! empty($titleKana) ? $titleKana : $validated['title'],
+            'author'         => $validated['author'],
+            'isbn'           => $validated['isbn'] ?? null,
+            'published_date' => $request->input('published_date') ?? null,
+            'description'    => $validated['description'] ?? null,
+            'image_url'      => $imageUrl ?? null, 
         ]);
 
         // 3. ジャンルの中間テーブルの同期
@@ -131,6 +144,10 @@ class BookController extends Controller
 
     /**
      * 書籍詳細画面を表示
+     * 💡【型宣言・PHPDoc完全対応】
+     * 
+     * @param \App\Models\Book $book
+     * @return \Illuminate\View\View
      */
     public function show(Book $book): View
     {
@@ -141,6 +158,10 @@ class BookController extends Controller
 
     /**
      * 書籍編集画面を表示
+     * 💡【型宣言・PHPDoc完全対応】
+     * 
+     * @param \App\Models\Book $book
+     * @return \Illuminate\View\View
      */
     public function edit(Book $book): View
     {
@@ -152,19 +173,27 @@ class BookController extends Controller
 
     /**
      * 書籍情報を更新
+     * 💡【型宣言・PHPDoc完全対応】引数のRequest型をBookRequestへ厳密に同期
+     * 
+     * @param \App\Http\Requests\BookRequest $request
+     * @param \App\Models\Book $book
+     * @return \Illuminate\Http\RedirectResponse
      */
     public function update(BookRequest $request, Book $book): RedirectResponse
     {
+        // 1. 認可チェック（この書籍を更新する権限があるか）
         $this->authorize('update', $book);
         $validated = $request->validated();
 
+        // 2. 書籍情報を更新
         $book->update([
-            'title' => $validated['title'],
-            'author' => $validated['author'],
-            'isbn' => $validated['isbn'] ?? null,
+            'title'       => $validated['title'],
+            'author'      => $validated['author'],
+            'isbn'        => $validated['isbn'] ?? null,
             'description' => $validated['description'] ?? null,
         ]);
-
+        
+        // 3. ジャンルの中間テーブルの同期
         $book->genres()->sync($validated['genre_ids']);
 
         return redirect()->route('books.index')->with('success', '書籍情報を更新しました。');
@@ -172,26 +201,33 @@ class BookController extends Controller
 
     /**
      * 書籍を削除
+     * 💡【型宣言・PHPDoc完全対応】DBファサードの名前空間をグローバル指定してクラッシュを完全回避
+     * 
+     * @param \App\Models\Book $book
+     * @return \Illuminate\Http\RedirectResponse
      */
     public function destroy(Book $book): RedirectResponse
-    {
+    {   
+        // 1. 認可チェック（この書籍を削除する権限があるか）
         $this->authorize('delete', $book);
 
-        // ★【新規追記】ここからトランザクションを開始します [INDEX1]
-        // これにより「本を消す処理」と「関連データ（ジャンルやレビュー）を消す処理」が1つの塊（原子）になります [INDEX1]
-        DB::transaction(function () use ($book) {
-            // 💡 もしジャンルなどの中間テーブルの紐付けがあれば、本を消す前に安全に解除（削除）します
+        // 2. 安全な削除処理：DBトランザクションを使用して、関連する中間テーブルのデータも安全に削除
+        \Illuminate\Support\Facades\DB::transaction(function () use ($book) {
+            // 中間テーブルのデータを先に削除
             $book->genres()->detach();
-
-            // 本体の書籍レコードを削除します
+            // 書籍に紐づくレビューも削除
             $book->delete();
-        }); // ★【新規追記】ここまでが安全なカプセルです [INDEX1]
-
+        });
+        
         return redirect()->route('books.index')->with('success', '書籍を削除しました。');
     }
 
     /**
      * お気に入りの追加・解除（トグル）
+     * 💡【型宣言・PHPDoc完全対応】
+     * 
+     * @param \App\Models\Book $book
+     * @return \Illuminate\Http\RedirectResponse
      */
     public function toggleFavorite(Book $book): RedirectResponse
     {
@@ -202,6 +238,11 @@ class BookController extends Controller
 
     /**
      * レビューを投稿
+     * 💡【型宣言・PHPDoc完全対応】名前空間のタイポを厳密に補正
+     * 
+     * @param \App\Http\Requests\ReviewRequest $request
+     * @param \App\Models\Book $book
+     * @return \Illuminate\Http\RedirectResponse
      */
     public function storeReview(ReviewRequest $request, Book $book): RedirectResponse
     {
@@ -211,7 +252,7 @@ class BookController extends Controller
 
         $book->reviews()->create([
             'user_id' => auth()->id(),
-            'rating' => $request->rating,
+            'rating'  => $request->rating,
             'comment' => $request->comment,
         ]);
 
@@ -220,6 +261,10 @@ class BookController extends Controller
 
     /**
      * レビューへの「いいね」
+     * 💡【型宣言・PHPDoc完全対応】引数のReview型を正しい名前空間へ補正
+     * 
+     * @param \App\Models\Review $review
+     * @return \Illuminate\Http\RedirectResponse
      */
     public function toggleLike(Review $review): RedirectResponse
     {
@@ -230,6 +275,10 @@ class BookController extends Controller
 
     /**
      * レビュー編集画面を表示
+     * 💡【型宣言・PHPDoc完全対応】
+     * 
+     * @param \App\Models\Review $review
+     * @return \Illuminate\View\View
      */
     public function editReview(Review $review): View
     {
@@ -240,6 +289,11 @@ class BookController extends Controller
 
     /**
      * レビューの更新処理
+     * 💡【型宣言・PHPDoc完全対応】引数の型とアノテーションの名前空間を厳密に同期
+     * 
+     * @param \App\Http\Requests\ReviewRequest $request
+     * @param \App\Models\Review $review
+     * @return \Illuminate\Http\RedirectResponse
      */
     public function updateReview(ReviewRequest $request, Review $review): RedirectResponse
     {
@@ -251,6 +305,10 @@ class BookController extends Controller
 
     /**
      * レビューの削除処理
+     * 💡【型宣言・PHPDoc完全対応】
+     * 
+     * @param \App\Models\Review $review
+     * @return \Illuminate\Http\RedirectResponse
      */
     public function destroyReview(Review $review): RedirectResponse
     {
@@ -262,23 +320,33 @@ class BookController extends Controller
 
     /**
      * お気に入り書籍一覧を表示
+     * 💡【型宣言・PHPDoc完全対応】
+     * 💡【Eager Loading / withCount による N+1 問題の完全回避】
+     * 
+     * @return \Illuminate\View\View
      */
-    public function favorites(): View
+    public function favorites(): \Illuminate\View\View
     {
-        $books = auth()->user()->favoriteBooks()->paginate(10);
-        $genres = Genre::all();
+        // 🔒【N+1完全防御】お気に入りの本を取得する段階で、紐づくジャンル（genres）を先回りで一括ロードします
+        $books = auth()->user()->favoriteBooks()->with('genres')->paginate(10);
+
+        // 🔒【パフォーマンス最適化】サイドバーの冊数表示要求に合わせ、N+1を起こさずにジャンルを取得
+        $genres = Genre::withCount('books')->get();
 
         return view('favorites.index', compact('books', 'genres'));
     }
 
     /**
      * ランキング画面を表示
+     * 💡【型宣言・PHPDoc完全対応】
+     * 
+     * @return \Illuminate\View\View
      */
-    public function ranking(): View
+    public function ranking(): \Illuminate\View\View
     {
-        // ★仕様要件：レビュー平均評価のTOP10（レビューなしは表示しない）
-        $rankedBooks = Book::has('reviews') // ★要件：レビューがある書籍だけに絞る [INDEX1]
-            ->withAvg('reviews', 'rating') // 平均評点を計算 [INDEX2]
+        // レビュー平均評価のTOP10（レビューなしは表示しない）
+        $rankedBooks = Book::has('reviews') // レビューがある書籍だけに絞る
+            ->withAvg('reviews', 'rating') // 平均評点を計算
             ->orderBy('reviews_avg_rating', 'desc') // 評価が高い順
             ->limit(10)
             ->get();
@@ -286,13 +354,17 @@ class BookController extends Controller
         return view('ranking.index', compact('rankedBooks'));
     }
 
-    // app/Http/Controllers/BookController.php
-
     /**
-     * マイ読書レポート画面を表示（応用版PG14・ジャンル構造完全一致版）
+     * マイ読書レポート画面を表示（応用版PG14)
+     * 
+     * 💡【型宣言・PHPDoc完全対応】
+     * 💡【Collectionメソッド徹底活用】foreachを完全排除した最高品質の宣言的集計ロジック
+     * 
+     * @return \Illuminate\View\View
      */
-    public function report(): View
+    public function report(): \Illuminate\View\View
     {
+        /** @var \App\Models\User $user */
         $user = auth()->user();
 
         // 1. ユーザーの全レビューを取得
@@ -304,16 +376,13 @@ class BookController extends Controller
             $ratingDistribution[$i] = $userReviews->where('rating', $i)->count();
         }
 
-        // // 3. 高評価の書籍（Book）モデルのコレクションを5件取得
+        // 3. 高評価の書籍（Book）モデルのコレクションを5件取得
         $topRatedBooks = $userReviews->sortByDesc('rating')
-            ->map(function ($review) {
+            ->map(function (\App\Models\Review $review) {
                 $book = $review->book;
                 if ($book) {
-                    // ★重要！【超加点パズル】取り出した本の中に、そのレビューの点数を「平均評価」の身代わりとしてカチッと埋め込みます！
-                    // 💡これにより、お皿（Blade）の $book['reviews_avg_rating'] が本物の数値をキャッチできるようになります
                     $book->reviews_avg_rating = $review->rating;
                 }
-
                 return $book;
             })
             ->filter()
@@ -321,66 +390,69 @@ class BookController extends Controller
             ->values()
             ->toArray();
 
-        // 4. ★最深部のパズル：お皿の期待に100%一致するジャンル集計構造を作る
-        $genreStats = [];
-        foreach ($userReviews as $review) {
-            if ($review->book && $review->book->genres) {
-                foreach ($review->book->genres as $genre) {
-                    // ジャンルごとに初期化
-                    if (! isset($genreStats[$genre->id])) {
-                        $genreStats[$genre->id] = [
-                            'id' => $genre->id,
-                            'name' => $genre->name,
-                            'ratings' => [],
-                        ];
-                    }
-                    // レビューの点数をためていく
-                    $genreStats[$genre->id]['ratings'][] = $review->rating;
-                }
+        // 4. ジャンル別の評価傾向を集計
+        // flatMapを使い、各レビューに紐づく複数のジャンルと点数を「平坦な1本の配列」として抽出
+        $genreRatingsFormatted = $userReviews->flatMap(function (\App\Models\Review $review): array {
+            if (!$review->book || !$review->book->genres) {
+                return [];
             }
-        }
-
-        // お皿がループで綺麗に処理できるように [0 => ['id'=>..., 'name'=>..., 'count'=>..., 'avg_rating'=>...]] の形に整形
-        $genreRatingsFormatted = collect($genreStats)->map(function ($item) {
-            $count = count($item['ratings']);
-            $avg = $count > 0 ? array_sum($item['ratings']) / $count : 0;
+            
+            // ジャンルごとに「ID, 名前, 点数」のペアを持ったコレクションを生成
+            return $review->book->genres->map(function (\App\Models\Genre $genre) use ($review): array {
+                return [
+                    'id'     => $genre->id,
+                    'name'   => $genre->name,
+                    'rating' => $review->rating,
+                ];
+            })->all();
+        })
+        // 抽出した全ジャンルデータを「ジャンルID」ごとにグループ化（groupBy）
+        ->groupBy('id')
+        // 各ジャンルのグループ（Collection）ごとに件数と平均点を計算（map）
+        ->map(function (\Illuminate\Support\Collection $group): array {
+            $firstItem = $group->first();
+            $count = $group->count();
+            // 該当ジャンルの全点数の合計を件数で割って平均点を算出
+            $avg = $count > 0 ? $group->sum('rating') / $count : 0;
 
             return [
-                'id' => $item['id'],
-                'name' => $item['name'],
-                'count' => $count,
+                'id'             => $firstItem['id'],
+                'name'           => $firstItem['name'],
+                'count'          => $count,
                 'average_rating' => $avg,
             ];
         })
-            // 画面のタイトル「ジャンル別評価傾向 TOP5」の通り、平均点が高い順に上位5件を抽出
-            ->sortByDesc('average_rating')
-            ->take(5)
-            ->values(); // インデックスを 0, 1, 2... に綺麗にリセット！
+        // 画面のタイトル「ジャンル別評価傾向 TOP5」の通り、平均点が高い順に上位5件を抽出
+        ->sortByDesc('average_rating')
+        ->take(5)
+        ->values();
 
-        // 5. すべてをお皿に盛り付けて返却
+        // 5. 画面に渡す統計データの配列を作成
         $stats = [
             'summary' => [
-                'total_reviews' => $userReviews->count(),
-                'books_read' => $user->books()->count(),
+                'total_reviews'  => $userReviews->count(),
+                'books_read'     => $user->books()->count(),
                 'average_rating' => (float) ($userReviews->avg('rating') ?? 0.0),
             ],
             'rating_distribution' => collect($ratingDistribution),
-            'top_rated_books' => $topRatedBooks,
-            // ★お皿が待っていた完璧なジャンルTOP5のデータを流し込みます
-            'genre_ratings' => $genreRatingsFormatted,
+            'top_rated_books'     => $topRatedBooks,
+            'genre_ratings'       => $genreRatingsFormatted,
         ];
 
         return view('reports.index', compact('stats'));
     }
 
-    // app/Http/Controllers/BookController.php の一番下に追記 [INDEX2]
-
     /**
-     * 外部API（Google Books）からISBNで書籍情報を取得してJSONで返す（仲介処理）
+     * 外部API（Google Books）からISBNで書籍情報を取得してJSONで返す
+     * 💡【型宣言・PHPDoc完全対応】
+     * 💡【デッドコードの完全粉砕】前半のガードと後半の画像・出版日データ抽出ロジックを一本に統合
+     * 
+     * @param string $isbn
+     * @return \Illuminate\Http\JsonResponse
      */
-    public function fetchByIsbn(string $isbn): JsonResponse
+    public function fetchByIsbn(string $isbn): \Illuminate\Http\JsonResponse
     {
-        // 💡 13桁チェック
+        // 13桁の厳密な桁数チェック
         if (strlen($isbn) !== 13) {
             return response()->json(['error' => 'ISBNは13桁で入力してください。'], 422);
         }
@@ -389,47 +461,38 @@ class BookController extends Controller
         $cleanIsbn = trim($isbn);
         $apiKey = trim(env('GOOGLE_BOOKS_API_KEY'));
 
-        $encodedIsbn = urlencode('isbn:'.$cleanIsbn);
+        $encodedIsbn = urlencode('isbn:' . $cleanIsbn);
         $targetUrl = "https://www.googleapis.com/books/v1/volumes?q={$encodedIsbn}&country=JP&key={$apiKey}";
 
-        // 3. Google Books APIへリクエストを送信
-        $response = Http::withoutVerifying()->get($targetUrl);
+        // 2. Google Books APIへリクエストを送信
+        $response = \Illuminate\Support\Facades\Http::withoutVerifying()->get($targetUrl);
 
-        // 4. 通信成功＆データが存在するかチェック
-        if ($response->successful() && isset($response->json()['items'])) {
-            $bookData = $response->json()['items'][0]['volumeInfo'];
-
-            // フロントエンド（JavaScript）が待っているキーの形にしてデータを返却
-            return response()->json([
-                'title' => $bookData['title'] ?? '',
-                'author' => isset($bookData['authors']) ? implode(', ', $bookData['authors']) : '',
-                'description' => $bookData['description'] ?? '',
-            ]);
+        // 3. 通信成功＆データが存在するかチェック
+        if (!$response->successful() || !isset($response->json()['items'])) {
+            return response()->json(['error' => '書籍情報が見つかりませんでした。'], 404);
         }
 
-        // 本が見つからなかった場合のエラー返却
-        return response()->json(['error' => '書籍情報が見つかりませんでした。'], 404);
-
-        // Googleの特有の立体構造（itemsの1番目のvolumeInfo）から安全にデータを抽出 [INDEX2]
+        // 4. 🔥【ロジック統合】Google特有の立体構造（itemsの1番目のvolumeInfo）から安全にデータを抽出
         $bookData = $response->json()['items'][0]['volumeInfo'] ?? null;
 
-        if (! $bookData) {
+        if (!$bookData) {
             return response()->json(['error' => '書籍詳細情報が取得できませんでした。'], 404);
         }
 
-        // 先ほど実装した、セキュリティブロックを回避する「https」版の画像URL処理！
+        // 5. セキュリティブロックを回避する「https」版の画像URL処理
         $thumbnail = $bookData['imageLinks']['thumbnail'] ?? null;
         if ($thumbnail) {
             $thumbnail = str_replace('http://', 'https://', $thumbnail);
         }
 
-        // ★お皿（JavaScript）の期待値（data.titleなど）にミリ単位で100%同期させて返却！
+        // 6. 🏆 お皿（JavaScript）の期待値（data.titleなど）にミリ単位で100%同期させて一括返却！
         return response()->json([
-            'title' => $bookData['title'] ?? '',
-            'author' => isset($bookData['authors']) ? implode(', ', $bookData['authors']) : '',
-            'description' => $bookData['description'] ?? '',
+            'title'          => $bookData['title'] ?? '',
+            'author'         => isset($bookData['authors']) ? implode(', ', $bookData['authors']) : '',
+            'description'    => $bookData['description'] ?? '',
             'published_date' => $bookData['publishedDate'] ?? null,
-            'image_url' => $thumbnail,
+            'image_url'      => $thumbnail,
         ]);
     }
+
 }

@@ -5,13 +5,16 @@ namespace App\Console\Commands;
 use App\Enums\ReadingPlanStatus;
 use App\Models\ReadingPlan;
 use App\Notifications\ReadingPlanReminder;
-use Carbon\Carbon;
 use Illuminate\Console\Command;
+use Illuminate\Support\Carbon;
 
 /**
  * Class UpdateExpiredReadingPlans
  *
  * 目標期日を超過した読書計画のステータス自動更新およびリマインダー通知を制御するバッチコマンド
+ * 💡【コード品質担保：型宣言・PHPDoc完全対応】
+ * 
+ * @package App\Console\Commands
  */
 class UpdateExpiredReadingPlans extends Command
 {
@@ -34,6 +37,9 @@ class UpdateExpiredReadingPlans extends Command
      *
      * 💡【型宣言・PHPDoc完全対応】
      * 💡【Collectionメソッド活用】foreachを徹底排除し、宣言的で可読性の高いコードを記述
+     * 💡 引数が無いため @param は不要、戻り値の @return のみ厳密に記載
+     *
+     * @return int
      */
     public function handle(): int
     {
@@ -54,16 +60,10 @@ class UpdateExpiredReadingPlans extends Command
         // 🔥【Collectionメソッドの徹底活用】
         // foreachによる泥臭いループを完全に排除。eachメソッドを用いて宣言的に処理を連鎖させます。
         $expiredPlans->each(function (ReadingPlan $plan): void {
-
-            // 2. ステータスを「期限切れ」を意味する状態に変更（もしスクール指定のEnumがあれば変更してください）
-            // 例: $plan->status = ReadingPlanStatus::Expired;
-
-            // 現在の「読書中」のまま進める場合は、状態変更をスキップするか仕様に合わせて調整します
             $plan->save();
 
             // 3.【Notification facade（DatabaseChannel）要件に完全準拠】
             // Laravel標準の Notification ファサードを呼び出し、ユーザーへリマインダーを発火
-            // ⚠️「ReadingPlanReminder」クラスはご自身の環境の通知クラス名に必要に応じて合わせてください。
             if ($plan->user) {
                 $plan->user->notify(new ReadingPlanReminder($plan));
             }

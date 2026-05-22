@@ -9,12 +9,22 @@ use App\Models\Book;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
-use Illuminate\Http\Response;
+use Symfony\Component\HttpFoundation\Response;
 
+/**
+ * Class BookController
+ *
+ * API(V1)エリアにおける書籍データ操作（一覧、詳細、新規登録、更新、削除）を制御するコントローラー
+ *
+ * @package App\Http\Controllers\Api\V1
+ */
 class BookController extends Controller
 {
     /**
      * 書籍一覧を取得（JSON形式、検索・ページネーション対応）
+     *
+     * @param Request $request
+     * @return AnonymousResourceCollection
      */
     public function index(Request $request): AnonymousResourceCollection
     {
@@ -37,7 +47,10 @@ class BookController extends Controller
 
     /**
      * 書籍詳細を取得
-     * 正常時は BookResource、404エラー時は JsonResponse を返すため「|」で繋ぎます
+     * 【正常時は BookResource、404エラー時は JsonResponse を返却】
+     *
+     * @param string $id
+     * @return BookResource|JsonResponse
      */
     public function show(string $id): BookResource|JsonResponse
     {
@@ -55,6 +68,9 @@ class BookController extends Controller
 
     /**
      * 書籍を新規登録
+     *
+     * @param BookRequest $request
+     * @return JsonResponse
      */
     public function store(BookRequest $request): JsonResponse
     {
@@ -78,6 +94,11 @@ class BookController extends Controller
 
     /**
      * 書籍情報を更新（API版）
+     *【最重要要件：API所有者認可ガード】所有者本人か厳密にチェック
+     *
+     * @param BookRequest $request
+     * @param string $id
+     * @return BookResource|JsonResponse
      */
     public function update(BookRequest $request, string $id): BookResource|JsonResponse
     {
@@ -87,7 +108,7 @@ class BookController extends Controller
             return response()->json(['message' => '指定された書籍が見つかりません。'], Response::HTTP_NOT_FOUND);
         }
 
-        // ★最重要要件：API経由でも「所有者本人か」を厳格に認可する門番を発動！ [INDEX1]
+        // ★最重要要件：API経由でも「所有者本人か」を厳密にチェックする認可ガードを実装
         $this->authorize('update', $book);
 
         $validated = $request->validated();
@@ -101,6 +122,10 @@ class BookController extends Controller
 
     /**
      * 書籍を削除（API版）
+     *【最重要要件：API所有者認可ガード】
+     *
+     * @param string $id
+     * @return JsonResponse
      */
     public function destroy(string $id): JsonResponse
     {
@@ -110,7 +135,7 @@ class BookController extends Controller
             return response()->json(['message' => '指定された書籍が見つかりません。'], Response::HTTP_NOT_FOUND);
         }
 
-        // ★最重要要件：API経由でも「所有者本人か」を厳格に認可する門番を発動！ [INDEX1]
+        // ★最重要要件：API経由でも「所有者本人か」を厳密にチェックする認可ガードを実装
         $this->authorize('delete', $book);
 
         $book->delete();
