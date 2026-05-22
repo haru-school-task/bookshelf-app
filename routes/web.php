@@ -20,26 +20,20 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-// 1. トップページ（玄関）
+// 1. トップページ
 Route::get('/', [BookController::class, 'index'])->name('books.index');
 
-// 2. 書籍関連ルート（【完全確定版】通常のリソースを正しい順序で配置）
-// ✅ ①「create」「store」を含むログイン必須ルートを【先】に書く
+// 2. 書籍関連ルート
 Route::resource('books', BookController::class)->except(['index', 'show'])->middleware('auth');
 
-// ✅ ②「index」「show」を含む一般公開ルートを【後】に書く（※必ず apiResource ではなく resource に！）
 Route::resource('books', BookController::class)->only(['index', 'show']);
 
-// ★マイ読書レポートは書籍リソースの「下」へ配置
 Route::get('/reports', [BookController::class, 'report'])->name('reports.index')->middleware('auth');
 
-// routes/web.php の3番をこれに書き換え
-
-// 3. ジャンル関連ルート（【要件完全一致版】すべてをログイン必須の盾でガードします）
-// 2行に分かれていたものを消して、以下の「1行」へ綺麗にドッキングさせてください
+// 3. ジャンル関連ルート
 Route::resource('genres', GenreController::class)->middleware('auth');
 
-// 4. お守り・その他アクション（本物ルート）
+// 4. その他アクション　（ランキング、マイページ、レビュー関連など）
 Route::get('/ranking', [BookController::class, 'ranking'])->name('ranking.index');
 Route::get('/favorites', [BookController::class, 'favorites'])->name('favorites.index')->middleware('auth');
 
@@ -53,13 +47,11 @@ Route::delete('/reviews/{review}', [BookController::class, 'destroyReview'])->na
 
 Route::get('/books/isbn/{isbn}', [BookController::class, 'fetchByIsbn']);
 
-// 📁 routes/web.php の一番最後に追記
-
 // =========================================================================
-// 🚀 【新応用要件】読書計画（ReadingPlan）関連ルート（認証必須）
+// 【新応用要件】読書計画（ReadingPlan）関連ルート（認証必須）
 // =========================================================================
 Route::middleware('auth')->group(function () {
-    // PG15: 読書計画一覧（状態による絞り込み対応）
+
     Route::get('/reading-plans', [ReadingPlanController::class, 'index'])
         ->name('reading-plans.index');
 
@@ -76,13 +68,13 @@ Route::middleware('auth')->group(function () {
         ->name('reading-plans.update');
     Route::delete('/reading-plans/{reading_plan}', [ReadingPlanController::class, 'destroy'])
         ->name('reading-plans.destroy');
-    // 変更後（受け皿をPOSTに変更してガチッと噛み合わせます）
+
     Route::post('/reading-plans/{reading_plan}/complete', [ReadingPlanController::class, 'complete'])
         ->name('reading-plans.complete');
 });
 
 // =========================================================================
-// 🚀 【新応用要件】通知（Notification）関連ルート（認証必須）
+// 【新応用要件】通知（Notification）関連ルート（認証必須）
 // =========================================================================
 Route::middleware('auth')->group(function () {
     // PG18: 通知一覧の表示、および各通知の既読化アクション（DatabaseChannel連動）

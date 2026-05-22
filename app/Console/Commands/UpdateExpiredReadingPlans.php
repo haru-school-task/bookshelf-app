@@ -13,8 +13,6 @@ use Illuminate\Support\Carbon;
  *
  * 目標期日を超過した読書計画のステータス自動更新およびリマインダー通知を制御するバッチコマンド
  * 💡【コード品質担保：型宣言・PHPDoc完全対応】
- * 
- * @package App\Console\Commands
  */
 class UpdateExpiredReadingPlans extends Command
 {
@@ -38,8 +36,6 @@ class UpdateExpiredReadingPlans extends Command
      * 💡【型宣言・PHPDoc完全対応】
      * 💡【Collectionメソッド活用】foreachを徹底排除し、宣言的で可読性の高いコードを記述
      * 💡 引数が無いため @param は不要、戻り値の @return のみ厳密に記載
-     *
-     * @return int
      */
     public function handle(): int
     {

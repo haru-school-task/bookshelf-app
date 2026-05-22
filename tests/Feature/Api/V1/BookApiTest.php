@@ -11,10 +11,8 @@ use Tests\TestCase;
 
 /**
  * Class BookApiTest
- * 
+ *
  * APIエリアにおける書籍操作（新規登録、JSON一覧取得、詳細エラーハンドリング）の挙動を検証するテストクラス
- * 
- * @package Tests\Feature
  */
 class BookApiTest extends TestCase
 {
@@ -23,8 +21,6 @@ class BookApiTest extends TestCase
     /**
      * Sanctum認証済みのユーザーが、適切な値を送信してAPI経由でお気に入りやジャンルを含めて書籍を新規登録できるかを検証する
      *【外部API連携のモック対応】Google Books APIへのリクエストをHttp::fakeによりダミー化
-     * 
-     * @return void
      */
     public function test_authenticated_user_can_store_book_via_api(): void
     {
@@ -34,7 +30,7 @@ class BookApiTest extends TestCase
                 'items' => [
                     [
                         'volumeInfo' => [
-                            'title'   => '新時代のAPI設計',
+                            'title' => '新時代のAPI設計',
                             'authors' => ['アーキテクト'],
                         ],
                     ],
@@ -47,10 +43,10 @@ class BookApiTest extends TestCase
         $genre = Genre::factory()->create();
 
         $data = [
-            'title'       => '新時代のAPI設計',
-            'author'      => 'アーキテクト',
-            'isbn'        => '9784000000000',
-            'genre_ids'   => [$genre->id],
+            'title' => '新時代のAPI設計',
+            'author' => 'アーキテクト',
+            'isbn' => '9784000000000',
+            'genre_ids' => [$genre->id],
             'description' => 'API経由での登録テストです。',
         ];
 
@@ -69,8 +65,6 @@ class BookApiTest extends TestCase
 
     /**
      * 必須データを含む書籍一覧が、要求された正しいJSON構造で正常に取得できるかを検証する
-     * 
-     * @return void
      */
     public function test_api_index_returns_required_json_structure(): void
     {
@@ -78,7 +72,7 @@ class BookApiTest extends TestCase
         $genre = Genre::factory()->create(['name' => '技術書']);
         $book = Book::factory()->create([
             'user_id' => $user->id,
-            'title'   => 'APIテスト本',
+            'title' => 'APIテスト本',
         ]);
         $book->genres()->attach($genre->id);
 
@@ -95,7 +89,7 @@ class BookApiTest extends TestCase
                         'isbn',
                         'description',
                         'genres' => [
-                            ['id', 'name']
+                            ['id', 'name'],
                         ],
                         'average_rating',
                         'reviews_count',
@@ -107,14 +101,12 @@ class BookApiTest extends TestCase
 
     /**
      * 書籍詳細APIにおいて、存在しない書籍IDを指定してアクセスした際、安全に404レスポンスを返すかを検証する
-     * 
-     * @return void
      */
     public function test_api_show_returns_404_for_non_existent_book_id(): void
     {
         // 存在しないIDを指定してファジング攻撃をシミュレート
         $response = $this->json('GET', '/api/books/99999');
-        
+
         $response->assertStatus(404);
     }
 }

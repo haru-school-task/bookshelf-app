@@ -11,14 +11,12 @@ use Illuminate\View\View;
  * Class GenreController
  *
  * ジャンル管理機能（一覧、作成、詳細表示、編集、更新、削除制限）の制御を行うコントローラー
- * 
- * @package App\Http\Controllers
  */
 class GenreController extends Controller
 {
     /**
      * Create a new controller instance.
-     *  
+     *
      * @return void
      */
     public function __construct()
@@ -29,8 +27,6 @@ class GenreController extends Controller
 
     /**
      * ジャンル管理の一覧画面を表示（冊数カウント対応）
-     * 
-     * @return View
      */
     public function index(): View
     {
@@ -42,8 +38,6 @@ class GenreController extends Controller
 
     /**
      * ジャンル登録画面を表示
-     * 
-     * @return View
      */
     public function create(): View
     {
@@ -52,9 +46,6 @@ class GenreController extends Controller
 
     /**
      * ジャンルを新規登録
-     *
-     * @param Request $request
-     * @return RedirectResponse
      */
     public function store(Request $request): RedirectResponse
     {
@@ -72,9 +63,6 @@ class GenreController extends Controller
     /**
      * 特定のジャンルに紐づく書籍一覧（詳細）を表示
      *【10件/ページのページネーション対応】
-     * 
-     * @param Genre $genre
-     * @return View
      */
     public function show(Genre $genre): View
     {
@@ -89,9 +77,6 @@ class GenreController extends Controller
 
     /**
      * ジャンル編集画面を表示
-     *
-     * @param Genre $genre
-     * @return View
      */
     public function edit(Genre $genre): View
     {
@@ -100,16 +85,12 @@ class GenreController extends Controller
 
     /**
      * ジャンル情報を更新（保存処理）
-     *
-     * @param Request $request
-     * @param Genre $genre
-     * @return RedirectResponse
      */
     public function update(Request $request, Genre $genre): RedirectResponse
     {
         // 更新時は、同じ名前のジャンルが存在しても自分自身は除外してユニークチェックを行う
         $validated = $request->validate([
-            'name' => ['required', 'string', 'max:255', 'unique:genres,name,' . $genre->id],
+            'name' => ['required', 'string', 'max:255', 'unique:genres,name,'.$genre->id],
         ]);
 
         $genre->update([
@@ -122,9 +103,6 @@ class GenreController extends Controller
     /**
      * ジャンルを削除
      *【書籍紐付き時の削除制限】
-     * 
-     * @param Genre $genre
-     * @return RedirectResponse
      */
     public function destroy(Genre $genre): RedirectResponse
     {

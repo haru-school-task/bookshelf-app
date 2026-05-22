@@ -10,17 +10,12 @@ use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
  *
  * アプリケーションのコンソールコマンドおよびスケジュール（日次バッチ）の管理を行うクラス
  * 💡【コード品質担保：型宣言・PHPDoc完全対応】
- * 
- * @package App\Console
  */
 class Kernel extends ConsoleKernel
 {
     /**
      * アプリケーションのコマンドスケジュール（日次自動実行など）を定義する
      * 💡【型宣言・PHPDoc完全対応】引数の型とアノテーションを厳密に記載
-     *
-     * @param Schedule $schedule
-     * @return void
      */
     protected function schedule(Schedule $schedule): void
     {
@@ -31,12 +26,10 @@ class Kernel extends ConsoleKernel
     /**
      * アプリケーションのコンソールコマンドを登録する
      * 💡【型宣言・PHPDoc完全対応】戻り値の型宣言 : void を厳密に明記
-     *
-     * @return void
      */
     protected function commands(): void
     {
-        $this->load(__DIR__ . '/Commands');
+        $this->load(__DIR__.'/Commands');
 
         require base_path('routes/console.php');
     }

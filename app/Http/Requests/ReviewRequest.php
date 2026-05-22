@@ -24,12 +24,12 @@ class ReviewRequest extends FormRequest
     {
         return [
             'rating' => ['required', 'integer', 'between:1,5'],
-            'comment' => ['required', 'string', 'max:400'], // 400文字制限
+            'comment' => ['required', 'string', 'max:400'], // 400文字に制限
         ];
     }
 
     /**
-     * ★【新規追記！】指示書要件：日本語のバリデーションメッセージを自分で設計して定義
+     * 指示書要件：日本語のバリデーションメッセージを自分で設計して定義
      */
     public function messages(): array
     {
