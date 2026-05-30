@@ -21,47 +21,50 @@
                                             {{ $index + 1 }}
                                         </div>
 
-                                        <!-- 書籍画像 -->
-                                        <div class="flex-shrink-0 w-16 h-20 mr-4">
+                                        <!-- 書籍画像（サイズ固定化とバグ修正） -->
+                                        <div class="flex-shrink-0 w-16 h-20 mr-4 bg-gray-50 border border-gray-200 rounded overflow-hidden shadow-sm flex items-center justify-center">
                                             @if($book->image_url)
-                                                <img src="{{ $book->image_url }}" alt="{{ $book->title }}" class="w-full h-full object-cover rounded shadow">
+                                                <img src="{{ $book->image_url . '&printsec=frontcover&img=1&zoom=1' }}" 
+                                                         alt="{{ $book->title }}" 
+                                                         class="w-full h-full object-contain"
+                                                         onerror="this.onerror=null; this.src='https://placeholder.com';">
                                             @else
-                                                <div class="w-full h-full bg-gray-200 flex items-center justify-center rounded">
-                                                    <span class="text-gray-400 text-xs">No Image</span>
-                                                </div>
+                                                <span class="text-gray-400 text-xs text-center p-1 leading-tight">No Image</span>
                                             @endif
                                         </div>
 
-                                        <!-- 書籍情報 -->
+                                        <!-- 書籍情報（flex-growで中央エリアを最大化） -->
                                         <div class="flex-grow min-w-0">
                                             <h3 class="text-lg font-semibold text-blue-600 hover:text-blue-800 truncate">
                                                 {{ $book->title }}
                                             </h3>
-                                            <p class="text-sm text-gray-600">{{ $book->author }}</p>
-                                            <div class="flex items-center mt-1">
-                                                @for($i = 1; $i <= 5; $i++)
-                                                    @if($i <= round($book->reviews_avg_rating))
-                                                        <span class="text-yellow-400">★</span>
-                                                    @else
-                                                        <span class="text-gray-300">★</span>
-                                                    @endif
-                                                @endfor
-                                                <span class="ml-2 text-sm text-gray-600">
-                                                    {{ number_format($book->reviews_avg_rating, 2) }}
-                                                </span>
-                                                <span class="ml-2 text-xs text-gray-500">
-                                                    ({{ $book->reviews_count }}件のレビュー)
+                                            <p class="text-sm text-gray-600 truncate">{{ $book->author }}</p>
+                                            <div class="flex items-center mt-1 flex-wrap gap-y-1">
+                                                <div class="flex items-center">
+                                                    @for($i = 1; $i <= 5; $i++)
+                                                        @if($i <= round($book->reviews_avg_rating))
+                                                            <span class="text-yellow-400">★</span>
+                                                        @else
+                                                            <span class="text-gray-300">★</span>
+                                                        @endif
+                                                    @endfor
+                                                    <span class="ml-1 text-sm font-semibold text-gray-700">
+                                                        {{ number_format($book->reviews_avg_rating, 1) }}
+                                                    </span>
+                                                </div>
+                                                <span class="ml-2 text-xs text-gray-500 whitespace-nowrap">
+                                                    ({{ $book->reviews_count ?? 0 }}件のレビュー)
                                                 </span>
                                             </div>
                                         </div>
 
-                                        <!-- 評価バッジ -->
-                                        <div class="flex-shrink-0 ml-4">
+                                        <!-- 評価バッジ（幅を固定し、改行と潰れを絶対に防止） -->
+                                        <div class="flex-shrink-0 w-24 ml-4 border-l border-gray-100 pl-4">
                                             <div class="text-center">
                                                 <div class="text-2xl font-bold {{ $index < 3 ? 'text-yellow-500' : 'text-gray-600' }}">
                                                     {{ number_format($book->reviews_avg_rating, 1) }}
                                                 </div>
-                                                <div class="text-xs text-gray-500">平均評価</div>
+                                                <div class="text-xs text-gray-400 whitespace-nowrap">平均評価</div>
                                             </div>
                                         </div>
                                     </div>

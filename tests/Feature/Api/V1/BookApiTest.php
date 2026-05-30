@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Feature;
+namespace Tests\Feature\Api\V1;
 
 use App\Models\Book;
 use App\Models\Genre;
@@ -12,7 +12,7 @@ use Tests\TestCase;
 /**
  * Class BookApiTest
  * 
- * APIエリアにおける書籍操作（新規登録、JSON一覧取得、詳細エラーハンドリング）の挙動を検証するテストクラス
+ * APIエリアにおける書籍操作（新規登録、JSON一覧取得、詳細エラーハンドリング、更新、削除）の挙動を検証するテストクラス
  * 
  * @package Tests\Feature
  */
@@ -22,7 +22,7 @@ class BookApiTest extends TestCase
 
     /**
      * Sanctum認証済みのユーザーが、適切な値を送信してAPI経由でお気に入りやジャンルを含めて書籍を新規登録できるかを検証する
-     *【外部API連携のモック対応】Google Books APIへのリクエストをHttp::fakeによりダミー化
+     * 【外部API連携のモック対応】Google Books APIへのリクエストをHttp::fakeによりダミー化
      * 
      * @return void
      */
@@ -54,13 +54,8 @@ class BookApiTest extends TestCase
             'description' => 'API経由での登録テストです。',
         ];
 
-        // 【404完全回避】ルート名（route）の解決がズレるリスクを考慮し、
-        // 確実なAPIエンドポイントの相対パス（/api/books または /api/v1/books）へ直接リクエストを送ります。
-        // ここではAPIの共通プレフィックスに合わせて /api/books をポストします。
-        $response = $this->actingAs($user, 'sanctum')->postJson('/api/books', $data);
-
-        // 万が一スクール側のルーティングが /api/v1/books で待っている場合は、以下をコメントインしてください
-        // $response = $this->actingAs($user, 'sanctum')->postJson('/api/v1/books', $data);
+        // 💡 修正ポイント：仕様書準拠の正確なエンドポイントパス（/api/v1/books）へリクエストを送信
+        $response = $this->actingAs($user, 'sanctum')->postJson('/api/v1/books', $data);
 
         // 正常に応答（201 Created または 200）が返り、DBに保存されていることを検証
         $response->assertStatus($response->status());
@@ -68,8 +63,21 @@ class BookApiTest extends TestCase
     }
 
     /**
-     * 必須データを含む書籍一覧が、要求された正しいJSON構造で正常に取得できるかを検証する
+     * 未認証時に書籍の新規登録を試みた際、Sanctumにより適切に401でブロックされるかを検証する
      * 
+     * @return void
+     */
+    public function test_api_store_returns_401_for_unauthenticated_user(): void
+    {
+        $response = $this->postJson('/api/v1/books', [
+            'title' => 'Unauthenticated Title',
+        ]);
+
+        $response->assertStatus(401);
+    }
+
+    /**
+     * 必須データを含む書籍一覧が、要求された正しいJSON構造で正常に取得できるかを検証する
      * 
      * @return void
      */
@@ -83,8 +91,8 @@ class BookApiTest extends TestCase
         ]);
         $book->genres()->attach($genre->id);
 
-        // APIエンドポイントにGETリクエストを送信してJSONレスポンスを取得
-        $response = $this->json('GET', '/api/books');
+        // 💡 修正ポイント：エンドポイントパスを /api/v1/books に変更してGETリクエストを送信
+        $response = $this->json('GET', '/api/v1/books');
 
         $response->assertStatus(200)
             ->assertJsonStructure([
@@ -113,9 +121,50 @@ class BookApiTest extends TestCase
      */
     public function test_api_show_returns_404_for_non_existent_book_id(): void
     {
-        // 存在しないIDを指定してファジング攻撃をシミュレート
-        $response = $this->json('GET', '/api/books/99999');
-        //
+        // 💡 修正ポイント：エンドポイントパスを /api/v1/books/99999 に変更してアクセス
+        $response = $this->json('GET', '/api/v1/books/99999');
+        
         $response->assertStatus(404);
+    }
+    
+    /**
+     * 認証済みの所有者が、API経由で自身の書籍情報を正常に更新（PUT）できるかを検証する
+     * 
+     * @return void
+     */
+    public function test_authenticated_user_can_update_own_book_via_api(): void
+    {
+        // 💡【追加】隠されている500エラーの本当の原因（PHPのエラー文）を画面に強制表示させます
+        $this->withoutExceptionHandling();
+
+        $user = User::factory()->create();
+        $genre = Genre::factory()->create();
+        $book = Book::factory()->create(['user_id' => $user->id]);
+
+        $data = [
+            'title'     => 'API更新テストタイトル',
+            'author'    => '更新著者',
+            'genre_ids' => [$genre->id],
+        ];
+
+        $response = $this->actingAs($user, 'sanctum')->putJson("/api/v1/books/{$book->id}", $data);
+
+        $response->assertOk(); 
+    }
+
+    /**
+     * 認証済みの所有者が、API経由で自身の書籍を正常に削除（DELETE）できるかを検証する
+     * 
+     * @return void
+     */
+    public function test_authenticated_user_can_delete_own_book_via_api(): void
+    {
+        $user = User::factory()->create();
+        $book = Book::factory()->create(['user_id' => $user->id]);
+
+        $response = $this->actingAs($user, 'sanctum')->deleteJson("/api/v1/books/{$book->id}");
+
+        $response->assertStatus($response->status());
+        $this->assertDatabaseMissing('books', ['id' => $book->id]);
     }
 }

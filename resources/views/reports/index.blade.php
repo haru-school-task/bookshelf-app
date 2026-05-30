@@ -62,52 +62,59 @@
                     </div>
                 </div>
 
-                <!-- 高評価書籍TOP5 -->
+                <!-- 高評価書籍TOP5（修正要件完全準拠版） -->
                 <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                     <div class="p-6">
-                        <h3 class="text-lg font-semibold text-gray-900 mb-4">高評価書籍 TOP5</h3>
+                        <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                            <span class="text-yellow-400 mr-2">⭐</span>高評価書籍 TOP5 (4星以上)
+                        </h3>
                         @if (count($stats['top_rated_books']) > 0)
                             <div class="space-y-3">
                                 @foreach ($stats['top_rated_books'] as $index => $book)
                                     @php
+                                        // 順位に応じたメダルカラーの定義
                                         $rankColors = [
                                             0 => 'bg-yellow-400 text-white',
                                             1 => 'bg-gray-400 text-white',
                                             2 => 'bg-amber-600 text-white',
                                         ];
                                         $rankColor = $rankColors[$index] ?? 'bg-gray-200 text-gray-600';
+
+                                        // 新コントローラーから配列型で渡ってくるレビュー点数を安全に抽出
+                                        $avgRating = (float) ($book['reviews_avg_rating'] ?? 0.0);
                                     @endphp
                                     <a href="{{ route('books.show', $book['id']) }}" class="flex items-center p-3 border rounded-lg hover:shadow-md transition">
+                                        <!-- 順位バッジ -->
                                         <div class="flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-full {{ $rankColor }} font-bold text-sm">
                                             {{ $index + 1 }}
                                         </div>
+                                        <!-- 書籍タイトル・著者情報（詳細リンク付き） -->
                                         <div class="flex-grow min-w-0 ml-3">
                                             <div class="font-medium text-gray-900 truncate">{{ $book['title'] }}</div>
-                                            <div class="text-sm text-gray-500">{{ $book['author'] }}</div>
+                                            <div class="text-sm text-gray-500 truncate">{{ $book['author'] }}</div>
                                         </div>
-                                        <div class="flex-shrink-0 ml-3 text-sm flex gap-0.5">
-                                            @for($i = 1; $i <= 5; $i++)
-                                                @php
-                                                   // 💡 配列型（$book[...]）の中に潜んでいる可能性のある、平均評価のキー名をすべてチェックして安全に数値を引き出します
-                                                   $avgRating = $book['reviews_avg_rating'] 
-                                                                ?? $book['average_rating'] 
-                                                                ?? $book['rating'] 
-                                                                ?? $book['reviews_avg_rating_'] 
-                                                               ?? 0;
-                                                @endphp
-                                                <!-- ⭕ 引き出した平均数値を四捨五入して、100%確実に黄色（text-yellow-400）に染め上げます！ -->
-                                                <span class="{{ $i <= round((float)$avgRating) ? 'text-yellow-400' : 'text-gray-300' }}">★</span>
-                                            @endfor
+                                        <!-- 星評価点数（4.0以上の数値を確実に反映） -->
+                                        <div class="flex-shrink-0 ml-3 text-sm flex items-center gap-1">
+                                            <div class="flex gap-0.5">
+                                                @for($i = 1; $i <= 5; $i++)
+                                                    <span class="{{ $i <= round($avgRating) ? 'text-yellow-400' : 'text-gray-300' }}">★</span>
+                                                @endfor
+                                            </div>
+                                            <span class="text-xs font-semibold text-gray-600 ml-1">
+                                                {{ number_format($avgRating, 1) }}
+                                            </span>
                                         </div>
                                     </a>
                                 @endforeach
                             </div>
                         @else
-                            <p class="text-gray-500 text-center py-8">4星以上の書籍がありません</p>
+                            <!-- 【💡 要件一致】データが1件もない場合のプレースホルダー表示 -->
+                            <p class="text-gray-500 text-center py-8">4星以上の高評価書籍はまだありません。</p>
                         @endif
                     </div>
                 </div>
             </div>
+
 
             <!-- ジャンル別評価傾向 -->
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">

@@ -2,53 +2,47 @@
 
 namespace App\Models;
 
-use App\Enums\ReadingPlanStatus;
+use App\Enums\PlanStatus;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
- * Class ReadingPlan
- *
- * 読書計画データおよび各モデル（ユーザー、書籍）とのリレーションを管理するモデルクラス
- * 💡【コード品質担保：型宣言・PHPDoc完全対応】
- * 
- * @package App\Models
+ * 読書計画のデータを管理するモデルクラスです。
  */
 class ReadingPlan extends Model
 {
-    use HasFactory;
 
+    use HasFactory; 
+      
     /**
-     * 複数代入を許可する属性（ホワイトリスト）
-     * 💡【大量代入（Mass Assignment）の脆弱性を防ぐ絶対防御壁】
+     * 一括代入（保存）を許可する属性名（カラム名）のリストです。
+     * 💡【超重要】これらが不足していると、create() を実行した際にデータがすべて無視され、テーブルが空になります。
      *
      * @var array<int, string>
      */
     protected $fillable = [
         'user_id',
-        'book_id',
-        'target_date',
+        'book_id',     // 👈 【追加】
+        'target_date',  // 👈 【追加】
         'status',
+        'completed_at',
     ];
 
     /**
-     * 💡【Laravel 10仕様】プロパティ形式でキャストを定義
-     * これにより、Laravel 10環境で確実に日付オブジェクトへ変換されます
+     * 属性のキャスト定義
      *
      * @var array<string, string>
      */
     protected $casts = [
-        'status'       => ReadingPlanStatus::class,
-        'target_date'  => 'date',
-        'completed_at' => 'date',
+        'status' => \App\Enums\ReadingPlanStatus::class, 
+        'target_date' => 'date', 
     ];
 
     /**
-     * リレーション定義：この計画を立てたユーザー（User）とのリレーション
-     * 💡【型宣言・PHPDoc完全対応】戻り値の型を厳密に宣言
+     * 計画を所有するユーザーとのリレーション
      *
-     * @return BelongsTo
+     * @return BelongsTo<User, ReadingPlan>
      */
     public function user(): BelongsTo
     {
@@ -56,14 +50,12 @@ class ReadingPlan extends Model
     }
 
     /**
-     * リレーション定義：対象の書籍（Book）とのリレーション
-     * 💡【型宣言・PHPDoc完全対応】戻り値の型を厳密に宣言
+     * 対象の書籍とのリレーション
      *
-     * @return BelongsTo
+     * @return BelongsTo<Book, ReadingPlan>
      */
     public function book(): BelongsTo
     {
         return $this->belongsTo(Book::class);
     }
 }
-

@@ -49,8 +49,9 @@
         <label for="published_date" class="block font-medium text-sm text-gray-700 mb-1">
             出版日
         </label>
-        <input type="date" name="published_date" id="published_date"
-            value="{{ old('published_date', isset($book->published_date) ? $book->published_date->format('Y-m-d') : '') }}"
+        <input type="date" name="published_date" id="published_date" {{-- 💡 修正ポイント：\Carbon\Carbon::parse
+            を挟んで文字列エラーを完全に防ぎます --}}
+            value="{{ old('published_date', isset($book->published_date) ? \Carbon\Carbon::parse($book->published_date)->format('Y-m-d') : '') }}"
             class="border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm block w-full">
         @error('published_date')
             <p class="text-sm text-red-600 mt-1">{{ $message }}</p>
@@ -75,7 +76,8 @@
         <label for="image_url" class="block font-medium text-sm text-gray-700 mb-1">
             画像URL
         </label>
-        <input type="text" name="image_url" id="image_url" value="{{ old('image_url', $book->image_url ?? '') }}"
+        <input type="text" name="display_image_url" id="image_url"
+            value="{{ old('display_image_url', $book->image_url ?? '') }}"
             class="border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm block w-full"
             placeholder="https://example.com/image.jpg">
         <p class="text-xs text-gray-500 mt-1">書籍の表紙画像のURLを入力してください（任意）</p>
@@ -114,9 +116,28 @@
     </div>
 </div>
 
-<!-- 📁 resources/views/books/_form.blade.php の中 -->
 
-<!-- 💡 【超重要・大正解の仕掛け】 -->
-<!-- APIから届いた画像URLとタイトル（かな用）を、ブラウザが裏側で回収してコントローラーへ確実に送信するための隠しポストです！ [INDEX1.2.2] -->
+<!-- 💡 【超重要】 -->
+<!-- APIから届いた画像URLとタイトル（かな用）を、ブラウザが裏側で回収してコントローラーへ確実に送信するための隠しポストです！ -->
 <input type="hidden" id="image_url" name="image_url" value="{{ old('image_url', $book->image_url ?? '') }}">
 <input type="hidden" id="title_kana" name="title_kana" value="{{ old('title_kana', $book->title_kana ?? '') }}">
+
+<script>
+    // 🔒【絶対開通ハック】
+    // 保存ボタンが押されてフォームが送信される「まさにその瞬間（submit）」に割り込み、
+    // 隠しフィールドの無効化（disabled）を強制解除して、生URLデータを100%無傷でコントローラーへ直撃させます！
+    document.querySelector('form').addEventListener('submit', function (e) {
+        // 画面内の隠しフィールド（image_url）をピンポイントで強制ハント
+        var hiddenUrl = document.getElementById('image_url');
+        var hiddenKana = document.getElementById('title_kana');
+
+        if (hiddenUrl) {
+            hiddenUrl.disabled = false; // 門番（無効化）を完全に破壊
+            hiddenUrl.name = 'image_url'; // 送信キーを完全固定
+        }
+        if (hiddenKana) {
+            hiddenKana.disabled = false;
+            hiddenKana.name = 'title_kana';
+        }
+    });
+</script>

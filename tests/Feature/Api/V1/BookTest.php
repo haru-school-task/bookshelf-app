@@ -30,7 +30,7 @@ class BookTest extends TestCase
         $book = Book::factory()->create(['title' => 'API公開本']);
 
         // 【アクセス制御】APIエンドポイントは /v1 を削除して、/api/books に直接アクセス
-        $response = $this->json('GET', '/api/books');
+        $response = $this->json('GET', '/api/v1/books');
 
         // 【アサーション】500クラッシュを起こさず、正常にJSON構造で書籍が返却されるか検証
         $response->assertStatus(200);

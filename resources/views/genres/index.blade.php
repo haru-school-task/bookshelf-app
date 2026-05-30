@@ -8,10 +8,24 @@
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="mb-4 flex justify-end">
-                <a href="{{ route('genres.create') }}" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                <a href="{{ route('genres.create') }}"
+                    class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
                     ジャンルを登録
                 </a>
             </div>
+
+            @error('error')
+                <div class="mb-4 p-4 rounded-lg bg-red-50 border border-red-200 shadow-sm flex items-center">
+                    <svg class="w-5 h-5 text-red-500 mr-2 flex-shrink-0" xmlns="http://w3.org" fill="none"
+                        viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
+                    </svg>
+                    <span class="text-sm font-medium text-red-800">
+                        {{ $message }}
+                    </span>
+                </div>
+            @enderror
 
             @if(session('success'))
                 <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
@@ -33,23 +47,32 @@
                         <table class="min-w-full divide-y divide-gray-200">
                             <thead class="bg-gray-50">
                                 <tr>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ジャンル名</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">書籍数</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">操作</th>
+                                    <th
+                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        ジャンル名</th>
+                                    <th
+                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        書籍数</th>
+                                    <th
+                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        操作</th>
                                 </tr>
                             </thead>
                             <tbody class="bg-white divide-y divide-gray-200">
                                 @foreach($genres as $genre)
                                     <tr>
                                         <td class="px-6 py-4 whitespace-nowrap">
-                                            <a href="{{ route('genres.show', $genre) }}" class="text-blue-600 hover:text-blue-800">
+                                            <a href="{{ route('genres.show', $genre) }}"
+                                                class="text-blue-600 hover:text-blue-800">
                                                 {{ $genre->name }}
                                             </a>
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap">{{ $genre->books_count }}冊</td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm">
-                                            <a href="{{ route('genres.edit', $genre) }}" class="text-indigo-600 hover:text-indigo-900 mr-3">編集</a>
-                                            <form action="{{ route('genres.destroy', $genre) }}" method="POST" class="inline" onsubmit="return confirm('本当に削除しますか？');" novalidate>
+                                            <a href="{{ route('genres.edit', $genre) }}"
+                                                class="text-indigo-600 hover:text-indigo-900 mr-3">編集</a>
+                                            <form action="{{ route('genres.destroy', $genre) }}" method="POST" class="inline"
+                                                onsubmit="return confirm('本当に削除しますか？');" novalidate>
                                                 @csrf
                                                 @method('DELETE')
                                                 <button type="submit" class="text-red-600 hover:text-red-900">削除</button>

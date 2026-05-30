@@ -20,7 +20,12 @@
                             @foreach($books as $book)
                                 <a href="{{ route('books.show', $book) }}" class="block border rounded-lg p-4 shadow hover:shadow-lg transition">
                                     @if($book->image_url)
-                                        <img src="{{ $book->image_url }}" alt="{{ $book->title }}" class="w-full h-48 object-cover mb-4 rounded">
+                                        <div class="flex justify-center items-center rounded overflow-hidden shadow-sm border border-gray-200 mb-2 bg-gray-50 mx-auto" style="width: 120px; height: 170px; max-width: 100%;">
+                                            <img src="{{ $book->image_url . '&printsec=frontcover&img=1&zoom=1' }}" 
+                                                 alt="{{ $book->title }}" 
+                                                 class="w-full h-full object-contain"
+                                                 onerror="this.onerror=null; this.src='https://placeholder.com';">
+                                        </div>
                                     @else
                                         <div class="w-full h-48 bg-gray-200 flex items-center justify-center mb-4 rounded">
                                             <span class="text-gray-500">画像なし</span>

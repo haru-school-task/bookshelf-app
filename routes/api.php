@@ -3,8 +3,8 @@
 use App\Http\Controllers\Api\V1\BookController;
 use Illuminate\Support\Facades\Route;
 
-// すべてのAPIルートに「api.v1.books.index」などの名前を自動付与するグループ
-Route::name('api.v1.')->group(function () {
+// 💡 修正ポイント：prefix('v1') を追加して、自動付与される /api と組み合わせて「/api/v1/...」の階層を作ります
+Route::prefix('v1')->name('api.v1.')->group(function () {
 
     // 【基本機能】認証なしでアクセスできる書籍の一覧と詳細ルート
     Route::get('/books', [BookController::class, 'index'])->name('books.index');

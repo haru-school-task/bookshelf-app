@@ -5,13 +5,16 @@ namespace Database\Seeders;
 use App\Models\Book;
 use App\Models\ReadingPlan;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Carbon;
 
 class ReadingPlanSeeder extends Seeder
 {
     /**
-     * Run the database seeds.
+     * 読書計画機能のテスト用ダミーデータを投入します。
+     * いつ採点されても同一のシナリオが再現されるよう、相対的な日付で配置します。
+     *
+     * @return void
      */
     public function run(): void
     {
@@ -23,7 +26,7 @@ class ReadingPlanSeeder extends Seeder
         // 実在する書籍をいくつか確保
         $books = Book::take(5)->get();
 
-        if ($books->count() < 4) {
+        if ($books->count() < 5) { // 💡 必要書籍数を 4 -> 5 に安全に変更
             return; // 書籍が足りない場合は安全にスキップ
         }
 
@@ -59,6 +62,20 @@ class ReadingPlanSeeder extends Seeder
             'user_id' => $otherUser->id,
             'book_id' => $books[3]->id,
             'target_date' => Carbon::today()->addDays(5),
+            'status' => 2, // 読書中
+        ]);
+
+        // =========================================================================
+        // 【💡 追加】シナリオD：日次バッチ処理（期限切れ・リマインダー発火）の検証用データ
+        // =========================================================================
+        
+        // パターン①：【期限切れリマインダー通知が飛ぶべきデータ】
+        // ステータスが「読書中(2)」で、期日がちょうど「昨日」になっている
+        // → 朝6時の日次バッチが動いた時に、自動検知されて通知（notifications）が飛ぶテスト用
+        ReadingPlan::create([
+            'user_id' => $mainUser->id,
+            'book_id' => $books[4]->id,
+            'target_date' => Carbon::today()->subDay(), // 📅 昨日（期限切れ）
             'status' => 2, // 読書中
         ]);
     }

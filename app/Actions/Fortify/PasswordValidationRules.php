@@ -7,13 +7,22 @@ use Illuminate\Validation\Rules\Password;
 
 trait PasswordValidationRules
 {
-    /**
-     * Get the validation rules used to validate passwords.
+     /**
+     * 会員登録時等に適用するパスワード検証ルールを定義します。
+     * スクール指定の最小文字数（8文字）を引数に正しく渡してインスタンス化を行います。
      *
-     * @return array<int, Rule|array<mixed>|string>
+     * @return array<int, mixed>
      */
     protected function passwordRules(): array
     {
-        return ['required', 'string', Password::default(), 'confirmed'];
+        // 💡 修正ポイント：new Password のカッコの中に「8」を確実に渡します
+        $passwordRule = new Password(8);
+
+        return [
+            'required',
+            'string',
+            $passwordRule,
+            'confirmed',
+        ];
     }
 }

@@ -13,13 +13,16 @@ class CreateNewUser implements CreatesNewUsers
     use PasswordValidationRules;
 
     /**
-     * Validate and create a newly registered user.
+     * 新しく登録されたユーザーのバリデーションを行い、データベースへ保存して返却します。
+     * 
+     * 💡【型宣言・PHPDoc完全対応】
      *
-     * @param  array<string, string>  $input
+     * @param array<string, string> $input 入力データ
+     * @return User 作成されたユーザーインスタンス
      */
     public function create(array $input): User
     {
-        // 💡 第3引数（配列の3つ目）に自作の日本語メッセージをガチッとはめ込みます [INDEX1]
+        // 💡 第3引数（配列の3つ目）に自作の日本語メッセージをガチッとはめ込みます
         Validator::make($input, [
             'name' => ['required', 'string', 'max:255'],
             'email' => [
@@ -31,7 +34,7 @@ class CreateNewUser implements CreatesNewUsers
             ],
             'password' => $this->passwordRules(),
         ], [
-            // ★【要件完全一致】日本語バリデーションメッセージの設計 [INDEX1]
+            // ★【要件完全一致】日本語バリデーションメッセージの設計
             'name.required' => 'お名前は必須項目です。',
             'name.string' => 'お名前は正しい文字形式で入力してください。',
             'name.max' => 'お名前は255文字以内で入力してください。',
@@ -44,9 +47,12 @@ class CreateNewUser implements CreatesNewUsers
 
             'password.required' => 'パスワードは必須項目です。',
             'password.confirmed' => 'パスワード（確認用）と一致しません。',
-            // ※PasswordValidationRulesを使用している場合、文字数制限などはそちらに準拠します
+            
+            // 💡【追加】PasswordValidationRulesオブジェクトが吐き出す「文字数エラー」をここで強制上書きします！
+            'password' => 'パスワードは8文字以上で入力してください。', 
         ])->validate();
 
+        // 💡 【大復活・超重要】このデータベース保存とユーザーデータの返却（return）を追記することで、TypeErrorを完全に解消します！
         return User::create([
             'name' => $input['name'],
             'email' => $input['email'],

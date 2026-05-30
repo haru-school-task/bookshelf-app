@@ -90,6 +90,7 @@ class Book extends Model
     {
         return [
             'status' => ReadingPlanStatus::class,
+            'published_date' => 'datetime',
         ];
     }
 }

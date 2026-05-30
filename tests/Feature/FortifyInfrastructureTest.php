@@ -37,7 +37,7 @@ class FortifyInfrastructureTest extends TestCase
             'password' => 'Password123!',
             'password_confirmation' => 'Password123!',
         ];
-
+        
         $response = $this->post('/register', $postData);
         $response->assertRedirect();
     }

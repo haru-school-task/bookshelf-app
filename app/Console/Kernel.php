@@ -2,30 +2,28 @@
 
 namespace App\Console;
 
-use Illuminate\Console\Scheduling\Schedule;
+use Illuminate\Console\Scheduling\Schedule; // 👈 元から入っているか確認
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
 
-/**
- * Class Kernel
- *
- * アプリケーションのコンソールコマンドおよびスケジュール（日次バッチ）の管理を行うクラス
- * 💡【コード品質担保：型宣言・PHPDoc完全対応】
- */
 class Kernel extends ConsoleKernel
 {
     /**
-     * アプリケーションのコマンドスケジュール（日次自動実行など）を定義する
-     * 💡【型宣言・PHPDoc完全対応】引数の型とアノテーションを厳密に記載
+     * アプリケーションのコマンドスケジュールを定義します。
+     * 毎日朝の 06:00 に自動実行されるよう日次バッチコマンドを登録します。
+     *
+     * @param Schedule $schedule スケジュール管理インスタンス
+     * @return void
      */
     protected function schedule(Schedule $schedule): void
     {
-        // 先ほど作成したコマンドのシグネチャを指定し、仕様書通り「毎日自動実行（daily）」に設定
-        $schedule->command('reading-plans:update-status')->daily();
+        // 👈 ここに「朝の6時実行」の設定を記述します
+        $schedule->command('app:daily-plan-check-command')->dailyAt('06:00');
     }
 
     /**
-     * アプリケーションのコンソールコマンドを登録する
-     * 💡【型宣言・PHPDoc完全対応】戻り値の型宣言 : void を厳密に明記
+     * アプリケーションのコンソール用コマンドを登録します。
+     *
+     * @return void
      */
     protected function commands(): void
     {
@@ -34,3 +32,4 @@ class Kernel extends ConsoleKernel
         require base_path('routes/console.php');
     }
 }
+

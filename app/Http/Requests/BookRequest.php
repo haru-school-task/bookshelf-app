@@ -27,7 +27,8 @@ class BookRequest extends FormRequest
             'author' => ['required', 'string', 'max:255'],
             'genre_ids' => ['required', 'array'], // ジャンル選択は必須
             'genre_ids.*' => ['exists:genres,id'], // 選ばれたIDがDBに存在するかチェック
-            'isbn' => ['nullable', 'string', 'unique:books,isbn,'.$this->book?->id], // 自分以外の重複を禁止
+            'isbn' => ['nullable', 'string', 'max:13', 'unique:books,isbn,' . (is_object($this->book) ? $this->book->id : $this->book)], // 💡 オブジェクトでも文字列でも安全にIDを抽出して自分以外の重複を禁止
+
             'description' => ['nullable', 'string', 'max:400'], // 解説文は400文字以内
 
             'title_kana' => ['nullable', 'string', 'max:255'],

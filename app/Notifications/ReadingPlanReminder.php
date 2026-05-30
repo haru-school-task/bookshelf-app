@@ -53,8 +53,7 @@ class ReadingPlanReminder extends Notification
     }
 
     /**
-     * データベース（notificationsテーブル）に保存するデータ構造を定義する
-     *
+     * データベースに保存する配列データを定義します。
      * 💡【型宣言・PHPDoc完全対応】
      *
      * @param mixed $notifiable
@@ -62,12 +61,17 @@ class ReadingPlanReminder extends Notification
      */
     public function toArray(mixed $notifiable): array
     {
-        // 画面（Blade）のベルアイコンなどで表示したい配列データを記述します
+        // 💡 修正ポイント：\Carbon\Carbon::parse を挟んで文字列エラーを100%回避します
+        $formattedDate = \Carbon\Carbon::parse($this->readingPlan->target_date)->format('Y-m-d');
+        $bookTitle = $this->readingPlan->book->title ?? '書籍';
+
         return [
             'reading_plan_id' => $this->readingPlan->id,
-            'book_title'      => $this->readingPlan->book->title ?? '書籍',
-            'target_date'     => $this->readingPlan->target_date->format('Y-m-d'),
-            'message'         => '「' . ($this->readingPlan->book->title ?? '書籍') . '」の読書目標期日（' . $this->readingPlan->target_date->format('Y-m-d') . '）を経過しています。',
+            'book_title'      => $bookTitle,
+            'target_date'     => $formattedDate,
+            'timing'          => 'three_days_before', // 💡 リマインダー用のタイミングキー
+            'message'         => '「' . $bookTitle . '」の目標期日（' . $formattedDate . '）が近づいています。',
         ];
     }
+
 }

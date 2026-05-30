@@ -81,7 +81,15 @@
                             @foreach($books as $book)
                                 <a href="{{ route('books.show', $book) }}" class="block border rounded-lg p-4 shadow hover:shadow-lg transition cursor-pointer">
                                     @if($book->image_url)
-                                        <img src="{{ $book->image_url }}" alt="{{ $book->title }}" class="w-full h-48 object-cover mb-4 rounded">
+                                        <!-- ⭕【一覧画面専用：周囲の脆弱なレイアウトを絶対に崩さない鉄壁の画像枠】 -->
+                                        <!-- 幅と高さをスクールのカードの限界値（例えば w-24 h-36 など、あるいは固定px）に -->
+                                        <!-- 完全に閉じ込め、object-contain / object-cover で中身だけを綺麗にフィットさせます -->
+                                        <div class="flex justify-center items-center rounded overflow-hidden shadow-sm border border-gray-200 mb-2 bg-gray-50 mx-auto" style="width: 120px; height: 170px; max-width: 100%;">
+                                            <img src="{{ $book->image_url . '&printsec=frontcover&img=1&zoom=1' }}" 
+                                                 alt="{{ $book->title }}" 
+                                                 class="w-full h-full object-contain"
+                                                 onerror="this.onerror=null; this.src='https://placeholder.com';">
+                                        </div>
                                     @else
                                         <div class="w-full h-48 bg-gray-200 flex items-center justify-center mb-4 rounded">
                                             <span class="text-gray-500">画像なし</span>

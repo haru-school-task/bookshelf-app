@@ -96,7 +96,11 @@
                         document.getElementById('author').value = data.author || '';
                         document.getElementById('isbn').value = isbn;
                         document.getElementById('description').value = data.description || '';
-                        document.getElementById('image_url').value = data.image_url || '';
+                        document.getElementById('image_url').value = data.image_url || data.image || data.thumbnail || '';
+
+                        document.querySelectorAll('input[name="image_url"]').forEach(function (el) {
+                            el.value = data.image_url || data.image || data.thumbnail || '';
+                        });
 
                         if (data.published_date) {
                             const date = new Date(data.published_date);

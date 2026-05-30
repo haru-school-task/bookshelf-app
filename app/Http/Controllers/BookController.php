@@ -121,7 +121,7 @@ class BookController extends Controller
 
         // 【重要】Google Books APIから届く画像URLは「http」なので、セキュリティブロックを回避するために「https」に変換して保存
         if ($imageUrl) {
-            $imageUrl = str_replace('http://', 'https://', $imageUrl);
+            $imageUrl = strtok($imageUrl, '&');
         }
 
         // 2. 書籍を保存（ユーザーIDは認証済みユーザーのIDを使用）
@@ -354,93 +354,6 @@ class BookController extends Controller
         return view('ranking.index', compact('rankedBooks'));
     }
 
-    /**
-     * マイ読書レポート画面を表示（応用版PG14)
-     * 
-     * 💡【型宣言・PHPDoc完全対応】
-     * 💡【Collectionメソッド徹底活用】foreachを完全排除した最高品質の宣言的集計ロジック
-     * 
-     * @return \Illuminate\View\View
-     */
-    public function report(): \Illuminate\View\View
-    {
-        /** @var \App\Models\User $user */
-        $user = auth()->user();
-
-        // 1. ユーザーの全レビューを取得
-        $userReviews = $user->reviews()->with('book.genres')->get();
-
-        // 2. 評価1〜5の分布（件数）を集計
-        $ratingDistribution = [];
-        for ($i = 1; $i <= 5; $i++) {
-            $ratingDistribution[$i] = $userReviews->where('rating', $i)->count();
-        }
-
-        // 3. 高評価の書籍（Book）モデルのコレクションを5件取得
-        $topRatedBooks = $userReviews->sortByDesc('rating')
-            ->map(function (\App\Models\Review $review) {
-                $book = $review->book;
-                if ($book) {
-                    $book->reviews_avg_rating = $review->rating;
-                }
-                return $book;
-            })
-            ->filter()
-            ->take(5)
-            ->values()
-            ->toArray();
-
-        // 4. ジャンル別の評価傾向を集計
-        // flatMapを使い、各レビューに紐づく複数のジャンルと点数を「平坦な1本の配列」として抽出
-        $genreRatingsFormatted = $userReviews->flatMap(function (\App\Models\Review $review): array {
-            if (!$review->book || !$review->book->genres) {
-                return [];
-            }
-            
-            // ジャンルごとに「ID, 名前, 点数」のペアを持ったコレクションを生成
-            return $review->book->genres->map(function (\App\Models\Genre $genre) use ($review): array {
-                return [
-                    'id'     => $genre->id,
-                    'name'   => $genre->name,
-                    'rating' => $review->rating,
-                ];
-            })->all();
-        })
-        // 抽出した全ジャンルデータを「ジャンルID」ごとにグループ化（groupBy）
-        ->groupBy('id')
-        // 各ジャンルのグループ（Collection）ごとに件数と平均点を計算（map）
-        ->map(function (\Illuminate\Support\Collection $group): array {
-            $firstItem = $group->first();
-            $count = $group->count();
-            // 該当ジャンルの全点数の合計を件数で割って平均点を算出
-            $avg = $count > 0 ? $group->sum('rating') / $count : 0;
-
-            return [
-                'id'             => $firstItem['id'],
-                'name'           => $firstItem['name'],
-                'count'          => $count,
-                'average_rating' => $avg,
-            ];
-        })
-        // 画面のタイトル「ジャンル別評価傾向 TOP5」の通り、平均点が高い順に上位5件を抽出
-        ->sortByDesc('average_rating')
-        ->take(5)
-        ->values();
-
-        // 5. 画面に渡す統計データの配列を作成
-        $stats = [
-            'summary' => [
-                'total_reviews'  => $userReviews->count(),
-                'books_read'     => $user->books()->count(),
-                'average_rating' => (float) ($userReviews->avg('rating') ?? 0.0),
-            ],
-            'rating_distribution' => collect($ratingDistribution),
-            'top_rated_books'     => $topRatedBooks,
-            'genre_ratings'       => $genreRatingsFormatted,
-        ];
-
-        return view('reports.index', compact('stats'));
-    }
 
     /**
      * 外部API（Google Books）からISBNで書籍情報を取得してJSONで返す
