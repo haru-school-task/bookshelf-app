@@ -49,8 +49,7 @@
         <label for="published_date" class="block font-medium text-sm text-gray-700 mb-1">
             出版日
         </label>
-        <input type="date" name="published_date" id="published_date" {{-- 💡 修正ポイント：\Carbon\Carbon::parse
-            を挟んで文字列エラーを完全に防ぎます --}}
+        <input type="date" name="published_date" id="published_date"
             value="{{ old('published_date', isset($book->published_date) ? \Carbon\Carbon::parse($book->published_date)->format('Y-m-d') : '') }}"
             class="border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm block w-full">
         @error('published_date')
@@ -79,12 +78,13 @@
         <input type="text" name="display_image_url" id="image_url"
             value="{{ old('display_image_url', $book->image_url ?? '') }}"
             class="border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm block w-full"
-            placeholder="https://example.com/image.jpg">
+            placeholder="https://example.com">
         <p class="text-xs text-gray-500 mt-1">書籍の表紙画像のURLを入力してください（任意）</p>
         @error('image_url')
             <p class="text-sm text-red-600 mt-1">{{ $message }}</p>
         @enderror
     </div>
+
 
     <!-- ジャンル -->
     <div>
@@ -116,28 +116,35 @@
     </div>
 </div>
 
-
-<!-- 💡 【超重要】 -->
-<!-- APIから届いた画像URLとタイトル（かな用）を、ブラウザが裏側で回収してコントローラーへ確実に送信するための隠しポストです！ -->
-<input type="hidden" id="image_url" name="image_url" value="{{ old('image_url', $book->image_url ?? '') }}">
-<input type="hidden" id="title_kana" name="title_kana" value="{{ old('title_kana', $book->title_kana ?? '') }}">
+<!-- 隠し入力欄（データのバッティングを防ぐため、name属性はJavaScriptで送信時のみ付与します） -->
+<input type="hidden" id="hidden_image_url" value="{{ old('image_url', $book->image_url ?? '') }}">
+<input type="hidden" id="hidden_title_kana" value="{{ old('title_kana', $book->title_kana ?? '') }}">
 
 <script>
-    // 🔒【絶対開通ハック】
-    // 保存ボタンが押されてフォームが送信される「まさにその瞬間（submit）」に割り込み、
-    // 隠しフィールドの無効化（disabled）を強制解除して、生URLデータを100%無傷でコントローラーへ直撃させます！
-    document.querySelector('form').addEventListener('submit', function (e) {
-        // 画面内の隠しフィールド（image_url）をピンポイントで強制ハント
-        var hiddenUrl = document.getElementById('image_url');
-        var hiddenKana = document.getElementById('title_kana');
+    var currentScript = document.currentScript || document.scripts[document.scripts.length - 1];
+    var parentForm = currentScript.closest('form');
 
-        if (hiddenUrl) {
-            hiddenUrl.disabled = false; // 門番（無効化）を完全に破壊
-            hiddenUrl.name = 'image_url'; // 送信キーを完全固定
-        }
-        if (hiddenKana) {
-            hiddenKana.disabled = false;
-            hiddenKana.name = 'title_kana';
-        }
-    });
+    if (parentForm) {
+        parentForm.addEventListener('submit', function (e) {
+            var displayUrl = document.getElementById('image_url');
+            var hiddenUrl = document.getElementById('hidden_image_url');
+            var hiddenKana = document.getElementById('hidden_title_kana');
+
+            // 画面上の手入力用URL（display_image_url）に値がある場合は、そちらを優先
+            if (displayUrl && displayUrl.value.trim() !== '') {
+                displayUrl.name = 'image_url';
+                if (hiddenUrl) hiddenUrl.disabled = true; // 隠しポストを無効化して衝突を防ぐ
+            } else if (hiddenUrl && hiddenUrl.value.trim() !== '') {
+                // APIから取得した隠しURLを使う場合のみ、送信キーを付与
+                hiddenUrl.disabled = false;
+                hiddenUrl.name = 'image_url';
+            }
+
+            // タイトル（かな）の送信制御
+            if (hiddenKana && hiddenKana.value.trim() !== '') {
+                hiddenKana.disabled = false;
+                hiddenKana.name = 'title_kana';
+            }
+        });
+    }
 </script>

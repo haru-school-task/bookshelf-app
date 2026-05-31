@@ -29,10 +29,8 @@ class BookTest extends TestCase
         $user = User::factory()->create();
         $book = Book::factory()->create(['title' => 'API公開本']);
 
-        // 【アクセス制御】APIエンドポイントは /v1 を削除して、/api/books に直接アクセス
         $response = $this->json('GET', '/api/v1/books');
 
-        // 【アサーション】500クラッシュを起こさず、正常にJSON構造で書籍が返却されるか検証
         $response->assertStatus(200);
         $response->assertJsonFragment(['title' => 'API公開本']);
     }
@@ -48,10 +46,8 @@ class BookTest extends TestCase
     {
         $user = User::factory()->create();
 
-        // こちらも同様に /v1 を削除して、存在しないID「99999」を直接指定してアクセス
         $response = $this->actingAs($user)->json('GET', '/api/books/99999');
 
-        // 安全に404を返すか検証
         $response->assertStatus(404);
     }
 }

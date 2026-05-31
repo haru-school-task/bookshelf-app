@@ -35,7 +35,7 @@ class UpdateNotificationRequest extends FormRequest
      *
      * @return array<string, mixed>
      */
-    protected function validationData(): array
+    public function validationData(): array
     {
         return array_merge($this->all(), [
             'id' => $this->route('id'),

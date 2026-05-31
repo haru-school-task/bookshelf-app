@@ -30,7 +30,7 @@ class ReminderNotification extends Notification
         return ['database'];
     }
 
-        /**
+    /**
      * データベースの notifications テーブルへ保存する配列データを定義します。
      * 渡された日付データが文字列の場合でも、Carbon::parse を用いて安全にフォーマットします。
      *
@@ -39,8 +39,6 @@ class ReminderNotification extends Notification
      */
     public function toArray(mixed $notifiable): array
     {
-        // 💡 修正＆安全対策：
-        // 変数名を $this->plan に合わせつつ、Carbon::parse() を使って文字列のままでも確実に動かします
         $formattedDate = \Carbon\Carbon::parse($this->plan->target_date)->format('Y-m-d');
         $bookTitle = $this->plan->book->title ?? '書籍';
 
@@ -49,10 +47,8 @@ class ReminderNotification extends Notification
             'book_title'  => $bookTitle,
             'target_date' => $formattedDate,
             
-            // 💡 スクール指定のデザインロジック（青・黄・赤）に合わせて期限切れ検知用の 'three_days_after' をセット
             'timing'      => 'three_days_after',
             
-            // 💡 メッセージも日本語化して、画面で見やすくなるように組み立てます
             'message'     => '「' . $bookTitle . '」の読書目標期日（' . $formattedDate . '）を経過しています。',
         ];
     }

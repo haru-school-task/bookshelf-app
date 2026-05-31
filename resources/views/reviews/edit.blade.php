@@ -56,7 +56,6 @@
 <!-- 評価エリアの </div> のすぐ下に追記 -->
 <script>
     document.addEventListener('DOMContentLoaded', function () {
-        // 💡 画面にある5つのラジオボタンと、5つの星のアイコンをすべて取得します
         const radios = document.querySelectorAll('input[name="rating"]');
         const stars = document.querySelectorAll('.star-icon');
 
@@ -65,7 +64,6 @@
             radio.addEventListener('change', function () {
                 const selectedValue = parseInt(this.value); // クリックされた星の数（1〜5）
 
-                // 💡 クリックされた数以下の星はすべて黄色、それより大きい星はグレーに塗り替えます
                 stars.forEach((star, i) => {
                     if (i < selectedValue) {
                         star.classList.remove('text-gray-300');

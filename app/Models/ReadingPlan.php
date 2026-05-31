@@ -23,8 +23,8 @@ class ReadingPlan extends Model
      */
     protected $fillable = [
         'user_id',
-        'book_id',     // 👈 【追加】
-        'target_date',  // 👈 【追加】
+        'book_id',
+        'target_date',
         'status',
         'completed_at',
     ];

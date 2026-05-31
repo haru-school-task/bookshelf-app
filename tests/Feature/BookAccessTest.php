@@ -38,14 +38,11 @@ class BookAccessTest extends TestCase
      */
     public function test_show_screen_can_be_accessed(): void
     {
-        // 1. テスト用データの準備
         $user = User::factory()->create();
         $book = Book::factory()->create(['user_id' => $user->id]);
 
-        // 2. 詳細画面へのアクセス検証
         $response = $this->get(route('books.show', $book));
 
-        // 3. アサーション（判定）
         $response->assertStatus(200);
         $response->assertViewIs('books.show');
         $response->assertSee($book->title);

@@ -72,7 +72,6 @@
                             <div class="space-y-3">
                                 @foreach ($stats['top_rated_books'] as $index => $book)
                                     @php
-                                        // 順位に応じたメダルカラーの定義
                                         $rankColors = [
                                             0 => 'bg-yellow-400 text-white',
                                             1 => 'bg-gray-400 text-white',
@@ -80,7 +79,6 @@
                                         ];
                                         $rankColor = $rankColors[$index] ?? 'bg-gray-200 text-gray-600';
 
-                                        // 新コントローラーから配列型で渡ってくるレビュー点数を安全に抽出
                                         $avgRating = (float) ($book['reviews_avg_rating'] ?? 0.0);
                                     @endphp
                                     <a href="{{ route('books.show', $book['id']) }}" class="flex items-center p-3 border rounded-lg hover:shadow-md transition">

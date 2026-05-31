@@ -12,7 +12,7 @@ class BookPolicy
      */
     public function viewAny(User $user): bool
     {
-        //
+
     }
 
     /**
@@ -20,7 +20,7 @@ class BookPolicy
      */
     public function view(User $user, Book $book): bool
     {
-        //
+
     }
 
     /**
@@ -28,7 +28,7 @@ class BookPolicy
      */
     public function create(User $user): bool
     {
-        //
+
     }
 
     /**
@@ -36,7 +36,6 @@ class BookPolicy
      */
     public function update(User $user, Book $book): bool
     {
-        // 「操作しようとしているユーザー」と「本の作成者」が一致するかチェック
         return $user->id === $book->user_id;
     }
 
@@ -45,7 +44,6 @@ class BookPolicy
      */
     public function delete(User $user, Book $book): bool
     {
-        // 削除も同様に本人だけ
         return $user->id === $book->user_id;
     }
 
@@ -54,7 +52,7 @@ class BookPolicy
      */
     public function restore(User $user, Book $book): bool
     {
-        //
+
     }
 
     /**
@@ -62,6 +60,6 @@ class BookPolicy
      */
     public function forceDelete(User $user, Book $book): bool
     {
-        //
+        
     }
 }

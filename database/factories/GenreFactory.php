@@ -18,7 +18,6 @@ class GenreFactory extends Factory
     public function definition(): array
     {
         return [
-            // fakeの単語を使って、自動でジャンル名（文字列）を生成させる
             'name' => fake()->unique()->word(),
         ];
     }

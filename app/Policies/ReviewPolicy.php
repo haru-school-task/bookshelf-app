@@ -12,7 +12,7 @@ class ReviewPolicy
      */
     public function viewAny(User $user): bool
     {
-        //
+        
     }
 
     /**
@@ -20,7 +20,7 @@ class ReviewPolicy
      */
     public function view(User $user, Review $review): bool
     {
-        //
+        
     }
 
     /**
@@ -28,7 +28,7 @@ class ReviewPolicy
      */
     public function create(User $user): bool
     {
-        //
+        
     }
 
     /**
@@ -53,7 +53,7 @@ class ReviewPolicy
      */
     public function restore(User $user, Review $review): bool
     {
-        //
+        
     }
 
     /**
@@ -61,6 +61,6 @@ class ReviewPolicy
      */
     public function forceDelete(User $user, Review $review): bool
     {
-        //
+        
     }
 }

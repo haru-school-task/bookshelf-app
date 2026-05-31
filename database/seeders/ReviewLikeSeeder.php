@@ -17,7 +17,6 @@ class ReviewLikeSeeder extends Seeder
         $reviews = Review::all();
 
         foreach ($reviews as $review) {
-            // 自分以外から0〜3人
             $likers = $users->reject(fn ($user) => $user->id === $review->user_id)
                 ->random(rand(0, 3))
                 ->pluck('id');

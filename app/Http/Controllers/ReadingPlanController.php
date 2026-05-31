@@ -36,7 +36,6 @@ class ReadingPlanController extends Controller
             $currentStatus = ReadingPlanStatus::tryFrom((int) $statusInput);
         }
 
-        // N+1問題を避けるため、with('book')によるEager Loadingを適切に実行
         $query = ReadingPlan::where('user_id', auth()->id())->with('book');
 
         if (! is_null($currentStatus)) {
@@ -55,7 +54,6 @@ class ReadingPlanController extends Controller
      */
     public function create(): View
     {
-        // 画面のプルダウン用の書籍データを取得
         $books = Book::where('user_id', auth()->id())->get();
 
         return view('reading-plans.create', compact('books'));
@@ -93,7 +91,6 @@ class ReadingPlanController extends Controller
      */
     public function edit(ReadingPlan $readingPlan): View
     {
-        // Policyを適用して、ユーザーがこの読書計画を編集する権限があるかを確認
         Gate::authorize('update', $readingPlan);
 
         
@@ -111,13 +108,10 @@ class ReadingPlanController extends Controller
     {
         Gate::authorize('update', $readingPlan);
 
-        // バリデーションルールの定義と適用
         $validated = $request->validate([
             'target_date' => ['required', 'date', 'after_or_equal:today'],
         ]);
 
-        // 期日の更新と同時に、ステータスを「Reading（読書中）」に自動アップデート
-        // これにより、画面にボタンが無くても「更新ボタンを押す」というトリガーで読書中へ移行できるようにする
         $readingPlan->update([
             'target_date' => $validated['target_date'],
             'status' => ReadingPlanStatus::Reading->value,
@@ -142,6 +136,7 @@ class ReadingPlanController extends Controller
         return redirect()->route('reading-plans.index')->with('success', '読書計画を削除しました。');
     }
 
+    
     /**
      * 読書計画を完了状態にする
      * 
@@ -152,9 +147,11 @@ class ReadingPlanController extends Controller
     {
         Gate::authorize('complete', $readingPlan);
 
+        // 1. 読書計画を完了にする
         $readingPlan->status = ReadingPlanStatus::Completed;
         $readingPlan->save();
 
         return redirect()->route('reading-plans.index')->with('success', '読書計画を完了にしました！');
     }
+
 }

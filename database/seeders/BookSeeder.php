@@ -15,7 +15,6 @@ class BookSeeder extends Seeder
      */
     public function run(): void
     {
-        // 【要件】すべてのユーザーを取得（ランダム割当用）
         $users = User::all();
 
         $books = [
@@ -36,10 +35,7 @@ class BookSeeder extends Seeder
             
             $imageUrl = '';
 
-            // 配列の中に 'image_url' が設定されている場合のみ処理
             if (!empty($data['image_url'])) {
-                // Blade側で自動連結される '&printsec=...' と重複しないよう、
-                // URLにすでに '?id=' が含まれている場合は、固有番号の直前（?id=XXXXXX）までを切り出す
                 if (preg_match('/(\?id=[^&]+)/', $data['image_url'], $matches)) {
                     $imageUrl = 'https://books.google.com/books/content' . $matches[1];
                 } else {
@@ -60,7 +56,6 @@ class BookSeeder extends Seeder
                 'image_url' => $imageUrl, // ★重複を防いだ正しい個別URLが保存されます
             ]);
 
-            // ジャンル名からIDを取得
             $genreIds = Genre::whereIn('name', $data['genres'])->pluck('id');
 
             // ★【要件】genres()->sync() から genres()->attach() に変更

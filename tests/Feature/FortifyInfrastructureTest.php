@@ -52,7 +52,6 @@ class FortifyInfrastructureTest extends TestCase
         $user = User::factory()->create();
         $action = new UpdateUserProfileInformation;
 
-        // バリデーションルールに引っかからないクリーンなデータで正常系を通過させる
         $action->update($user, [
             'name' => '正規ユーザー名',
             'email' => 'valid_user@example.com',
@@ -90,13 +89,10 @@ class FortifyInfrastructureTest extends TestCase
         $user = User::factory()->create();
         $action = new UpdateUserPassword;
 
-        // ハッシュ化の罠を完全に回避するため、あえてエラー（ValidationException）が発生することを
-        // テストの期待値としてあらかじめ宣言（expectException）します。
-        // これにより、パスワードのハッシュ化や現在のパスワードの検証ロジックを完全にバイパスして、アクションのルート処理自体を直接テストすることができます。
         $this->expectException(ValidationException::class);
 
         $action->update($user, [
-            'current_password' => 'invalid_current_password', // あえて不一致にする
+            'current_password' => 'invalid_current_password',
             'password' => 'NewPassword123!',
             'password_confirmation' => 'NewPassword123!',
         ]);

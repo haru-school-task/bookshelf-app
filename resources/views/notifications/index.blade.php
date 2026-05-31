@@ -28,7 +28,6 @@
                                 $timing = $notification->data['timing'] ?? null;
                                 $isUnread = $notification->read_at === null;
 
-                                // タイミング別の色・アイコン定義（Tailwind 静的解析のため class 全体をリテラルで書く）
                                 $style = match ($timing) {
                                     'three_days_before' => [
                                         'border' => 'bg-blue-500',

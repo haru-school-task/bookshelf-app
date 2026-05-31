@@ -16,7 +16,6 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule): void
     {
-        // 👈 ここに「朝の6時実行」の設定を記述します
         $schedule->command('app:daily-plan-check-command')->dailyAt('06:00');
     }
 

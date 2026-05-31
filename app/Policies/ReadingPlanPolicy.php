@@ -12,7 +12,7 @@ class ReadingPlanPolicy
      */
     public function viewAny(User $user): bool
     {
-        //
+
     }
 
     /**
@@ -20,7 +20,7 @@ class ReadingPlanPolicy
      */
     public function view(User $user, ReadingPlan $readingPlan): bool
     {
-        //
+
     }
 
     /**
@@ -28,7 +28,7 @@ class ReadingPlanPolicy
      */
     public function create(User $user): bool
     {
-        //
+
     }
 
     /**
@@ -60,7 +60,7 @@ class ReadingPlanPolicy
      */
     public function restore(User $user, ReadingPlan $readingPlan): bool
     {
-        //
+
     }
 
     /**
@@ -68,6 +68,6 @@ class ReadingPlanPolicy
      */
     public function forceDelete(User $user, ReadingPlan $readingPlan): bool
     {
-        //
+        
     }
 }

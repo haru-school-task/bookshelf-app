@@ -28,7 +28,6 @@ class BookApiTest extends TestCase
      */
     public function test_authenticated_user_can_store_book_via_api(): void
     {
-        // 【外部API連携モック】googleapis.com を含むすべての通信を確実にインターセプト
         Http::fake([
             '*googleapis.com*' => Http::response([
                 'items' => [
@@ -54,10 +53,8 @@ class BookApiTest extends TestCase
             'description' => 'API経由での登録テストです。',
         ];
 
-        // 💡 修正ポイント：仕様書準拠の正確なエンドポイントパス（/api/v1/books）へリクエストを送信
         $response = $this->actingAs($user, 'sanctum')->postJson('/api/v1/books', $data);
 
-        // 正常に応答（201 Created または 200）が返り、DBに保存されていることを検証
         $response->assertStatus($response->status());
         $this->assertDatabaseHas('books', ['title' => '新時代のAPI設計']);
     }
@@ -91,7 +88,6 @@ class BookApiTest extends TestCase
         ]);
         $book->genres()->attach($genre->id);
 
-        // 💡 修正ポイント：エンドポイントパスを /api/v1/books に変更してGETリクエストを送信
         $response = $this->json('GET', '/api/v1/books');
 
         $response->assertStatus(200)
@@ -121,7 +117,6 @@ class BookApiTest extends TestCase
      */
     public function test_api_show_returns_404_for_non_existent_book_id(): void
     {
-        // 💡 修正ポイント：エンドポイントパスを /api/v1/books/99999 に変更してアクセス
         $response = $this->json('GET', '/api/v1/books/99999');
         
         $response->assertStatus(404);
@@ -134,7 +129,6 @@ class BookApiTest extends TestCase
      */
     public function test_authenticated_user_can_update_own_book_via_api(): void
     {
-        // 💡【追加】隠されている500エラーの本当の原因（PHPのエラー文）を画面に強制表示させます
         $this->withoutExceptionHandling();
 
         $user = User::factory()->create();

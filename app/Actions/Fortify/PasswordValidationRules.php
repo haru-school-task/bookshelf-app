@@ -15,7 +15,6 @@ trait PasswordValidationRules
      */
     protected function passwordRules(): array
     {
-        // 💡 修正ポイント：new Password のカッコの中に「8」を確実に渡します
         $passwordRule = new Password(8);
 
         return [

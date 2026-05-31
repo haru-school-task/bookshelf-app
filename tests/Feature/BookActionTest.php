@@ -31,7 +31,6 @@ class BookActionTest extends TestCase
         $user = User::factory()->create();
         $book = Book::factory()->create(['user_id' => $user->id]);
 
-        // 1. お気に入り登録（1回目のリクエスト）
         $response = $this->actingAs($user)->post(route('favorites.toggle', $book));
 
         $this->assertDatabaseHas('favorites', [
@@ -39,7 +38,6 @@ class BookActionTest extends TestCase
             'book_id' => $book->id,
         ]);
 
-        // 2. お気に入り解除（2回目のリクエストで削除されるか確認）
         $response = $this->actingAs($user)->post(route('favorites.toggle', $book));
 
         $this->assertDatabaseMissing('favorites', [
@@ -84,20 +82,17 @@ class BookActionTest extends TestCase
         $user = User::factory()->create();
         $book = Book::factory()->create(['user_id' => $user->id]);
 
-        // テスト用のレビューを作成
         $review = Review::factory()->create([
             'book_id' => $book->id,
-            'user_id' => User::factory()->create()->id, // レビュー投稿者は別の人
+            'user_id' => User::factory()->create()->id,
         ]);
 
-        // 1. いいね登録
         $this->actingAs($user)->post(route('reviews.like', $review));
         $this->assertDatabaseHas('review_likes', [
             'user_id'   => $user->id,
             'review_id' => $review->id,
         ]);
 
-        // 2. いいね解除
         $this->actingAs($user)->post(route('reviews.like', $review));
         $this->assertDatabaseMissing('review_likes', [
             'user_id'   => $user->id,
@@ -149,10 +144,8 @@ class BookActionTest extends TestCase
         $user = User::factory()->create();
         $book = Book::factory()->create(['user_id' => $user->id]);
 
-        // あらかじめお気に入りに登録しておく
         $user->favoriteBooks()->attach($book->id);
 
-        // お気に入り一覧画面にアクセス
         $response = $this->actingAs($user)->get(route('favorites.index'));
 
         $response->assertStatus(200);
@@ -194,13 +187,11 @@ class BookActionTest extends TestCase
         $book1->genres()->attach($genre1->id);
         $book2->genres()->attach($genre2->id);
 
-        // 1. キーワード「夏目」で検索リクエストを送る
         $response = $this->get(route('books.index', ['keyword' => '夏目']));
         $response->assertStatus(200);
         $response->assertSee('夏目漱石の本');
         $response->assertDontSee('PHPの教科書');
 
-        // 2. ジャンル「技術書」で絞り込みリクエストを送る
         $response = $this->get(route('books.index', ['genre_id' => $genre2->id]));
         $response->assertStatus(200);
         $response->assertSee('PHPの教科書');
@@ -216,7 +207,6 @@ class BookActionTest extends TestCase
     {
         $user = User::factory()->create();
 
-        // テストデータを用意（本1冊、レビュー1件を自分に紐づける）
         $book = Book::factory()->create(['user_id' => $user->id]);
         $user->reviews()->create([
             'book_id' => $book->id,
@@ -224,7 +214,6 @@ class BookActionTest extends TestCase
             'comment' => 'テストレポート用のレビューです。',
         ]);
 
-        // ログインしてレポート画面へアクセス
         $response = $this->actingAs($user)->get(route('reports.index'));
 
         $response->assertStatus(200);
@@ -250,7 +239,6 @@ class BookActionTest extends TestCase
         $response = $this->get(route('books.index', ['sort' => 'rating']));
 
         $response->assertStatus(200);
-        // 評価の高い「超人気本」が「普通の本」より先に画面に映っている順番を厳密にチェック
         $response->assertSeeInOrder(['超人気本', '普通の本']);
     }
 

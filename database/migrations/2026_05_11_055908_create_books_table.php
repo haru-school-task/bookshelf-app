@@ -11,7 +11,6 @@ return new class extends Migration
      */
     public function up(): void
     {
-        // schemaの定義（upメソッド内）の中に「title_kana」を追記します
         Schema::create('books', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();

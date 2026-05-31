@@ -41,7 +41,6 @@ class UpdateExpiredReadingPlans extends Command
     {
         $today = Carbon::today();
 
-        // 1. 今日より前の日付（超過）で、かつ「完了」になっていない計画を、リレーション（user, book）を含めて取得
         $expiredPlans = ReadingPlan::where('target_date', '<', $today)
             ->where('status', '!=', ReadingPlanStatus::Completed)
             ->with(['user', 'book'])
@@ -53,13 +52,9 @@ class UpdateExpiredReadingPlans extends Command
             return Command::SUCCESS;
         }
 
-        // 🔥【Collectionメソッドの徹底活用】
-        // foreachによる泥臭いループを完全に排除。eachメソッドを用いて宣言的に処理を連鎖させます。
         $expiredPlans->each(function (ReadingPlan $plan): void {
             $plan->save();
 
-            // 3.【Notification facade（DatabaseChannel）要件に完全準拠】
-            // Laravel標準の Notification ファサードを呼び出し、ユーザーへリマインダーを発火
             if ($plan->user) {
                 $plan->user->notify(new ReadingPlanReminder($plan));
             }

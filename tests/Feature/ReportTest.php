@@ -23,15 +23,12 @@ class ReportTest extends TestCase
      */
     public function test_authenticated_user_can_view_report_page(): void
     {
-        // テスト用のユーザーを作成
         $user = User::factory()->create();
 
-        // ログインした状態で、新しくグループ化した /reports へアクセス
         $response = $this->actingAs($user)->get(route('reports.index'));
 
-        // 💡 画面が 200 OK で正常に表示され、新コントローラーが動いていることを検証
         $response->assertStatus(200);
         $response->assertViewIs('reports.index');
-        $response->assertViewHas('stats'); // 既存のBladeに渡している変数の存在確認
+        $response->assertViewHas('stats');
     }
 }

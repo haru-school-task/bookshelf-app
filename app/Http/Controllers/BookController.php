@@ -33,10 +33,8 @@ class BookController extends Controller
      */  
     public function index(Request $request): View
     {
-        // 1. クエリの土台を作成（N+1問題を避けるため genres を Eagerロード）
         $query = Book::with('genres');
 
-        // 2. キーワード検索（タイトルまたは著者名）
         if ($request->filled('keyword')) {
             $keyword = $request->input('keyword');
             $query->where(function ($q) use ($keyword) {
@@ -45,7 +43,6 @@ class BookController extends Controller
             });
         }
 
-        // 3. ジャンルフィルタ（単一選択）
         $genreId = $request->input('genre_id') ?? $request->input('genre');
 
         if (! empty($genreId)) {
@@ -54,7 +51,6 @@ class BookController extends Controller
             });
         }
         
-        // 4. ソート機能
         $sort = $request->input('sort', 'latest');
 
         switch ($sort) {
@@ -79,10 +75,8 @@ class BookController extends Controller
                 break;
         }
 
-        // 5. 検索条件をページネーションのリンク（2ページ目以降）に完全に引き継ぐ
         $books = $query->paginate(10)->appends($request->all());
 
-        // 6. 🔥【修正ポイント】画面側の冊数表示要件に合わせ、N+1問題を完全回避して取得
         $genres = Genre::withCount('books')->get();
 
         return view('books.index', compact('books', 'genres'));
@@ -96,10 +90,8 @@ class BookController extends Controller
      */
     public function create(): View
     {
-        // 1. 登録画面のセレクトボックス（またはチェックボックス）用に全ジャンルを取得
         $genres = Genre::all();
 
-        // 2. 登録画面を表示
         return view('books.create', compact('genres'));
     }
     
@@ -112,19 +104,15 @@ class BookController extends Controller
      */
     public function store(BookRequest $request): RedirectResponse
     {
-        // 1. バリデーション済みのデータを取得
         $validated = $request->validated();
 
-        // 画面から届く追加のデータを安全に取得
         $imageUrl = $request->input('image_url');
         $titleKana = $request->input('title_kana');
 
-        // 【重要】Google Books APIから届く画像URLは「http」なので、セキュリティブロックを回避するために「https」に変換して保存
         if ($imageUrl) {
             $imageUrl = strtok($imageUrl, '&');
         }
 
-        // 2. 書籍を保存（ユーザーIDは認証済みユーザーのIDを使用）
         $book = Book::create([
             'user_id'        => auth()->id(),
             'title'          => $validated['title'],
@@ -136,7 +124,6 @@ class BookController extends Controller
             'image_url'      => $imageUrl ?? null, 
         ]);
 
-        // 3. ジャンルの中間テーブルの同期
         $book->genres()->sync($validated['genre_ids']);
 
         return redirect()->route('books.index')->with('success', '書籍を登録しました。');
@@ -181,11 +168,9 @@ class BookController extends Controller
      */
     public function update(BookRequest $request, Book $book): RedirectResponse
     {
-        // 1. 認可チェック（この書籍を更新する権限があるか）
         $this->authorize('update', $book);
         $validated = $request->validated();
 
-        // 2. 書籍情報を更新
         $book->update([
             'title'       => $validated['title'],
             'author'      => $validated['author'],
@@ -193,7 +178,6 @@ class BookController extends Controller
             'description' => $validated['description'] ?? null,
         ]);
         
-        // 3. ジャンルの中間テーブルの同期
         $book->genres()->sync($validated['genre_ids']);
 
         return redirect()->route('books.index')->with('success', '書籍情報を更新しました。');
@@ -208,14 +192,10 @@ class BookController extends Controller
      */
     public function destroy(Book $book): RedirectResponse
     {   
-        // 1. 認可チェック（この書籍を削除する権限があるか）
         $this->authorize('delete', $book);
 
-        // 2. 安全な削除処理：DBトランザクションを使用して、関連する中間テーブルのデータも安全に削除
         \Illuminate\Support\Facades\DB::transaction(function () use ($book) {
-            // 中間テーブルのデータを先に削除
             $book->genres()->detach();
-            // 書籍に紐づくレビューも削除
             $book->delete();
         });
         
@@ -327,10 +307,8 @@ class BookController extends Controller
      */
     public function favorites(): \Illuminate\View\View
     {
-        // 🔒【N+1完全防御】お気に入りの本を取得する段階で、紐づくジャンル（genres）を先回りで一括ロードします
         $books = auth()->user()->favoriteBooks()->with('genres')->paginate(10);
 
-        // 🔒【パフォーマンス最適化】サイドバーの冊数表示要求に合わせ、N+1を起こさずにジャンルを取得
         $genres = Genre::withCount('books')->get();
 
         return view('favorites.index', compact('books', 'genres'));
@@ -344,7 +322,6 @@ class BookController extends Controller
      */
     public function ranking(): \Illuminate\View\View
     {
-        // レビュー平均評価のTOP10（レビューなしは表示しない）
         $rankedBooks = Book::has('reviews') // レビューがある書籍だけに絞る
             ->withAvg('reviews', 'rating') // 平均評点を計算
             ->orderBy('reviews_avg_rating', 'desc') // 評価が高い順
@@ -365,40 +342,33 @@ class BookController extends Controller
      */
     public function fetchByIsbn(string $isbn): \Illuminate\Http\JsonResponse
     {
-        // 13桁の厳密な桁数チェック
         if (strlen($isbn) !== 13) {
             return response()->json(['error' => 'ISBNは13桁で入力してください。'], 422);
         }
 
-        // 1. ISBNとAPIキーを取得（trimで余計な空白を排除）
         $cleanIsbn = trim($isbn);
         $apiKey = trim(env('GOOGLE_BOOKS_API_KEY'));
 
         $encodedIsbn = urlencode('isbn:' . $cleanIsbn);
         $targetUrl = "https://www.googleapis.com/books/v1/volumes?q={$encodedIsbn}&country=JP&key={$apiKey}";
 
-        // 2. Google Books APIへリクエストを送信
         $response = \Illuminate\Support\Facades\Http::withoutVerifying()->get($targetUrl);
 
-        // 3. 通信成功＆データが存在するかチェック
         if (!$response->successful() || !isset($response->json()['items'])) {
             return response()->json(['error' => '書籍情報が見つかりませんでした。'], 404);
         }
 
-        // 4. 🔥【ロジック統合】Google特有の立体構造（itemsの1番目のvolumeInfo）から安全にデータを抽出
         $bookData = $response->json()['items'][0]['volumeInfo'] ?? null;
 
         if (!$bookData) {
             return response()->json(['error' => '書籍詳細情報が取得できませんでした。'], 404);
         }
 
-        // 5. セキュリティブロックを回避する「https」版の画像URL処理
         $thumbnail = $bookData['imageLinks']['thumbnail'] ?? null;
         if ($thumbnail) {
             $thumbnail = str_replace('http://', 'https://', $thumbnail);
         }
 
-        // 6. 🏆 お皿（JavaScript）の期待値（data.titleなど）にミリ単位で100%同期させて一括返却！
         return response()->json([
             'title'          => $bookData['title'] ?? '',
             'author'         => isset($bookData['authors']) ? implode(', ', $bookData['authors']) : '',

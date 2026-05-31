@@ -18,7 +18,6 @@ class BookFactory extends Factory
      */
     public function definition(): array
     {
-        // ランダムなタイトルを一度変数に代入します
         $title = $this->faker->realText(15);
 
         return [

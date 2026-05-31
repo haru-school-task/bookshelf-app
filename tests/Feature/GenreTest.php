@@ -47,8 +47,6 @@ class GenreTest extends TestCase
         $user = User::factory()->create();
         $genre = Genre::factory()->create();
 
-        // 💡【多対多対応】本を11冊作成し、モデルのリレーション経由でジャンルへ安全に紐付ける
-        // ※ もしモデル内のリレーション名が「books」でない場合は、定義されている名前に合わせる
         Book::factory()->count(11)->create()->each(function (Book $book) use ($genre) {
             $genre->books()->attach($book->id);
         });
@@ -154,14 +152,11 @@ class GenreTest extends TestCase
         $user = User::factory()->create();
         $genre = Genre::factory()->create();
 
-        // 【多対多対応】本を1冊作成し、モデルのリレーション経由でジャンルへ安全に紐付ける
         $book = Book::factory()->create();
         $genre->books()->attach($book->id);
 
-        // 削除を実行
         $response = $this->actingAs($user)->delete(route('genres.destroy', $genre));
 
-        // 【アサーション】削除が制限され、データベースにジャンルが残っていることを確認
         $this->assertDatabaseHas('genres', ['id' => $genre->id]);
     }
 }

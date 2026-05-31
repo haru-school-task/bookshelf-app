@@ -22,7 +22,6 @@ class CreateNewUser implements CreatesNewUsers
      */
     public function create(array $input): User
     {
-        // 💡 第3引数（配列の3つ目）に自作の日本語メッセージをガチッとはめ込みます
         Validator::make($input, [
             'name' => ['required', 'string', 'max:255'],
             'email' => [
@@ -48,11 +47,9 @@ class CreateNewUser implements CreatesNewUsers
             'password.required' => 'パスワードは必須項目です。',
             'password.confirmed' => 'パスワード（確認用）と一致しません。',
             
-            // 💡【追加】PasswordValidationRulesオブジェクトが吐き出す「文字数エラー」をここで強制上書きします！
             'password' => 'パスワードは8文字以上で入力してください。', 
         ])->validate();
 
-        // 💡 【大復活・超重要】このデータベース保存とユーザーデータの返却（return）を追記することで、TypeErrorを完全に解消します！
         return User::create([
             'name' => $input['name'],
             'email' => $input['email'],

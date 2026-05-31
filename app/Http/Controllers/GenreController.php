@@ -23,7 +23,6 @@ class GenreController extends Controller
      */
     public function __construct()
     {
-        // 一覧や詳細も含め、ジャンル関連はすべてログイン必須
         $this->middleware('auth');
     }
 
@@ -34,7 +33,6 @@ class GenreController extends Controller
      */
     public function index(): View
     {
-        // 各ジャンルに紐づく書籍（books）の数を自動集計して一括取得
         $genres = Genre::withCount('books')->get();
 
         return view('genres.index', compact('genres'));
@@ -78,10 +76,8 @@ class GenreController extends Controller
      */
     public function show(Genre $genre): View
     {
-        // 仕様書の「10件/ページで表示されること」に完全同期
         $books = $genre->books()->paginate(10);
 
-        // サイドバーなどの表示用に withCount を添えて全ジャンルを取得
         $genres = Genre::withCount('books')->get();
 
         return view('genres.show', compact('genre', 'books', 'genres'));
@@ -107,7 +103,6 @@ class GenreController extends Controller
      */
     public function update(Request $request, Genre $genre): RedirectResponse
     {
-        // 更新時は、同じ名前のジャンルが存在しても自分自身は除外してユニークチェックを行う
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255', 'unique:genres,name,' . $genre->id],
         ]);
@@ -128,7 +123,6 @@ class GenreController extends Controller
      */
     public function destroy(Genre $genre): RedirectResponse
     {
-        // 書籍の紐付きがある場合は削除を制限して安全にブロック
         if ($genre->books()->exists()) {
             return back()->withErrors(['error' => 'このジャンルには書籍が登録されているため、削除できません。']);
         }

@@ -88,7 +88,6 @@ class BookController extends Controller
 
         $book->load('genres')->loadCount('reviews')->loadAvg('reviews', 'rating');
 
-        // 201 Created ステータスを持つレスポンスを返却
         return (new BookResource($book))->response()->setStatusCode(Response::HTTP_CREATED);
     }
 

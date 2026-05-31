@@ -26,31 +26,25 @@ class ReadingPlanTest extends TestCase
      */
     public function test_index_displays_only_authenticated_users_plans(): void
     {
-        // 1. テストデータの準備（ログインユーザーと他のユーザー）
         $user = User::factory()->create();
         $otherUser = User::factory()->create();
 
-        // それぞれのユーザーに紐付く書籍を作成
         $myBook = Book::factory()->create(['title' => '私の愛読書']);
         $otherBook = Book::factory()->create(['title' => '他のユーザーの愛読書']);
 
-        // それぞれに独立した書籍を紐付けて計画を作成
         $myPlan = ReadingPlan::factory()->create(['user_id' => $user->id, 'book_id' => $myBook->id]);
         $otherPlan = ReadingPlan::factory()->create(['user_id' => $otherUser->id, 'book_id' => $otherBook->id]);
 
-        // 2. 認証状態でのアクセス検証
         $response = $this->actingAs($user)->get(route('reading-plans.index'));
 
-        // 3. アサーション（判定）
         $response->assertStatus(200);
         $response->assertSee($myPlan->book->title);
 
-        // 他のユーザーの愛読書が表示されていないことを検証
         $response->assertDontSee($otherPlan->book->title);
     }
 
     
-        /**
+    /**
      * バリデーション済みのデータを用いて、読書計画が初期ステータス（1=未着手）で正しく保存されるかを検証する
      * 
      * @return void
@@ -60,18 +54,15 @@ class ReadingPlanTest extends TestCase
         $user = User::factory()->create();
         $book = Book::factory()->create();
 
-        // 💡 解決の決定打：after_or_equal:today を確実に通過させるため、
-        // 計算を挟まない純粋な「今日の日付（Y-m-d）」を送信して判定ズレを完全に防ぎます。
         $todayDate = \Carbon\Carbon::today()->format('Y-m-d');
         
         $postData = [
             'book_id'     => $book->id,
-            'target_date' => $todayDate, // 👈 これで確実にバリデーションを突破します
+            'target_date' => $todayDate,
         ];
 
         $response = $this->actingAs($user)->post(route('reading-plans.store'), $postData);
 
-        // データベースに本物のデータが安全に書き込まれたか検証
         $this->assertDatabaseHas('reading_plans', [
             'user_id'     => $user->id,
             'book_id'     => $book->id,
@@ -94,10 +85,8 @@ class ReadingPlanTest extends TestCase
         $otherUser = User::factory()->create();
         $book = Book::factory()->create();
 
-        // 他のユーザーが作成した読書計画
         $otherPlan = ReadingPlan::factory()->create(['user_id' => $otherUser->id, 'book_id' => $book->id]);
 
-        // 自分が他のユーザーの編集URLにGETリクエストを送信した時、403 Forbiddenになるか確認
         $response = $this->actingAs($user)->get(route('reading-plans.edit', $otherPlan));
 
         $response->assertStatus(403);
@@ -119,10 +108,8 @@ class ReadingPlanTest extends TestCase
             'status' => ReadingPlanStatus::Unread,
         ]);
 
-        // 完了ボタン（POST）を実行
         $response = $this->actingAs($user)->post(route('reading-plans.complete', $plan));
 
-        // データベースのステータスが Completed (3) に書き換わっているか確認
         $this->assertDatabaseHas('reading_plans', [
             'id' => $plan->id,
             'status' => ReadingPlanStatus::Completed->value,
@@ -140,11 +127,9 @@ class ReadingPlanTest extends TestCase
      */
     public function test_batch_command_sends_notification_for_expired_plans(): void
     {
-        // 1. テストデータの準備
         $user = User::factory()->create();
         $book = Book::factory()->create();
 
-        // 期日を過ぎた読書計画を作成
         $expiredPlan = ReadingPlan::factory()->create([
             'user_id' => $user->id,
             'book_id' => $book->id,
@@ -152,11 +137,9 @@ class ReadingPlanTest extends TestCase
             'status' => ReadingPlanStatus::Unread,
         ]);
 
-        // 2. コマンドの実行
         $this->artisan('reading-plans:update-status')
-            ->assertExitCode(0); // コマンドがエラーなく正常終了（SUCCESS）したか検証
+            ->assertExitCode(0); //
 
-        // 3. アサーション：notificationsテーブルに、指定のデータ構造で通知レコードが生成されているか確認
         $this->assertDatabaseHas('notifications', [
             'notifiable_id' => $user->id,
             'notifiable_type' => User::class,
@@ -177,14 +160,11 @@ class ReadingPlanTest extends TestCase
         $otherUser = User::factory()->create();
         $book = Book::factory()->create();
 
-        // 他のユーザーの読書計画
         $otherPlan = ReadingPlan::factory()->create(['user_id' => $otherUser->id, 'book_id' => $book->id]);
 
-        // 自分が他のユーザーの削除URLにDELETEリクエストを送信した時、403 Forbiddenになるか確認
         $response = $this->actingAs($user)->delete(route('reading-plans.destroy', $otherPlan));
 
         $response->assertStatus(403);
-        // データベースからデータが消えていない（守られた）ことを確認
         $this->assertDatabaseHas('reading_plans', ['id' => $otherPlan->id]);
     }
 
@@ -201,18 +181,15 @@ class ReadingPlanTest extends TestCase
         $otherUser = User::factory()->create();
         $book = Book::factory()->create();
 
-        // 他のユーザーの読書計画（初期状態：Unread）
         $otherPlan = ReadingPlan::factory()->create([
             'user_id' => $otherUser->id,
             'book_id' => $book->id,
             'status' => ReadingPlanStatus::Unread,
         ]);
 
-        // 自分が他のユーザーの完了URLにPOSTリクエストを送信した時、403 Forbiddenになるか確認
         $response = $this->actingAs($user)->post(route('reading-plans.complete', $otherPlan));
 
         $response->assertStatus(403);
-        // ステータスが改ざんされず、Unreadのままであることを検証
         $this->assertDatabaseHas('reading_plans', [
             'id' => $otherPlan->id,
             'status' => ReadingPlanStatus::Unread->value,
@@ -235,7 +212,6 @@ class ReadingPlanTest extends TestCase
 
         $response->assertStatus(200);
 
-        // 編集画面に、編集対象の読書計画データが正しく渡されているかを検証
         $response->assertViewHas('readingPlan');
     }
 
@@ -250,7 +226,6 @@ class ReadingPlanTest extends TestCase
         $user = User::factory()->create();
         $book = Book::factory()->create();
 
-        // 💡 修正ポイント①：初期状態（今日から7日後）でテストデータを安全に作成
         $plan = ReadingPlan::factory()->create([
             'user_id'     => $user->id,
             'book_id'     => $book->id,
@@ -258,7 +233,6 @@ class ReadingPlanTest extends TestCase
             'status'      => 1,
         ]);
 
-        // 💡 修正ポイント②：更新後の期待値となる「今日から14日後の日付」を完璧に変数化します
         $targetDate = now()->addDays(14)->format('Y-m-d');
         $putData = [
             'target_date' => $targetDate,
@@ -266,10 +240,9 @@ class ReadingPlanTest extends TestCase
 
         $response = $this->actingAs($user)->put(route('reading-plans.update', $plan), $putData);
 
-        // 💡 修正ポイント③：データベースが14日後（$targetDate）に正しく書き換わっていることを厳密に検証します
         $this->assertDatabaseHas('reading_plans', [
             'id'          => $plan->id,
-            'target_date' => $targetDate, // 👈 実際のDBの変更成功値（2026-06-12）に完璧に一致させます
+            'target_date' => $targetDate, // 
             'status'      => 2, // 2: 読書中
         ]);
         
@@ -291,7 +264,6 @@ class ReadingPlanTest extends TestCase
 
         $response = $this->actingAs($user)->delete(route('reading-plans.destroy', $plan));
 
-        // データベースから完全に消え去っていることを検証
         $this->assertDatabaseMissing('reading_plans', ['id' => $plan->id]);
         $response->assertRedirect(route('reading-plans.index'));
     }
@@ -306,7 +278,6 @@ class ReadingPlanTest extends TestCase
     {
         $user = User::factory()->create();
 
-        // 新規作成画面（GET）へアクセスし、コントローラーの未通過行（create）を通過させる
         $response = $this->actingAs($user)->get(route('reading-plans.create'));
 
         $response->assertStatus(200);
@@ -324,20 +295,16 @@ class ReadingPlanTest extends TestCase
         $user = User::factory()->create();
         $book = Book::factory()->create();
 
-        // 💡 解決の決定打：こちらも同様に「今日の日付」を確実に送信し、
-        // コントローラー内のバリデーションチェックを無傷で突破させます。
         $todayDate = \Carbon\Carbon::today()->format('Y-m-d');
         
         $attackData = [
             'book_id'     => $book->id,
             'target_date' => $todayDate,
-            'status'      => 3, // 攻撃者が一気に「読了(3)」に改ざんしようとした不正データ
+            'status'      => 3,
         ];
 
         $response = $this->actingAs($user)->post(route('reading-plans.store'), $attackData);
 
-        // 攻撃者の値（3）はコントローラーの validate() 後の配列から自動消去され、
-        // かつモデルの $fillable で守られているため無視され、初期状態の 1 で安全に保存されることを検証
         $this->assertDatabaseHas('reading_plans', [
             'user_id'     => $user->id,
             'book_id'     => $book->id,

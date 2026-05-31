@@ -30,14 +30,12 @@ class ReviewSeeder extends Seeder
             // ★要件：各書籍へのレビュー件数をランダム化（各書籍に2〜4件）
             $reviewCount = rand(2, 4);
 
-            // レビュー投稿者が重複しないように、ユーザーをランダムにシャッフルして選ぶ
             $shuffledUsers = $users->shuffle();
 
             for ($i = 0; $i < $reviewCount; $i++) {
                 // ★要件：投稿者をランダム化
                 $reviewer = $shuffledUsers[$i];
 
-                // 自分が登録した本にはレビューできないルール（DB制約など）がある場合は回避
                 if ($reviewer->id === $book->user_id) {
                     continue;
                 }

@@ -48,7 +48,6 @@ class ReadingPlanReminder extends Notification
      */
     public function via(mixed $notifiable): array
     {
-        // 仕様書の「DatabaseChannelに保存する」の要件を満たすため 'database' を返します
         return ['database'];
     }
 
@@ -61,7 +60,6 @@ class ReadingPlanReminder extends Notification
      */
     public function toArray(mixed $notifiable): array
     {
-        // 💡 修正ポイント：\Carbon\Carbon::parse を挟んで文字列エラーを100%回避します
         $formattedDate = \Carbon\Carbon::parse($this->readingPlan->target_date)->format('Y-m-d');
         $bookTitle = $this->readingPlan->book->title ?? '書籍';
 

@@ -35,14 +35,11 @@ class ReadingPlanFactory extends Factory
     public function definition(): array
     {
         return [
-            // 紐づくユーザーと書籍を自動生成（または既存のIDを再利用）
             'user_id' => User::factory(),
             'book_id' => Book::factory(),
 
-            // 目標期日として「今日から7日後」をダミー設定
             'target_date' => now()->addDays(7)->format('Y-m-d'),
 
-            // ステータスの初期状態をEnum値から安全に解決
             'status' => ReadingPlanStatus::Unread->value,
         ];
     }

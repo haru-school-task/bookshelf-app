@@ -21,7 +21,6 @@ class NotificationController extends Controller
      */
     public function index(): View
     {
-        // ログインユーザーの「すべての通知（既読・未読すべて）」を取得してビューに渡す
         $notifications = auth()->user()->notifications;
 
         return view('notifications.index', compact('notifications'));
@@ -35,11 +34,9 @@ class NotificationController extends Controller
      */
     public function markAsRead(string $id): RedirectResponse
     {
-        // ユーザーの未読通知の中から、該当するIDの通知をピンポイントで検索
         $notification = auth()->user()->unreadNotifications->find($id);
 
         if ($notification) {
-            // Laravel標準機能を使って、read_at に日付を入れて既読状態にする
             $notification->markAsRead();
         }
 
