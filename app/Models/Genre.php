@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
  * Class Genre
  *
  * ジャンルデータおよび書籍（Book）モデルとの多対多リレーションを管理するモデルクラス
- * 💡【コード品質担保：型宣言・PHPDoc完全対応】
+ * 【コード品質担保：型宣言・PHPDoc完全対応】
  * 
  * @package App\Models
  */
@@ -20,7 +20,7 @@ class Genre extends Model
 
     /**
      * 複数代入を許可する属性（ホワイトリスト）
-     * 💡【大量代入（Mass Assignment）の脆弱性を防ぐ絶対防御壁】
+     * 【大量代入（Mass Assignment）の脆弱性を防ぐ防御壁】
      *
      * @var array<int, string>
      */
@@ -28,7 +28,7 @@ class Genre extends Model
 
     /**
      * ジャンルに属する複数の書籍（Book）との多対多リレーションを定義
-     * 💡【型宣言・PHPDoc完全対応】引数が無いため @return のみ厳密に記載
+     * 【型宣言・PHPDoc完全対応】引数が無いため @return のみ厳密に記載
      *
      * @return BelongsToMany
      */

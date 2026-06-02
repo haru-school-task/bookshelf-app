@@ -116,9 +116,8 @@
     </div>
 </div>
 
-<!-- 隠し入力欄（データのバッティングを防ぐため、name属性はJavaScriptで送信時のみ付与します） -->
-<input type="hidden" id="hidden_image_url" value="{{ old('image_url', $book->image_url ?? '') }}">
-<input type="hidden" id="hidden_title_kana" value="{{ old('title_kana', $book->title_kana ?? '') }}">
+<input type="hidden" id="hidden_image_url" name="image_url" value="{{ old('image_url', $book->image_url ?? '') }}">
+<input type="hidden" id="hidden_title_kana" name="title_kana" value="{{ old('title_kana', $book->title_kana ?? '') }}">
 
 <script>
     var currentScript = document.currentScript || document.scripts[document.scripts.length - 1];
@@ -130,17 +129,20 @@
             var hiddenUrl = document.getElementById('hidden_image_url');
             var hiddenKana = document.getElementById('hidden_title_kana');
 
-            // 画面上の手入力用URL（display_image_url）に値がある場合は、そちらを優先
-            if (displayUrl && displayUrl.value.trim() !== '') {
+            // 💡 編集画面で「空欄にして更新」できるように制御をスマートにアップデート
+            if (displayUrl) {
+                // 画面上の入力欄（display_image_url）の名前を正式な 'image_url' に変更し、
+                // 空欄も含めてユーザーが入力した文字をそのまま100%最優先でサーバーへ送信します
                 displayUrl.name = 'image_url';
-                if (hiddenUrl) hiddenUrl.disabled = true; // 隠しポストを無効化して衝突を防ぐ
-            } else if (hiddenUrl && hiddenUrl.value.trim() !== '') {
-                // APIから取得した隠しURLを使う場合のみ、送信キーを付与
+                
+                // データのバッティングを防ぐため、裏側の隠しポストは完全に無効化（切断）します
+                if (hiddenUrl) hiddenUrl.disabled = true;
+            } else if (hiddenUrl) {
+                // API自動取得の隠しURLしか存在しない場合のみ、こちらを有効化します
                 hiddenUrl.disabled = false;
                 hiddenUrl.name = 'image_url';
             }
 
-            // タイトル（かな）の送信制御
             if (hiddenKana && hiddenKana.value.trim() !== '') {
                 hiddenKana.disabled = false;
                 hiddenKana.name = 'title_kana';
@@ -148,3 +150,4 @@
         });
     }
 </script>
+

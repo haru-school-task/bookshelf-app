@@ -11,7 +11,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
  * Class Review
  *
  * 書籍に対するレビュー（評価・コメント）および「いいね」のリレーションを管理するモデルクラス
- * 💡【コード品質担保：型宣言・PHPDoc完全対応】
+ * 【コード品質担保：型宣言・PHPDoc完全対応】
  * 
  * @package App\Models
  */
@@ -21,7 +21,7 @@ class Review extends Model
 
     /**
      * 複数代入を許可する属性（ホワイトリスト）
-     * 💡【大量代入（Mass Assignment）の脆弱性を防ぐ絶対防御壁】
+     * 【大量代入（Mass Assignment）の脆弱性を防ぐ防御壁】
      *
      * @var array<int, string>
      */
@@ -29,7 +29,7 @@ class Review extends Model
 
     /**
      * レビューを投稿した本人（User）との1対多リレーションを定義
-     * 💡【型宣言・PHPDoc完全対応】引数が無いため @return のみ厳密に記載
+     * 【型宣言・PHPDoc完全対応】引数が無いため @return のみ厳密に記載
      *
      * @return BelongsTo
      */
@@ -40,7 +40,7 @@ class Review extends Model
 
     /**
      * レビュー対象の書籍（Book）との1対多リレーションを定義
-     * 💡【型宣言・PHPDoc完全対応】
+     * 【型宣言・PHPDoc完全対応】
      *
      * @return BelongsTo
      */
@@ -51,7 +51,7 @@ class Review extends Model
 
     /**
      * レビューに対して「いいね」をした複数のユーザー（User）との多対多リレーションを定義
-     * 💡【型宣言・PHPDoc完全対応】
+     * 【型宣言・PHPDoc完全対応】
      *
      * @return BelongsToMany
      */

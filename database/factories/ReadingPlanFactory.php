@@ -27,8 +27,8 @@ class ReadingPlanFactory extends Factory
     /**
      * テストデータのデフォルト定義を設定する
      *
-     * 💡【型宣言・PHPDoc完全対応】
-     * 💡【ネイティブEnum要件】初期状態として「Unread」を安全に注入
+     * 【型宣言・PHPDoc完全対応】
+     * 【ネイティブEnum要件】初期状態として「Unread」を安全に注入
      *
      * @return array<string, mixed>
      */

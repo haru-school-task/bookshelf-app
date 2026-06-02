@@ -15,11 +15,11 @@ return new class extends Migration
             $table->id();
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
             $table->string('title');
-            // ★この1行を新規追記！後から任意入力にできるよう nullable にしておきます
+            
             $table->string('title_kana')->nullable();
             $table->string('author');
 
-            // ★ここを修正！末尾に ->nullable() を追加して空でもOKにします [INDEX1]
+            
             $table->string('isbn')->nullable();
             $table->date('published_date')->nullable();
 

@@ -3,7 +3,6 @@
 namespace App\Console\Commands;
 
 use App\Models\ReadingPlan;
-use App\Enums\ReadingPlanStatus;
 use App\Notifications\ReminderNotification;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
@@ -39,7 +38,7 @@ class DailyPlanCheckCommand extends Command
             
             $expiredPlans = ReadingPlan::with(['user'])
                 ->where('target_date', '<', $today)
-                ->whereIn('status', [1, 2]) // 👈 ここを [1, 2] に変更して定義エラーを確実に回避します
+                ->whereIn('status', [1, 2])
                 ->get();
 
             $expiredPlans->map(function (ReadingPlan $plan): void {

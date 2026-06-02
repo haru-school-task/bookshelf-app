@@ -47,7 +47,7 @@ class ReviewSeeder extends Seeder
                     'book_id' => $book->id,
                     'user_id' => $reviewer->id,
                     'rating' => $rating,
-                    'comment' => $comments[$rating], // 評価に対応した簡潔な汎文言
+                    'comment' => $comments[$rating],
                 ]);
             }
         }

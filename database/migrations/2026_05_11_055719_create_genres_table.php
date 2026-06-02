@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('genres', function (Blueprint $table) {
             $table->id();
-            $table->string('name')->unique(); // あなたの美学：重複を許さない唯一無二の定義
+            $table->string('name')->unique();
             $table->timestamps();
         });
     }

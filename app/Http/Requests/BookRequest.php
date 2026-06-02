@@ -2,7 +2,6 @@
 
 namespace App\Http\Requests;
 
-use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
 class BookRequest extends FormRequest
@@ -18,37 +17,38 @@ class BookRequest extends FormRequest
     /**
      * Get the validation rules that apply to the request.
      *
-     * @return array<string, ValidationRule|array<mixed>|string>
+     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
      */
     public function rules(): array
     {
         return [
-            'title' => ['required', 'string', 'max:255'],
-            'author' => ['required', 'string', 'max:255'],
-            'genre_ids' => ['required', 'array'], // ジャンル選択は必須
-            'genre_ids.*' => ['exists:genres,id'], // 選ばれたIDがDBに存在するかチェック
-            'isbn' => ['nullable', 'string', 'max:13', 'unique:books,isbn,' . (is_object($this->book) ? $this->book->id : $this->book)], // 💡 オブジェクトでも文字列でも安全にIDを抽出して自分以外の重複を禁止
-
-            'description' => ['nullable', 'string', 'max:400'], // 解説文は400文字以内
-
+            'title' => ['required', 'string', 'max:100'],
+            'author' => ['required', 'string', 'max:50'],
+            'genre_ids' => ['required', 'array'],
+            'genre_ids.*' => ['exists:genres,id'],
+            'isbn' => ['nullable', 'string', 'max:13', 'unique:books,isbn,' . (is_object($this->book) ? $this->book->id : $this->book)],
+            'description' => ['nullable', 'string', 'max:400'],
             'title_kana' => ['nullable', 'string', 'max:255'],
-            'image_url' => ['nullable', 'string'],
+            'image_url' => ['nullable', 'string', 'max:2000'],
+            'display_image_url' => ['nullable', 'string', 'max:2000'],
         ];
     }
 
     /**
-     * 指示書要件：日本語のバリデーションメッセージを自分で設計して定義
+     * Get the error messages for the defined validation rules.
+     *
+     * @return array<string, string>
      */
     public function messages(): array
     {
         return [
             'title.required' => '書籍のタイトルは必須項目です。',
             'title.string' => 'タイトルは正しい文字形式で入力してください。',
-            'title.max' => 'タイトルは255文字以内で入力してください。',
+            'title.max' => 'タイトルは100文字以内で入力してください。',
 
             'author.required' => '著者名は必須項目です。',
             'author.string' => '著者名は正しい文字形式で入力してください。',
-            'author.max' => '著者名は255文字以内で入力してください。',
+            'author.max' => '著者名は50文字以内で入力してください。',
 
             'genre_ids.required' => 'ジャンルは少なくとも1つ以上選択してください。',
             'genre_ids.array' => 'ジャンルの選択形式が不正です。',
@@ -56,9 +56,13 @@ class BookRequest extends FormRequest
 
             'isbn.string' => 'ISBNは正しい文字形式で入力してください。',
             'isbn.unique' => 'このISBNは既に他の書籍で登録されています。',
+            'isbn.max' => 'ISBNは13文字以内で入力してください。',
 
-            'description.string' => '解説文は正しい文字形式で入力してください。',
-            'description.max' => '解説文は400文字以内で入力してください。',
+            'description.string' => '説明文は正しい文字形式で入力してください。',
+            'description.max' => '説明文は400文字以内で入力してください。',
+
+            'image_url.max' => '画像URLは2000文字以内で入力してください。',
+            'display_image_url.max' => '画像URLは2000文字以内で入力してください。',
 
             'image.image' => '指定されたファイルが画像ではありません。',
             'image.mimes' => '画像の種類はjpeg、png、jpgのいずれかを選択してください。',

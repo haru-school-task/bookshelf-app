@@ -12,26 +12,32 @@
                     @if($books->count() > 0)
                         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                             @foreach($books as $book)
-                                <div class="border rounded-lg p-4 hover:shadow-lg transition-shadow cursor-pointer">
-                                    @if($book->image_url)
-                                        <div class="flex justify-center items-center rounded overflow-hidden shadow-sm border border-gray-200 mb-2 bg-gray-50 mx-auto" style="width: 120px; height: 170px; max-width: 100%;">
-                                            <img src="{{ $book->image_url . '&printsec=frontcover&img=1&zoom=1' }}" 
-                                                 alt="{{ $book->title }}" 
-                                                 class="w-full h-full object-contain"
-                                                 onerror="this.onerror=null; this.src='https://placeholder.com';">
+                                <div class="border rounded-lg p-4 hover:shadow-lg transition-shadow cursor-pointer flex flex-col justify-between">
+                                    <div>
+                                        <div class="flex justify-center items-center rounded overflow-hidden shadow-sm border border-gray-200 mb-2 bg-gray-50 mx-auto" 
+                                             style="width: 120px; height: 170px; max-width: 100%;">
+                                            @if (!empty($book->image_url) && (str_contains($book->image_url, 'id=') || str_contains($book->image_url, 'isbn=')))
+                                                <img src="{{ $book->image_url . '&printsec=frontcover&img=1&zoom=1' }}" 
+                                                     alt="{{ $book->title }}" 
+                                                     class="w-full h-full object-contain"
+                                                     onerror="this.onerror=null; this.src='https://placehold.co';">
+                                            @else
+                                                <!-- 外部の画像サイトを一切使わず、Tailwindで綺麗なグレーの「No Image」枠を作ります -->
+                                                <div class="w-full h-full bg-gray-200 flex items-center justify-center text-gray-400 font-bold text-xs p-1 text-center">
+                                                    No Image
+                                                </div>
+                                            @endif
                                         </div>
-                                    @else
-                                        <div class="w-full h-48 bg-gray-200 rounded mb-4 flex items-center justify-center">
-                                            <span class="text-gray-400">No Image</span>
-                                        </div>
-                                    @endif
-                                    <h3 class="font-bold text-lg mb-2">
-                                        <a href="{{ route('books.show', $book->id)}}" class="text-blue-600 hover:underline">
-                                            {{ $book->title }}
-                                        </a>
-                                    </h3>
-                                    <p class="text-gray-600 mb-2">{{ $book->author }}</p>
-                                    <div class="flex items-center justify-between">
+
+                                        <h3 class="font-bold text-lg mb-2">
+                                            <a href="{{ route('books.show', $book->id)}}" class="text-blue-600 hover:underline">
+                                                {{ $book->title }}
+                                            </a>
+                                        </h3>
+                                        <p class="text-gray-600 mb-2">{{ $book->author }}</p>
+                                    </div>
+
+                                    <div class="flex items-center justify-between mt-2">
                                         <span class="text-sm text-gray-500">ISBN: {{ $book->isbn ?? '未登録' }}</span>
                                         <form action="{{ route('favorites.toggle', $book) }}" method="POST" novalidate>
                                             @csrf

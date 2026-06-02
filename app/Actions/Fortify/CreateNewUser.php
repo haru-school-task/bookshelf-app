@@ -15,7 +15,7 @@ class CreateNewUser implements CreatesNewUsers
     /**
      * 新しく登録されたユーザーのバリデーションを行い、データベースへ保存して返却します。
      * 
-     * 💡【型宣言・PHPDoc完全対応】
+     * 【型宣言・PHPDoc完全対応】
      *
      * @param array<string, string> $input 入力データ
      * @return User 作成されたユーザーインスタンス
@@ -23,7 +23,12 @@ class CreateNewUser implements CreatesNewUsers
     public function create(array $input): User
     {
         Validator::make($input, [
-            'name' => ['required', 'string', 'max:255'],
+            'name' => [
+                'required', 
+                'string', 
+                'max:50', 
+                'regex:/^[a-zA-Z\p{Hiragana}\p{Katakana}\p{Han}　 ]+$/u'
+            ],
             'email' => [
                 'required',
                 'string',
@@ -33,10 +38,11 @@ class CreateNewUser implements CreatesNewUsers
             ],
             'password' => $this->passwordRules(),
         ], [
-            // ★【要件完全一致】日本語バリデーションメッセージの設計
+            
             'name.required' => 'お名前は必須項目です。',
             'name.string' => 'お名前は正しい文字形式で入力してください。',
-            'name.max' => 'お名前は255文字以内で入力してください。',
+            'name.max' => 'お名前は50文字以内で入力してください。',
+            'name.regex' => 'お名前の形式が正しくありません。',
 
             'email.required' => 'メールアドレスは必須項目です。',
             'email.string' => 'メールアドレスは正しい文字形式で入力してください。',

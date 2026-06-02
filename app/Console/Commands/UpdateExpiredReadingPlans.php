@@ -12,12 +12,12 @@ use Illuminate\Support\Carbon;
  * Class UpdateExpiredReadingPlans
  *
  * 目標期日を超過した読書計画のステータス自動更新およびリマインダー通知を制御するバッチコマンド
- * 💡【コード品質担保：型宣言・PHPDoc完全対応】
+ * 【コード品質担保：型宣言・PHPDoc完全対応】
  */
 class UpdateExpiredReadingPlans extends Command
 {
     /**
-     * 職人がターミナルやスケジュールから呼び出す時の名前（コマンド名）
+     * ターミナルやスケジュールから呼び出す時の名前（コマンド名）
      *
      * @var string
      */
@@ -33,9 +33,9 @@ class UpdateExpiredReadingPlans extends Command
     /**
      * バッチ処理の本体ロジック
      *
-     * 💡【型宣言・PHPDoc完全対応】
-     * 💡【Collectionメソッド活用】foreachを徹底排除し、宣言的で可読性の高いコードを記述
-     * 💡 引数が無いため @param は不要、戻り値の @return のみ厳密に記載
+     * 【型宣言・PHPDoc完全対応】
+     * 【Collectionメソッド活用】foreachを徹底排除し、宣言的で可読性の高いコードを記述
+     *  引数が無いため @param は不要、戻り値の @return のみ厳密に記載
      */
     public function handle(): int
     {

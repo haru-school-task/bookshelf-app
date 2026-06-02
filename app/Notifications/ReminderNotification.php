@@ -2,7 +2,7 @@
 
 namespace App\Notifications;
 
-use App\Models\ReadingPlan; // 👈 ここを Plan から ReadingPlan に修正
+use App\Models\ReadingPlan;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Notification;
 
@@ -16,7 +16,7 @@ class ReminderNotification extends Notification
      * @param ReadingPlan $plan 読書計画モデルインスタンス
      */
     public function __construct(
-        protected ReadingPlan $plan // 👈 受け取る型を ReadingPlan に修正
+        protected ReadingPlan $plan 
     ) {}
 
     /**

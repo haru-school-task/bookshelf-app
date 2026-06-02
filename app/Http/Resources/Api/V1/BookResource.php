@@ -21,21 +21,21 @@ class BookResource extends JsonResource
             'isbn' => $this->isbn,
             'description' => $this->description,
             'image_url' => $this->image_url,
-            // ★要件：各書籍にジャンル情報を含める
+            
             'genres' => GenreResource::collection($this->whenLoaded('genres')),
-            // ★要件：平均評点（レビューがなければ0.0）
+            
             'average_rating' => (float) ($this->reviews_avg_rating ?? 0),
-            // ★要件：レビュー件数
+            
             'reviews_count' => (int) ($this->reviews_count ?? 0),
 
-            // ★【新規追記！】AP02（詳細API）専用のレビュー情報パズル [INDEX1]
+            
             'reviews' => $this->whenLoaded('reviews', function () {
                 return $this->reviews->map(function ($review) {
                     return [
-                        'user_name' => $review->user ? $review->user->name : '名無しユーザー', // 投稿者名
-                        'rating' => (int) $review->rating,                                // 評価
-                        'comment' => $review->comment,                                     // コメント
-                        'created_at' => $review->created_at ? $review->created_at->toIso8601String() : null, // 投稿日時
+                        'user_name' => $review->user ? $review->user->name : '名無しユーザー', 
+                        'rating' => (int) $review->rating,                                
+                        'comment' => $review->comment,                                     
+                        'created_at' => $review->created_at ? $review->created_at->toIso8601String() : null,
                     ];
                 });
             }),

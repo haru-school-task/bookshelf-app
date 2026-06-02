@@ -60,3 +60,8 @@ Route::middleware(['auth'])->group(function () {
 
 
 Route::get('/books/{book}', [BookController::class, 'show'])->name('books.show');
+
+
+Route::post('/register', [\Laravel\Fortify\Http\Controllers\RegisteredUserController::class, 'store'])
+    ->middleware(['guest:'.config('fortify.guard'), 'throttle:register']);
+

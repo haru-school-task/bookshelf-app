@@ -61,7 +61,14 @@
 
     @push('scripts')
         <script>
-            document.getElementById('fetch-btn').addEventListener('click', async function () {
+            document.getElementById('fetch-btn').addEventListener('click', async function (e) {
+                // 連打によるイベントの連続発生とブラウザの待機列への追加を根本から即座に遮断
+                e.preventDefault();
+                e.stopPropagation();
+
+                // すでにボタンが無効化されている（検索中）の場合は処理を完全にスルーする
+                if (this.disabled) return;
+
                 const isbn = document.getElementById('isbn-search').value.trim();
                 const errorEl = document.getElementById('fetch-error');
                 const successEl = document.getElementById('fetch-success');
@@ -81,17 +88,24 @@
 
                 try {
                     const response = await fetch(`/books/isbn/${isbn}`, {
-
                         headers: {
                             'Accept': 'application/json',
                         },
                     });
+
+                    // 💡 1. 通信ステータスが正常（200番台）ではない場合は、強制的にエラー（catch）へ飛ばす
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+
                     const data = await response.json();
 
-                    if (data.error) {
-                        errorEl.textContent = data.error;
+                    // 💡 2. データの中に書籍情報（itemsなど）が1件も入っていない、またはエラーがある場合
+                    if (data.error || !data.title) {
+                        errorEl.textContent = data.error || '書籍情報が見つかりませんでした。';
                         errorEl.classList.remove('hidden');
                     } else {
+                        // 3. 本当に正しいデータが取れた時だけ、画面に値をセットする
                         document.getElementById('title').value = data.title || '';
                         document.getElementById('author').value = data.author || '';
                         document.getElementById('isbn').value = isbn;
@@ -115,11 +129,10 @@
                 } catch (e) {
                     errorEl.textContent = '通信エラーが発生しました。';
                     errorEl.classList.remove('hidden');
-                } finally {
-                    this.disabled = false;
-                    labelEl.textContent = '検索';
                 }
+
             });
         </script>
+
     @endpush
 </x-app-layout>

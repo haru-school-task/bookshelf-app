@@ -2,7 +2,7 @@
 
 namespace App\Console;
 
-use Illuminate\Console\Scheduling\Schedule; // 👈 元から入っているか確認
+use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
 
 class Kernel extends ConsoleKernel

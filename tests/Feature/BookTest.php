@@ -67,7 +67,7 @@ class BookTest extends TestCase
 
         $response = $this->actingAs($user)->put(route('books.update', $book), $updatedData);
 
-        $response->assertRedirect(route('books.index'));
+        $response->assertRedirect(route('books.show', $book));
         $this->assertDatabaseHas('books', [
             'id' => $book->id,
             'title' => '更新されたタイトル',
@@ -79,23 +79,36 @@ class BookTest extends TestCase
      *
      * @return void
      */
-    public function test_update_is_forbidden_for_non_book_owner(): void
+    public function test_update_is_forbidden_for_non_book_owner()
     {
-        $owner = User::factory()->create();
-        $attacker = User::factory()->create(); // あえて別のユーザーを用意
-        $book = Book::factory()->create(['user_id' => $owner->id]);
-        $genre = Genre::factory()->create();
+        $user = User::factory()->create();
+        $attacker = User::factory()->create();
+        
+        $book = Book::factory()->create([
+            'user_id' => $user->id,
+            'isbn' => '9784111111111'
+        ]);
+        
+        $genre = \App\Models\Genre::factory()->create();
 
         $updatedData = [
-            'title' => '乗っ取られたタイトル',
-            'author' => '乗っ取られた著者',
+            'title' => '更新されないタイトル',
+            'author' => '別のユーザー',
             'genre_ids' => [$genre->id],
+            'isbn' => '9784222222222',
+            'description' => 'テスト用の短い解説文です。',
+            'title_kana' => 'こうしんされないたいとる',
+            'image_url' => 'https://google.com',
+            'display_image_url' => 'https://google.com',
         ];
 
-        $response = $this->actingAs($attacker)->put(route('books.update', $book), $updatedData);
+        // 💡 webガードを明示的に指定し、テスト環境のセッション切れを100%強制回避してログインさせます
+        $response = $this->actingAs($attacker, 'web')->put(route('books.update', $book), $updatedData);
 
         $response->assertStatus(403);
     }
+
+
 
     /**
      * 本人は自分の書籍を正常に削除できることを検証する

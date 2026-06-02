@@ -13,7 +13,7 @@ use Laravel\Sanctum\HasApiTokens;
  * Class User
  *
  * ユーザー認証、認可、および各モデル（書籍、レビュー、お気に入り、いいね）とのリレーションを管理する中心モデルクラス
- * 💡【コード品質担保：型宣言・PHPDoc完全対応】
+ * 【コード品質担保：型宣言・PHPDoc完全対応】
  * 
  * @package App\Models
  */
@@ -23,7 +23,7 @@ class User extends Authenticatable
 
     /**
      * 複数代入を許可する属性（ホワイトリスト）
-     * 💡【大量代入（Mass Assignment）の脆弱性を防ぐ絶対防御壁】
+     * 【大量代入（Mass Assignment）の脆弱性を防ぐ絶対防御壁】
      *
      * @var array<int, string>
      */
@@ -45,7 +45,7 @@ class User extends Authenticatable
 
     /**
      * 属性のキャスト（型変換）定義
-     * 💡【Laravel 10仕様】プロパティ形式でキャストを定義
+     * 【Laravel 10仕様】プロパティ形式でキャストを定義
      *
      * @var array<string, string>
      */
@@ -56,7 +56,7 @@ class User extends Authenticatable
 
     /**
      * 自分が登録した複数の書籍（Book）との1対多リレーションを定義
-     * 💡【型宣言・PHPDoc完全対応】引数が無いため @return のみ厳密に記載
+     * 【型宣言・PHPDoc完全対応】引数が無いため @return のみ厳密に記載
      *
      * @return HasMany
      */
@@ -67,7 +67,7 @@ class User extends Authenticatable
 
     /**
      * 自分が投稿した複数のレビュー（Review）との1対多リレーションを定義
-     * 💡【型宣言・PHPDoc完全対応】
+     * 【型宣言・PHPDoc完全対応】
      *
      * @return HasMany
      */
@@ -78,7 +78,7 @@ class User extends Authenticatable
 
     /**
      * 自分がお気に入りに登録した複数の書籍（Book）との多対多リレーションを定義
-     * 💡【型宣言・PHPDoc完全対応】
+     * 【型宣言・PHPDoc完全対応】
      *
      * @return BelongsToMany
      */
@@ -89,7 +89,7 @@ class User extends Authenticatable
 
     /**
      * 自分が「いいね」した複数のレビュー（Review）との多対多リレーションを定義
-     * 💡【型宣言・PHPDoc完全対応】
+     * 【型宣言・PHPDoc完全対応】
      *
      * @return BelongsToMany
      */

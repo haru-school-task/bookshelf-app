@@ -7,18 +7,15 @@ use App\Http\Requests\ReviewRequest;
 use App\Models\Book;
 use App\Models\Genre;
 use App\Models\Review;
-use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Http;
 use Illuminate\View\View;
 
 /**
  * Class BookController
  *
  * 書籍管理機能（一覧、検索、登録、編集、更新、削除）の制御を行うコントローラー
- * 💡【コード品質担保：型宣言・PHPDoc、コントローラーの責務に専念】
+ * 【コード品質担保：型宣言・PHPDoc】
  *  
  * @package App\Http\Controllers
  */
@@ -26,13 +23,19 @@ class BookController extends Controller
 {
     /**
      * 書籍一覧画面を表示（検索・フィルタ・ソート対応)
-     * 💡【型宣言・PHPDoc完全対応】【Eager LoadingによるN+1問題の完全回避】
      *
      * @param Request $request
      * @return View
      */  
     public function index(Request $request): View
     {
+        
+        $request->validate([
+            'keyword' => ['nullable', 'string', 'max:100'],
+        ], [
+            'keyword.max' => '検索キーワードは100文字以内で入力してください。',
+        ]);
+
         $query = Book::with('genres');
 
         if ($request->filled('keyword')) {
@@ -84,7 +87,7 @@ class BookController extends Controller
 
     /**
      * 書籍登録画面を表示（応用版PG03）
-     * 💡【引数無しの正しいPHPDoc構造へ調整】
+     * 【引数無しの正しいPHPDoc構造へ調整】
      * 
      * @return View 
      */
@@ -97,7 +100,7 @@ class BookController extends Controller
     
     /**
      * 書籍を新規登録
-     * 💡【型宣言・PHPDoc完全対応】名前空間のタイポを厳密に補正
+     * 【型宣言・PHPDoc完全対応】名前空間のタイポを厳密に補正
      * 
      * @param \App\Http\Requests\BookRequest $request
      * @return \Illuminate\Http\RedirectResponse
@@ -131,7 +134,7 @@ class BookController extends Controller
 
     /**
      * 書籍詳細画面を表示
-     * 💡【型宣言・PHPDoc完全対応】
+     * 【型宣言・PHPDoc完全対応】
      * 
      * @param \App\Models\Book $book
      * @return \Illuminate\View\View
@@ -145,7 +148,7 @@ class BookController extends Controller
 
     /**
      * 書籍編集画面を表示
-     * 💡【型宣言・PHPDoc完全対応】
+     * 【型宣言・PHPDoc完全対応】
      * 
      * @param \App\Models\Book $book
      * @return \Illuminate\View\View
@@ -159,33 +162,45 @@ class BookController extends Controller
     }
 
     /**
-     * 書籍情報を更新
-     * 💡【型宣言・PHPDoc完全対応】引数のRequest型をBookRequestへ厳密に同期
-     * 
-     * @param \App\Http\Requests\BookRequest $request
-     * @param \App\Models\Book $book
-     * @return \Illuminate\Http\RedirectResponse
+     * 書籍情報を更新（保存処理）
+     *
+     * @param BookRequest $request
+     * @param Book $book
+     * @return RedirectResponse
      */
     public function update(BookRequest $request, Book $book): RedirectResponse
     {
-        $this->authorize('update', $book);
+        
+        \Illuminate\Support\Facades\Gate::authorize('update', $book);
+
         $validated = $request->validated();
 
+        $imageUrl = $request->input('image_url');
+        $titleKana = $request->input('title_kana');
+
+        if ($imageUrl) {
+            $imageUrl = strtok($imageUrl, '&');
+        }
+
         $book->update([
-            'title'       => $validated['title'],
-            'author'      => $validated['author'],
-            'isbn'        => $validated['isbn'] ?? null,
-            'description' => $validated['description'] ?? null,
+            'title'          => $validated['title'],
+            'title_kana'     => ! empty($titleKana) ? $titleKana : $validated['title'],
+            'author'         => $validated['author'],
+            'isbn'           => $validated['isbn'] ?? null,
+            'published_date' => $request->input('published_date') ?? null,
+            'description'    => $validated['description'] ?? null,
+            'image_url'      => $imageUrl,
         ]);
-        
+
         $book->genres()->sync($validated['genre_ids']);
 
-        return redirect()->route('books.index')->with('success', '書籍情報を更新しました。');
+        return redirect()->route('books.show', $book)->with('success', '書籍情報を更新しました。');
     }
+
 
     /**
      * 書籍を削除
-     * 💡【型宣言・PHPDoc完全対応】DBファサードの名前空間をグローバル指定してクラッシュを完全回避
+     * 【型宣言・PHPDoc完全対応】DBファサードの名前空間をグローバル指定してクラッシュを完全回避
      * 
      * @param \App\Models\Book $book
      * @return \Illuminate\Http\RedirectResponse
@@ -204,7 +219,7 @@ class BookController extends Controller
 
     /**
      * お気に入りの追加・解除（トグル）
-     * 💡【型宣言・PHPDoc完全対応】
+     * 【型宣言・PHPDoc完全対応】
      * 
      * @param \App\Models\Book $book
      * @return \Illuminate\Http\RedirectResponse
@@ -218,7 +233,7 @@ class BookController extends Controller
 
     /**
      * レビューを投稿
-     * 💡【型宣言・PHPDoc完全対応】名前空間のタイポを厳密に補正
+     * 【型宣言・PHPDoc完全対応】名前空間のタイポを厳密に補正
      * 
      * @param \App\Http\Requests\ReviewRequest $request
      * @param \App\Models\Book $book
@@ -241,7 +256,7 @@ class BookController extends Controller
 
     /**
      * レビューへの「いいね」
-     * 💡【型宣言・PHPDoc完全対応】引数のReview型を正しい名前空間へ補正
+     * 【型宣言・PHPDoc完全対応】引数のReview型を正しい名前空間へ補正
      * 
      * @param \App\Models\Review $review
      * @return \Illuminate\Http\RedirectResponse
@@ -255,7 +270,7 @@ class BookController extends Controller
 
     /**
      * レビュー編集画面を表示
-     * 💡【型宣言・PHPDoc完全対応】
+     * 【型宣言・PHPDoc完全対応】
      * 
      * @param \App\Models\Review $review
      * @return \Illuminate\View\View
@@ -269,7 +284,7 @@ class BookController extends Controller
 
     /**
      * レビューの更新処理
-     * 💡【型宣言・PHPDoc完全対応】引数の型とアノテーションの名前空間を厳密に同期
+     * 【型宣言・PHPDoc完全対応】引数の型とアノテーションの名前空間を厳密に同期
      * 
      * @param \App\Http\Requests\ReviewRequest $request
      * @param \App\Models\Review $review
@@ -285,7 +300,7 @@ class BookController extends Controller
 
     /**
      * レビューの削除処理
-     * 💡【型宣言・PHPDoc完全対応】
+     * 【型宣言・PHPDoc完全対応】
      * 
      * @param \App\Models\Review $review
      * @return \Illuminate\Http\RedirectResponse
@@ -300,8 +315,8 @@ class BookController extends Controller
 
     /**
      * お気に入り書籍一覧を表示
-     * 💡【型宣言・PHPDoc完全対応】
-     * 💡【Eager Loading / withCount による N+1 問題の完全回避】
+     * 【型宣言・PHPDoc完全対応】
+     * 【Eager Loading / withCount による N+1 問題の完全回避】
      * 
      * @return \Illuminate\View\View
      */
@@ -316,15 +331,15 @@ class BookController extends Controller
 
     /**
      * ランキング画面を表示
-     * 💡【型宣言・PHPDoc完全対応】
+     * 【型宣言・PHPDoc完全対応】
      * 
      * @return \Illuminate\View\View
      */
     public function ranking(): \Illuminate\View\View
     {
-        $rankedBooks = Book::has('reviews') // レビューがある書籍だけに絞る
-            ->withAvg('reviews', 'rating') // 平均評点を計算
-            ->orderBy('reviews_avg_rating', 'desc') // 評価が高い順
+        $rankedBooks = Book::has('reviews')
+            ->withAvg('reviews', 'rating')
+            ->orderBy('reviews_avg_rating', 'desc')
             ->limit(10)
             ->get();
 
@@ -334,8 +349,8 @@ class BookController extends Controller
 
     /**
      * 外部API（Google Books）からISBNで書籍情報を取得してJSONで返す
-     * 💡【型宣言・PHPDoc完全対応】
-     * 💡【デッドコードの完全粉砕】前半のガードと後半の画像・出版日データ抽出ロジックを一本に統合
+     * 【型宣言・PHPDoc完全対応】
+     * 【前半のガードと後半の画像・出版日データ抽出ロジックを一本に統合】
      * 
      * @param string $isbn
      * @return \Illuminate\Http\JsonResponse

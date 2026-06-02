@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->foreignId('review_id')->constrained()->onDelete('cascade');
-            // 一人が一つのレビューに「いいね」は一回だけ
+            
             $table->unique(['user_id', 'review_id']);
             $table->timestamps();
         });

@@ -2,7 +2,6 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Support\Facades\Http;
 use App\Models\Book;
 use App\Models\Genre;
 use App\Models\User;
@@ -43,22 +42,21 @@ class BookSeeder extends Seeder
                 }
             }
 
-            // ★【要件】firstOrCreate() から create() に変更
-            // ★【要件】user_id を User::first() から $users->random()->id によるランダム割当に変更
+            
             $book = Book::create([
                 'user_id' => $users->random()->id,
                 'title' => $data['title'],
                 'title_kana' => $data['title_kana'],
                 'author' => $data['author'],
                 'isbn' => $data['isbn'],
-                'published_date' => $data['date'], // ★【要件】前行程で追加した published_date を流し込む
+                'published_date' => $data['date'],
                 'description' => $data['title'].'の解説文がここに入ります。',
-                'image_url' => $imageUrl, // ★重複を防いだ正しい個別URLが保存されます
+                'image_url' => $imageUrl,
             ]);
 
             $genreIds = Genre::whereIn('name', $data['genres'])->pluck('id');
 
-            // ★【要件】genres()->sync() から genres()->attach() に変更
+            
             $book->genres()->attach($genreIds);
         }
 

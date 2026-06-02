@@ -19,18 +19,23 @@
                 </div>
             @endif
 
-            <!-- 検索フォーム -->
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg mb-6">
                 <div class="p-6 text-gray-900">
                     <form action="{{ route('books.index') }}" method="GET" class="space-y-4" novalidate>
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                             <div>
                                 <label for="keyword" class="block text-sm font-medium text-gray-700 mb-1">キーワード</label>
-                                <input type="text" name="keyword" id="keyword" value="{{ request('keyword') }}" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" placeholder="タイトル・著者で検索">
+                                <input type="text" name="keyword" id="keyword" value="{{ request('keyword') }}"
+                                    class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                                    placeholder="タイトル・著者で検索">
+                                @error('keyword')
+                                    <p class="text-sm text-red-600 mt-1">{{ $message }}</p>
+                                @enderror
                             </div>
                             <div>
                                 <label for="genre" class="block text-sm font-medium text-gray-700 mb-1">ジャンル</label>
-                                <select name="genre" id="genre" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                <select name="genre" id="genre"
+                                    class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                                     <option value="">すべて</option>
                                     @foreach($genres ?? [] as $genre)
                                         <option value="{{ $genre->id }}" {{ request('genre') == $genre->id ? 'selected' : '' }}>
@@ -41,7 +46,8 @@
                             </div>
                             <div>
                                 <label for="sort" class="block text-sm font-medium text-gray-700 mb-1">並び順</label>
-                                <select name="sort" id="sort" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                <select name="sort" id="sort"
+                                    class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                                     <option value="newest" {{ request('sort') == 'newest' ? 'selected' : '' }}>新しい順</option>
                                     <option value="oldest" {{ request('sort') == 'oldest' ? 'selected' : '' }}>古い順</option>
                                     <option value="rating" {{ request('sort') == 'rating' ? 'selected' : '' }}>評価順</option>
@@ -79,34 +85,37 @@
                     @else
                         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                             @foreach($books as $book)
-                                <a href="{{ route('books.show', $book) }}" class="block border rounded-lg p-4 shadow hover:shadow-lg transition cursor-pointer">
-                                    @if($book->image_url)
-                                        <!-- ⭕【一覧画面専用：周囲の脆弱なレイアウトを絶対に崩さない鉄壁の画像枠】 -->
-                                        <!-- 幅と高さをスクールのカードの限界値（例えば w-24 h-36 など、あるいは固定px）に -->
-                                        <!-- 完全に閉じ込め、object-contain / object-cover で中身だけを綺麗にフィットさせます -->
-                                        <div class="flex justify-center items-center rounded overflow-hidden shadow-sm border border-gray-200 mb-2 bg-gray-50 mx-auto" style="width: 120px; height: 170px; max-width: 100%;">
-                                            <img src="{{ $book->image_url . '&printsec=frontcover&img=1&zoom=1' }}" 
-                                                 alt="{{ $book->title }}" 
-                                                 class="w-full h-full object-contain"
-                                                 onerror="this.onerror=null; this.src='https://placeholder.com';">
+                                <a href="{{ route('books.show', $book) }}" class="block border rounded-lg p-4 shadow hover:shadow-lg transition cursor-pointer flex flex-col justify-between">
+                                    <div>
+                                        <div class="flex justify-center items-center rounded overflow-hidden shadow-sm border border-gray-200 mb-4 bg-gray-50 mx-auto"
+                                            style="width: 120px; height: 170px; max-width: 100%;">
+                                            @if (!empty($book->image_url) && (str_contains($book->image_url, 'id=') || str_contains($book->image_url, 'isbn=')))
+                                                <img src="{{ $book->image_url . '&printsec=frontcover&img=1&zoom=1' }}"
+                                                     alt="{{ $book->title }}" class="w-full h-full object-contain"
+                                                     onerror="this.onerror=null; this.src='https://placehold.co';">
+                                            @else
+                                                <!-- 外部の画像サイトを一切使わず、Tailwindで綺麗なグレーの「No Image」枠を作ります -->
+                                                <div class="w-full h-full bg-gray-200 flex items-center justify-center text-gray-400 font-bold text-xs p-1 text-center">
+                                                    No Image
+                                                </div>
+                                            @endif
+
                                         </div>
-                                    @else
-                                        <div class="w-full h-48 bg-gray-200 flex items-center justify-center mb-4 rounded">
-                                            <span class="text-gray-500">画像なし</span>
+
+                                        <h3 class="font-bold text-lg mb-2 text-blue-600 hover:text-blue-800">
+                                            {{ $book->title }}
+                                        </h3>
+                                        <p class="text-gray-600 text-sm mb-2">{{ $book->author }}</p>
+                                        <div class="flex flex-wrap gap-1 mb-2">
+                                            @foreach($book->genres as $genre)
+                                                <span class="bg-gray-200 text-gray-700 text-xs px-2 py-1 rounded">{{ $genre->name }}</span>
+                                            @endforeach
                                         </div>
-                                    @endif
-                                    <h3 class="font-bold text-lg mb-2 text-blue-600 hover:text-blue-800">
-                                        {{ $book->title }}
-                                    </h3>
-                                    <p class="text-gray-600 text-sm mb-2">{{ $book->author }}</p>
-                                    <div class="flex flex-wrap gap-1 mb-2">
-                                        @foreach($book->genres as $genre)
-                                            <span class="bg-gray-200 text-gray-700 text-xs px-2 py-1 rounded">{{ $genre->name }}</span>
-                                        @endforeach
                                     </div>
+                                    
                                     @if($book->reviews_avg_rating)
-                                        <div class="flex items-center">
-                                            <span class="text-yellow-500">
+                                        <div class="flex items-center mt-2">
+                                            <span class="text-yellow-500 text-sm">
                                                 @for($i = 1; $i <= 5; $i++)
                                                     @if($i <= round($book->reviews_avg_rating))
                                                         ★
@@ -115,15 +124,12 @@
                                                     @endif
                                                 @endfor
                                             </span>
-                                            <span class="text-sm text-gray-500 ml-2">
-                                                ({{ number_format($book->reviews_avg_rating, 1) }})
-                                            </span>
+                                            <span class="text-gray-500 text-xs ml-1">({{ number_format($book->reviews_avg_rating, 1) }})</span>
                                         </div>
                                     @endif
                                 </a>
                             @endforeach
                         </div>
-
                         <div class="mt-6">
                             {{ $books->links() }}
                         </div>

@@ -13,7 +13,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * Class Book
  *
  * 書籍データおよび各モデル（ユーザー、ジャンル、レビュー）とのリレーションを管理するモデルクラス
- * 💡【コード品質担保：型宣言・PHPDoc完全対応】
+ * 【コード品質担保：型宣言・PHPDoc完全対応】
  * 
  * @package App\Models
  */
@@ -23,7 +23,7 @@ class Book extends Model
 
     /**
      * 複数代入を許可する属性（ホワイトリスト）
-     * 💡【大量代入（Mass Assignment）の脆弱性を防ぐ絶対防御壁】
+     * 【大量代入（Mass Assignment）の脆弱性を防ぐ防御壁】
      *
      * @var array<int, string>
      */
@@ -40,7 +40,7 @@ class Book extends Model
 
     /**
      * 書籍の登録主（User）とのリレーションを定義
-     * 💡【型宣言・PHPDoc完全対応】
+     * 【型宣言・PHPDoc完全対応】
      *
      * @return BelongsTo
      */
@@ -81,8 +81,8 @@ class Book extends Model
 
     /**
      * 属性のキャスト（型変換）定義を返却
-     * 💡【Laravel 10 / 11仕様に完全適合】
-     * 💡【Enum連携】ステータスが存在する場合、自動的に正規の ReadingPlanStatus オブジェクトへ安全にキャストします
+     * 【Laravel 10 / 11仕様に完全適合】
+     * 【Enum連携】ステータスが存在する場合、自動的に正規の ReadingPlanStatus オブジェクトへ安全にキャストします
      *
      * @return array<string, string>
      */

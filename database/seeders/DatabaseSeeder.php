@@ -16,9 +16,9 @@ class DatabaseSeeder extends Seeder
             GenreSeeder::class,
             BookSeeder::class,
             ReadingPlanSeeder::class,
-            ReviewSeeder::class,     // 4番目
-            FavoriteSeeder::class,   // 5番目
-            ReviewLikeSeeder::class, // 6番目
+            ReviewSeeder::class,     
+            FavoriteSeeder::class,   
+            ReviewLikeSeeder::class, 
         ]);
     }
 }

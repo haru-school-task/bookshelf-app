@@ -15,9 +15,9 @@ return new class extends Migration
             $table->id();
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->foreignId('book_id')->constrained()->onDelete('cascade');
-            $table->integer('rating'); // 1-5の数値
+            $table->integer('rating');
             $table->text('comment');
-            // 1ユーザー1書籍1レビューの一意制約
+            
             $table->unique(['user_id', 'book_id']);
             $table->timestamps();
         });

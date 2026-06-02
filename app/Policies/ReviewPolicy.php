@@ -36,7 +36,7 @@ class ReviewPolicy
      */
     public function update(User $user, Review $review): bool
     {
-        // レビューの投稿者 ID と、現在のユーザー ID が一致するかチェック
+        
         return $user->id === $review->user_id;
     }
 

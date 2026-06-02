@@ -12,8 +12,8 @@ class ReportController extends Controller
     /**
      * マイ読書レポート画面を表示します（応用版修正対応）。
      * 
-     * 💡【型宣言・PHPDoc完全対応】
-     * 💡【Collectionメソッド徹底活用】foreachを完全排除した最高品質の宣言的集計ロジック
+     * 【型宣言・PHPDoc完全対応】
+     * 【Collectionメソッド徹底活用】foreachを完全排除した最高品質の宣言的集計ロジック
      * 
      * @param Request $request リクエストインスタンス
      * @return View レポート画面のビューレスポンス

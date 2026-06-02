@@ -32,6 +32,17 @@ Bladeテンプレートを使用した従来のWeb画面機能と、外部アプ
 ・Google Books API連携: 通信エラーを防ぐため、Http::fake() を用いた堅牢なモックテストを実装。
 ・品質担保: 画面操作からAPI認証、異常系バリデーションまで、全21テスト（68アサーション）がPASS（合格）。
 
+5. 品質管理とセキュリティ（テストカバレッジ82%達成）
+・応用機能の実装に伴い、Featureテストを中心としたクリーンな自動テストを徹底。スクール要件（80%以上）を上回る**カバレッジ82%**を達成。
+
+6. 堅牢なフロント・バックエンド制御
+・会員登録や書籍登録、検索窓の全フォームに対して厳密な文字数バリデーションと記号排除（正規表現）を適用。ネットワーク遅延（3G環境など）を想定したJavaScriptによる二重送信（連打）防止や、XSS対策、エラー発生時の自前No Image（HTML/CSS制御）切り替えなど、画面崩れを防ぐエラーハンドリングを実装しています。
+
+7. Google Books API 連携と画像の安定取得
+・Google Books APIから取得できる画像URLは、一部の環境やツールにおいてセキュリティ制限によるリンク切れや非表示トラブルが発生するリスクがあります。
+・本システムでは、ダミーデータ（Seeder）および手動登録時の双方において、APIから取得した固有番号（Volume ID / ISBN）のみを厳密に抽出・正規化してデータベースへ保存。画面出力（Blade）時に正しいパラメータ群（`&printsec=frontcover&img=1&zoom=1`）を動的に組み立てて結合する方式を採用し、あらゆる環境で確実に実在する書籍の表紙画像を表示できる仕組みを構築しました。
+
+
 ---
 
 
@@ -150,7 +161,7 @@ Docker環境（Laravel Sail）を使用して、以下の手順でローカル�
 
 ```bash
 
-git clone [私のリポジトリURL] bookshelf-app
+git clone https://github.com/haru-school-task/bookshelf-app.git 
 
 ```
 
@@ -158,7 +169,7 @@ git clone [私のリポジトリURL] bookshelf-app
 
 ```bash
 
-cd bookshelf-app
+cd 【クローンされたアプリのフォルダ名】
 
 ```
 
@@ -181,12 +192,17 @@ cp .env.example .env
 ```
 .env ファイルを開き、データベース接続情報を書き換えます。
 
-DB_CONNECTION=mysql
-DB_HOST=mysql
-DB_PORT=3306
-DB_DATABASE=laravel
-DB_USERNAME=sail
-DB_PASSWORD=password
+> DB_CONNECTION=mysql
+
+> DB_HOST=mysql
+
+> DB_PORT=3306
+
+> DB_DATABASE=laravel
+
+> DB_USERNAME=sail
+
+> DB_PASSWORD=password
 
 重要: DB_HOST は localhost や 127.0.0.1 ではなく、Dockerコンテナ名である mysql を指定します。
 
@@ -215,19 +231,19 @@ DB_PASSWORD=password
 
 ```
 
-### 8. Vite開発サーバーの起動（常時起動）
-
-```bash
-
-./vendor/bin/sail npm run dev
-
-```
-
-### 9.マイグレーションとテストデータの投入
+### 8.マイグレーションとテストデータの投入
 
 ```bash
 
 ./vendor/bin/sail artisan migrate:fresh --seed
+
+```
+
+### 9. Vite開発サーバーの起動（常時起動）
+
+```bash
+
+./vendor/bin/sail npm run dev
 
 ```
 
@@ -268,7 +284,7 @@ DB_PASSWORD=password
 
 本アプリケーションは、ブルートフォースアタック等の不正アクセス対策として、Laravel Fortify標準のレートリミッター（Rate Limiter）が正常に稼働しています。
 
-📝 挙動と仕様について発生条件: 短時間に連続してログインや会員登録の試行（リピート要請・連打等）を行った場合、セキュリティ機能が作動します。
+📝 挙動と仕様について発生条件:1分間に10回連続してログインや会員登録の試行（リピート要請・連打等）を行った場合、セキュリティ機能が作動します。
 
 ・制限時の挙動: 「429 Too Many Requests」が返され、対象IP/アカウントからのアクセスが一時的にロックアウトされます。これは脆弱性を防御するための正常な仕様（安全装置）です。
 

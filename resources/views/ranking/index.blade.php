@@ -16,24 +16,23 @@
                             @foreach($rankedBooks as $index => $book)
                                 <a href="{{ route('books.show', $book) }}" class="block hover:bg-gray-50 transition rounded-lg">
                                     <div class="flex items-center p-4 border rounded-lg {{ $index < 3 ? 'border-yellow-300 bg-yellow-50' : 'border-gray-200' }}">
-                                        <!-- 順位 -->
                                         <div class="flex-shrink-0 w-12 h-12 flex items-center justify-center rounded-full {{ $index === 0 ? 'bg-yellow-400 text-white' : ($index === 1 ? 'bg-gray-300 text-white' : ($index === 2 ? 'bg-amber-600 text-white' : 'bg-gray-100 text-gray-600')) }} font-bold text-xl mr-4">
                                             {{ $index + 1 }}
                                         </div>
 
-                                        <!-- 書籍画像（サイズ固定化とバグ修正） -->
                                         <div class="flex-shrink-0 w-16 h-20 mr-4 bg-gray-50 border border-gray-200 rounded overflow-hidden shadow-sm flex items-center justify-center">
-                                            @if($book->image_url)
+                                            @if (!empty($book->image_url) && (str_contains($book->image_url, 'id=') || str_contains($book->image_url, 'isbn=')))
                                                 <img src="{{ $book->image_url . '&printsec=frontcover&img=1&zoom=1' }}" 
-                                                         alt="{{ $book->title }}" 
-                                                         class="w-full h-full object-contain"
-                                                         onerror="this.onerror=null; this.src='https://placeholder.com';">
+                                                     alt="{{ $book->title }}" 
+                                                     class="w-full h-full object-contain"
+                                                     onerror="this.onerror=null; this.src='https://placehold.co';">
                                             @else
-                                                <span class="text-gray-400 text-xs text-center p-1 leading-tight">No Image</span>
+                                                <div class="w-full h-full bg-gray-200 flex items-center justify-center text-gray-400 font-bold text-[10px] leading-tight text-center p-0.5">
+                                                    No<br>Image
+                                                </div>
                                             @endif
                                         </div>
 
-                                        <!-- 書籍情報（flex-growで中央エリアを最大化） -->
                                         <div class="flex-grow min-w-0">
                                             <h3 class="text-lg font-semibold text-blue-600 hover:text-blue-800 truncate">
                                                 {{ $book->title }}
@@ -58,7 +57,6 @@
                                             </div>
                                         </div>
 
-                                        <!-- 評価バッジ（幅を固定し、改行と潰れを絶対に防止） -->
                                         <div class="flex-shrink-0 w-24 ml-4 border-l border-gray-100 pl-4">
                                             <div class="text-center">
                                                 <div class="text-2xl font-bold {{ $index < 3 ? 'text-yellow-500' : 'text-gray-600' }}">

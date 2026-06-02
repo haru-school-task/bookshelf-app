@@ -23,10 +23,10 @@ class UserSeeder extends Seeder
 
         foreach ($users as $user) {
             User::firstOrCreate(
-                ['email' => $user['email']], // emailで重複をチェック
+                ['email' => $user['email']],
                 [
                     'name' => $user['name'],
-                    'password' => Hash::make('password'), // 安全にハッシュ化
+                    'password' => Hash::make('password'),
                 ]
             );
         }

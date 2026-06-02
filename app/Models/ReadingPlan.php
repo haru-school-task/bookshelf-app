@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use App\Enums\PlanStatus;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -17,7 +16,7 @@ class ReadingPlan extends Model
       
     /**
      * 一括代入（保存）を許可する属性名（カラム名）のリストです。
-     * 💡【超重要】これらが不足していると、create() を実行した際にデータがすべて無視され、テーブルが空になります。
+     * 【重要】これらが不足していると、create() を実行した際にデータがすべて無視され、テーブルが空になります。
      *
      * @var array<int, string>
      */

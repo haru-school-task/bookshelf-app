@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->foreignId('book_id')->constrained()->onDelete('cascade');
-            // 二重登録を防ぐ一意制約
+            
             $table->unique(['user_id', 'book_id']);
             $table->timestamps();
         });

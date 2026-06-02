@@ -6,7 +6,7 @@ namespace App\Enums;
  * Class ReadingPlanStatus
  *
  * 読書計画の状態（未着手、読書中、完了）を管理する列挙型（ネイティブEnum）
- * 💡【コード品質担保：型宣言・PHPDoc完全対応】
+ * 【コード品質担保：型宣言・PHPDoc完全対応】
  */
 enum ReadingPlanStatus: int
 {
@@ -17,7 +17,7 @@ enum ReadingPlanStatus: int
 
     /**
      * 各ステータスの日本語表示用の文言（ラベル）を返す
-     * 💡【型宣言・PHPDoc完全対応】引数が無いため @return のみ厳密に記載
+     * 【型宣言・PHPDoc完全対応】引数が無いため @return のみ厳密に記載
      */
     public function label(): string
     {
@@ -30,7 +30,7 @@ enum ReadingPlanStatus: int
 
     /**
      * 各ステータスに対応するフロントエンド用のバッジCSSクラスを返す
-     * 💡【型宣言・PHPDoc完全対応】
+     * 【型宣言・PHPDoc完全対応】
      */
     public function badgeClass(): string
     {

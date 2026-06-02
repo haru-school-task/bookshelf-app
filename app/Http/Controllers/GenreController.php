@@ -57,7 +57,10 @@ class GenreController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $validated = $request->validate([
-            'name' => ['required', 'string', 'max:255', 'unique:genres,name'],
+            'name' => ['required', 'string', 'max:20', 'unique:genres,name'],
+        ], [
+            'name.max' => 'ジャンル名は20文字以内で入力してください。',
+            'name.unique' => 'そのジャンル名は既に登録されています。',
         ]);
 
         Genre::create([
@@ -103,8 +106,13 @@ class GenreController extends Controller
      */
     public function update(Request $request, Genre $genre): RedirectResponse
     {
+        
         $validated = $request->validate([
-            'name' => ['required', 'string', 'max:255', 'unique:genres,name,' . $genre->id],
+            'name' => ['required', 'string', 'max:20', 'unique:genres,name,' . $genre->id],
+        ], [
+            'name.required' => 'ジャンル名を入力してください。',
+            'name.max' => 'ジャンル名は20文字以内で入力してください。',
+            'name.unique' => 'そのジャンル名は既に登録されています。',
         ]);
 
         $genre->update([
@@ -113,6 +121,7 @@ class GenreController extends Controller
 
         return redirect()->route('genres.index')->with('success', 'ジャンル名を更新しました。');
     }
+
 
     /**
      * ジャンルを削除

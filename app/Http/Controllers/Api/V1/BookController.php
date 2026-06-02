@@ -107,7 +107,7 @@ class BookController extends Controller
             return response()->json(['message' => '指定された書籍が見つかりません。'], Response::HTTP_NOT_FOUND);
         }
 
-        // ★最重要要件：API経由でも「所有者本人か」を厳密にチェックする認可ガードを実装
+        
         $this->authorize('update', $book);
 
         $validated = $request->validated();
@@ -134,7 +134,7 @@ class BookController extends Controller
             return response()->json(['message' => '指定された書籍が見つかりません。'], Response::HTTP_NOT_FOUND);
         }
 
-        // ★最重要要件：API経由でも「所有者本人か」を厳密にチェックする認可ガードを実装
+        
         $this->authorize('delete', $book);
 
         $book->delete();
