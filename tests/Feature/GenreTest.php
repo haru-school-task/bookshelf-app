@@ -13,8 +13,6 @@ use Tests\TestCase;
  * Class GenreTest
  *
  * ジャンル管理機能（詳細画面の10件ページネーション、書籍紐付き時の削除制限を含む）を検証するテストクラス
- * 
- * @package Tests\Feature
  */
 class GenreTest extends TestCase
 {
@@ -22,8 +20,6 @@ class GenreTest extends TestCase
 
     /**
      * ジャンル一覧画面が正常に表示されることを検証する
-     * 
-     * @return void
      */
     public function test_index_displays_genres(): void
     {
@@ -39,8 +35,6 @@ class GenreTest extends TestCase
     /**
      * ジャンル詳細画面が正常に表示され、紐づく書籍がページネーション（10件）で渡されることを検証する
      * 仕様書要件：詳細画面のページネーション10件/ページ
-     * 
-     * @return void
      */
     public function test_show_displays_genre_detail_with_ten_books_pagination(): void
     {
@@ -62,8 +56,6 @@ class GenreTest extends TestCase
 
     /**
      * ジャンル作成画面が正常に表示されることを検証する
-     *  
-     * @return void
      */
     public function test_create_returns_successful_response(): void
     {
@@ -76,8 +68,6 @@ class GenreTest extends TestCase
 
     /**
      * ジャンルがバリデーションを通過して正常に保存できるかを検証する
-     * 
-     * @return void
      */
     public function test_store_saves_new_genre(): void
     {
@@ -92,8 +82,6 @@ class GenreTest extends TestCase
 
     /**
      * ジャンル編集画面が正常に表示されることを検証する
-     * 
-     * @return void
      */
     public function test_edit_returns_successful_response(): void
     {
@@ -108,8 +96,6 @@ class GenreTest extends TestCase
 
     /**
      * ジャンルの更新が正常に動作するかを検証する
-     *  
-     * @return void
      */
     public function test_update_modifies_genre(): void
     {
@@ -128,8 +114,6 @@ class GenreTest extends TestCase
 
     /**
      * 書籍の紐付きがないクリーンなジャンルは正常に削除できることを検証する
-     *  
-     * @return void
      */
     public function test_destroy_removes_genre_without_books(): void
     {
@@ -144,8 +128,6 @@ class GenreTest extends TestCase
 
     /**
      * 書籍が登録されているジャンルを削除しようとした際、ブロックされる（制限される）ことを検証する
-     *  
-     * @return void
      */
     public function test_destroy_restricts_deletion_if_genre_has_books(): void
     {

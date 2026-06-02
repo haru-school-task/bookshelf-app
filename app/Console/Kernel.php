@@ -11,8 +11,7 @@ class Kernel extends ConsoleKernel
      * アプリケーションのコマンドスケジュールを定義します。
      * 毎日朝の 06:00 に自動実行されるよう日次バッチコマンドを登録します。
      *
-     * @param Schedule $schedule スケジュール管理インスタンス
-     * @return void
+     * @param  Schedule  $schedule  スケジュール管理インスタンス
      */
     protected function schedule(Schedule $schedule): void
     {
@@ -21,8 +20,6 @@ class Kernel extends ConsoleKernel
 
     /**
      * アプリケーションのコンソール用コマンドを登録します。
-     *
-     * @return void
      */
     protected function commands(): void
     {
@@ -31,4 +28,3 @@ class Kernel extends ConsoleKernel
         require base_path('routes/console.php');
     }
 }
-

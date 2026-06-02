@@ -21,20 +21,19 @@ class BookResource extends JsonResource
             'isbn' => $this->isbn,
             'description' => $this->description,
             'image_url' => $this->image_url,
-            
+
             'genres' => GenreResource::collection($this->whenLoaded('genres')),
-            
+
             'average_rating' => (float) ($this->reviews_avg_rating ?? 0),
-            
+
             'reviews_count' => (int) ($this->reviews_count ?? 0),
 
-            
             'reviews' => $this->whenLoaded('reviews', function () {
                 return $this->reviews->map(function ($review) {
                     return [
-                        'user_name' => $review->user ? $review->user->name : '名無しユーザー', 
-                        'rating' => (int) $review->rating,                                
-                        'comment' => $review->comment,                                     
+                        'user_name' => $review->user ? $review->user->name : '名無しユーザー',
+                        'rating' => (int) $review->rating,
+                        'comment' => $review->comment,
                         'created_at' => $review->created_at ? $review->created_at->toIso8601String() : null,
                     ];
                 });

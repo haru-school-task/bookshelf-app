@@ -15,8 +15,6 @@ use Tests\TestCase;
  * Class BookTest
  *
  * 書籍管理機能（基本CRUD、認可ポリシー、検索・フィルタ・ソート、およびISBN検索）の機能検証を行うテストクラス
- * 
- * @package Tests\Feature
  */
 class BookTest extends TestCase
 {
@@ -24,8 +22,6 @@ class BookTest extends TestCase
 
     /**
      * 適切な値が入力されれば書籍を登録できることを検証する
-     *
-     * @return void
      */
     public function test_store_saves_book_with_valid_data(): void
     {
@@ -50,8 +46,6 @@ class BookTest extends TestCase
 
     /**
      * 本人は自分の書籍の情報を更新できることを検証する
-     *
-     * @return void
      */
     public function test_update_modifies_own_book_data(): void
     {
@@ -83,13 +77,13 @@ class BookTest extends TestCase
     {
         $user = User::factory()->create();
         $attacker = User::factory()->create();
-        
+
         $book = Book::factory()->create([
             'user_id' => $user->id,
-            'isbn' => '9784111111111'
+            'isbn' => '9784111111111',
         ]);
-        
-        $genre = \App\Models\Genre::factory()->create();
+
+        $genre = Genre::factory()->create();
 
         $updatedData = [
             'title' => '更新されないタイトル',
@@ -108,12 +102,8 @@ class BookTest extends TestCase
         $response->assertStatus(403);
     }
 
-
-
     /**
      * 本人は自分の書籍を正常に削除できることを検証する
-     *
-     * @return void
      */
     public function test_destroy_removes_own_book_successfully(): void
     {
@@ -128,8 +118,6 @@ class BookTest extends TestCase
 
     /**
      * 他人の書籍は削除できず、認可ポリシーによって403で弾かれることを検証する
-     * 
-     * @return void
      */
     public function test_destroy_is_forbidden_for_non_book_owner(): void
     {
@@ -145,8 +133,6 @@ class BookTest extends TestCase
 
     /**
      * 書籍一覧でのキーワード検索、ジャンルフィルタ、およびソート機能が正常に機能するか検証する
-     * 
-     * @return void
      */
     public function test_index_can_filter_and_sort_books(): void
     {
@@ -175,8 +161,6 @@ class BookTest extends TestCase
     /**
      * 他人が登録した書籍を悪意をもって編集画面にアクセスしようとした際、403で遮断されるか検証する
      * 【書籍CRUD認可の詳細テスト】
-     * 
-     * @return void
      */
     public function test_edit_is_forbidden_for_non_book_owner(): void
     {
@@ -192,8 +176,6 @@ class BookTest extends TestCase
      * ISBNコードを指定して外部から書籍データを正常に取得できるか検証する
      * 【テスト要件：ISBN検索】
      * 【品質指示：外部API連携の例外処理・モック対応】
-     * 
-     * @return void
      */
     public function test_fetch_by_isbn_returns_successful_response(): void
     {
@@ -223,8 +205,6 @@ class BookTest extends TestCase
 
     /**
      * 他人が登録した書籍の削除が認可ポリシーによって403で確実に遮断されるか検証する
-     *  
-     * @return void
      */
     public function test_destroy_is_forbidden_for_non_owner_explicit(): void
     {
@@ -253,8 +233,6 @@ class BookTest extends TestCase
     /**
      * 他人の書籍に対するレビュー操作（編集・削除）がポリシーでブロックされるか検証する
      * 【テスト要件：レビューCRUD認可】
-     *  
-     * @return void
      */
     public function test_review_manipulation_is_forbidden_for_non_owner(): void
     {
@@ -295,8 +273,6 @@ class BookTest extends TestCase
      * 他人が書いた書籍レビューの更新URLに対して、攻撃者が不正なPUTリクエストを
      * 送りつけた際、ポリシーによって確実に403で遮断されるかを検証する
      * 【IDOR脆弱性の検証テスト】
-     * 
-     * @return void 
      */
     public function test_vulnerability_idor_attacker_cannot_update_others_review(): void
     {
@@ -334,8 +310,6 @@ class BookTest extends TestCase
      * 特殊文字（シングルクォートや論理演算子）を注入してリクエストを送信した際、
      * データベースが500エラー（クラッシュ）を起こさずに安全に処理されるかを検証する
      * 【不正入力・SQLインジェクションの耐性テスト】
-     * 
-     * @return void
      */
     public function test_vulnerability_malicious_search_input_is_handled_safely(): void
     {

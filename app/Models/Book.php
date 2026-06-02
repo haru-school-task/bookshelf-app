@@ -14,8 +14,6 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  *
  * 書籍データおよび各モデル（ユーザー、ジャンル、レビュー）とのリレーションを管理するモデルクラス
  * 【コード品質担保：型宣言・PHPDoc完全対応】
- * 
- * @package App\Models
  */
 class Book extends Model
 {
@@ -35,14 +33,12 @@ class Book extends Model
         'isbn',
         'published_date',
         'description',
-        'image_url'
+        'image_url',
     ];
 
     /**
      * 書籍の登録主（User）とのリレーションを定義
      * 【型宣言・PHPDoc完全対応】
-     *
-     * @return BelongsTo
      */
     public function user(): BelongsTo
     {
@@ -51,8 +47,6 @@ class Book extends Model
 
     /**
      * 書籍に紐づく複数のジャンル（Genre）との多対多リレーションを定義
-     *
-     * @return BelongsToMany
      */
     public function genres(): BelongsToMany
     {
@@ -61,8 +55,6 @@ class Book extends Model
 
     /**
      * 書籍に寄せられた複数のレビュー（Review）との1対多リレーションを定義
-     *
-     * @return HasMany
      */
     public function reviews(): HasMany
     {
@@ -71,8 +63,6 @@ class Book extends Model
 
     /**
      * 書籍をお気に入り登録した複数のユーザー（User）との多対多リレーションを定義（ランキング機能等で使用）
-     *
-     * @return BelongsToMany
      */
     public function favoriteUsers(): BelongsToMany
     {

@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
 class BookRequest extends FormRequest
@@ -17,7 +18,7 @@ class BookRequest extends FormRequest
     /**
      * Get the validation rules that apply to the request.
      *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
+     * @return array<string, ValidationRule|array<mixed>|string>
      */
     public function rules(): array
     {
@@ -26,7 +27,7 @@ class BookRequest extends FormRequest
             'author' => ['required', 'string', 'max:50'],
             'genre_ids' => ['required', 'array'],
             'genre_ids.*' => ['exists:genres,id'],
-            'isbn' => ['nullable', 'string', 'max:13', 'unique:books,isbn,' . (is_object($this->book) ? $this->book->id : $this->book)],
+            'isbn' => ['nullable', 'string', 'max:13', 'unique:books,isbn,'.(is_object($this->book) ? $this->book->id : $this->book)],
             'description' => ['nullable', 'string', 'max:400'],
             'title_kana' => ['nullable', 'string', 'max:255'],
             'image_url' => ['nullable', 'string', 'max:2000'],

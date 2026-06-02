@@ -1,8 +1,6 @@
 <?php
 
 use Illuminate\Support\Facades\Schedule;
-use Illuminate\Foundation\Inspiring;
-use Illuminate\Support\Facades\Artisan;
 
 /*
 |--------------------------------------------------------------------------
@@ -19,4 +17,4 @@ use Illuminate\Support\Facades\Artisan;
  * アプリケーションのスケジュールタスク（日次バッチ）を定義します。
  * 毎日朝の 06:00 に自動実行されるようスケジュールを登録します。
  */
-//Schedule::command('app:daily-plan-check-command')->dailyAt('06:00');
+// Schedule::command('app:daily-plan-check-command')->dailyAt('06:00');

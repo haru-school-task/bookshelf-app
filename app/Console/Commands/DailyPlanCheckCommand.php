@@ -27,15 +27,13 @@ class DailyPlanCheckCommand extends Command
     /**
      * 朝6時の日次バッチ処理を実行します。
      * 手続き的なループを排除し、Collectionメソッドとデータベーストランザクションを用いて原子性を担保します。
-     *
-     * @return int
      */
     public function handle(): int
     {
         $today = Carbon::today();
 
         DB::transaction(function () use ($today): void {
-            
+
             $expiredPlans = ReadingPlan::with(['user'])
                 ->where('target_date', '<', $today)
                 ->whereIn('status', [1, 2])
@@ -47,7 +45,7 @@ class DailyPlanCheckCommand extends Command
         });
 
         $this->info('Daily reading plan maintenance task completed successfully.');
-        
+
         return Command::SUCCESS;
     }
 }

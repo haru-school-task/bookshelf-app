@@ -12,8 +12,6 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
  *
  * 書籍に対するレビュー（評価・コメント）および「いいね」のリレーションを管理するモデルクラス
  * 【コード品質担保：型宣言・PHPDoc完全対応】
- * 
- * @package App\Models
  */
 class Review extends Model
 {
@@ -30,8 +28,6 @@ class Review extends Model
     /**
      * レビューを投稿した本人（User）との1対多リレーションを定義
      * 【型宣言・PHPDoc完全対応】引数が無いため @return のみ厳密に記載
-     *
-     * @return BelongsTo
      */
     public function user(): BelongsTo
     {
@@ -41,8 +37,6 @@ class Review extends Model
     /**
      * レビュー対象の書籍（Book）との1対多リレーションを定義
      * 【型宣言・PHPDoc完全対応】
-     *
-     * @return BelongsTo
      */
     public function book(): BelongsTo
     {
@@ -52,12 +46,9 @@ class Review extends Model
     /**
      * レビューに対して「いいね」をした複数のユーザー（User）との多対多リレーションを定義
      * 【型宣言・PHPDoc完全対応】
-     *
-     * @return BelongsToMany
      */
     public function likedByUsers(): BelongsToMany
     {
         return $this->belongsToMany(User::class, 'review_likes', 'review_id', 'user_id');
     }
 }
-

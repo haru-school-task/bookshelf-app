@@ -9,8 +9,6 @@ class UpdateNotificationRequest extends FormRequest
     /**
      * リクエストのユーザー認可判定を行います。
      * 本機能ではPolicy側で厳格な所有者チェックを行うため、ここでは一律でtrueを返します。
-     *
-     * @return bool
      */
     public function authorize(): bool
     {

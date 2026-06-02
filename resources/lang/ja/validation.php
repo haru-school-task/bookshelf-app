@@ -1,14 +1,12 @@
 <?php
 
-
 return [
     'required' => ':attributeは必須項目です。',
     'max' => ':attributeは:max文字以内で入力してください。',
     'min' => ':attributeは:min文字以上で入力してください。',
     'unique' => 'この:attributeは既に登録されています。',
     'confirmed' => ':attributeが確認用の入力と一致しません。',
-    'after_or_equal' => ':attributeには、今日以降の日付を指定してください。', 
-
+    'after_or_equal' => ':attributeには、今日以降の日付を指定してください。',
 
     /*
 
@@ -22,7 +20,7 @@ return [
         'name' => 'ユーザー名', // 💡 name属性が単体で使われたときは「ユーザー名」にします
 
         'genre_name' => 'ジャンル名',
-        'target_date' => '期日', 
+        'target_date' => '期日',
     ],
 
     /*
@@ -37,4 +35,3 @@ return [
         ],
     ],
 ];
-

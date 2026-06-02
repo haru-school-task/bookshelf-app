@@ -13,8 +13,6 @@ use Tests\TestCase;
  * Class NotificationTest
  *
  * 通知一覧画面の表示および既読化処理（markAsRead）の正常系・異常系検証を行うテストクラス
- *  
- * @package Tests\Feature
  */
 class NotificationTest extends TestCase
 {
@@ -22,8 +20,6 @@ class NotificationTest extends TestCase
 
     /**
      * ログインユーザーの通知一覧画面が正常に表示されることを検証する
-     * 
-     * @return void
      */
     public function test_index_displays_user_notifications(): void
     {
@@ -42,8 +38,6 @@ class NotificationTest extends TestCase
 
     /**
      * 未読通知が正常に既読化され、read_atにタイムスタンプが記録されることを検証する
-     *
-     * @return void
      */
     public function test_mark_as_read_successfully_updates_notification(): void
     {
@@ -64,8 +58,6 @@ class NotificationTest extends TestCase
     /**
      * 他人の通知IDを悪意をもって指定した場合、既読化されずにデータが守られることを検証する
      * IDOR（不正直接参照）脆弱性の防御テスト
-     * 
-     * @return void
      */
     public function test_mark_as_read_does_not_update_other_users_notification(): void
     {

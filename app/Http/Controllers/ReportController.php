@@ -2,25 +2,28 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\ReadingPlanStatus;
+use App\Models\ReadingPlan;
 use App\Models\Review;
+use App\Models\User;
 use Illuminate\Http\Request;
-use Illuminate\View\View;
 use Illuminate\Support\Collection;
+use Illuminate\View\View;
 
 class ReportController extends Controller
 {
     /**
      * マイ読書レポート画面を表示します（応用版修正対応）。
-     * 
+     *
      * 【型宣言・PHPDoc完全対応】
      * 【Collectionメソッド徹底活用】foreachを完全排除した最高品質の宣言的集計ロジック
-     * 
-     * @param Request $request リクエストインスタンス
+     *
+     * @param  Request  $request  リクエストインスタンス
      * @return View レポート画面のビューレスポンス
      */
     public function index(Request $request): View
     {
-        /** @var \App\Models\User $user */
+        /** @var User $user */
         $user = $request->user();
 
         $userReviews = $user->reviews()->with('book.genres')->get();
@@ -40,6 +43,7 @@ class ReportController extends Controller
                 if ($book) {
                     $book->reviews_avg_rating = $review->rating;
                 }
+
                 return $book;
             })
             ->filter()
@@ -48,7 +52,7 @@ class ReportController extends Controller
             ->toArray();
 
         $genreRatingsFormatted = $userReviews->flatMap(function (Review $review): array {
-            if (!$review->book || !$review->book->genres) {
+            if (! $review->book || ! $review->book->genres) {
                 return [];
             }
 
@@ -80,8 +84,8 @@ class ReportController extends Controller
         $stats = [
             'summary' => [
                 'total_reviews' => $userReviews->count(),
-                'books_read' => \App\Models\ReadingPlan::where('user_id', $user->id)
-                    ->where('status', \App\Enums\ReadingPlanStatus::Completed)
+                'books_read' => ReadingPlan::where('user_id', $user->id)
+                    ->where('status', ReadingPlanStatus::Completed)
                     ->count(),
                 'average_rating' => (float) ($userReviews->avg('rating') ?? 0.0),
             ],

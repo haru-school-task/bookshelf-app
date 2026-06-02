@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\ReadingPlanStatus;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -11,9 +12,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  */
 class ReadingPlan extends Model
 {
+    use HasFactory;
 
-    use HasFactory; 
-      
     /**
      * 一括代入（保存）を許可する属性名（カラム名）のリストです。
      * 【重要】これらが不足していると、create() を実行した際にデータがすべて無視され、テーブルが空になります。
@@ -34,8 +34,8 @@ class ReadingPlan extends Model
      * @var array<string, string>
      */
     protected $casts = [
-        'status' => \App\Enums\ReadingPlanStatus::class, 
-        'target_date' => 'date', 
+        'status' => ReadingPlanStatus::class,
+        'target_date' => 'date',
     ];
 
     /**

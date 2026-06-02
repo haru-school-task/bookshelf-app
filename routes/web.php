@@ -6,6 +6,7 @@ use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ReadingPlanController;
 use App\Http\Controllers\ReportController;
 use Illuminate\Support\Facades\Route;
+use Laravel\Fortify\Http\Controllers\RegisteredUserController;
 
 /*
 
@@ -14,13 +15,11 @@ use Illuminate\Support\Facades\Route;
 |--------------------------------------------------------------------------
 */
 
-
 Route::get('/', [BookController::class, 'index'])->name('books.index');
 
 Route::get('/ranking', [BookController::class, 'ranking'])->name('ranking.index');
 
 Route::get('/books/isbn/{isbn}', [BookController::class, 'fetchByIsbn']);
-
 
 Route::middleware(['auth'])->group(function () {
 
@@ -58,10 +57,7 @@ Route::middleware(['auth'])->group(function () {
     });
 });
 
-
 Route::get('/books/{book}', [BookController::class, 'show'])->name('books.show');
 
-
-Route::post('/register', [\Laravel\Fortify\Http\Controllers\RegisteredUserController::class, 'store'])
+Route::post('/register', [RegisteredUserController::class, 'store'])
     ->middleware(['guest:'.config('fortify.guard'), 'throttle:register']);
-
